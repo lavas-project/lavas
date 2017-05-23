@@ -9,11 +9,11 @@ import babel from 'rollup-plugin-babel';
 import resolve from 'rollup-plugin-node-resolve';
 
 export default {
-    entry: './index.js',
+    entry: './src/bpwa.js',
     format: 'cjs',
     plugins: [
         resolve({
-            jail: path.resolve(__dirname, 'lib')
+            jail: path.resolve(__dirname, 'src')
         }),
         babel({
             runtimeHelpers: true,

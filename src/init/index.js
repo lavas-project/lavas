@@ -5,14 +5,13 @@
 
 import log from '../log';
 import inquirer from 'inquirer';
-import childP from 'child_process';
-// import bpwa from '../../../bpwa/index';
+import childProcess from 'child_process';
 import bpwa from 'bpwa';
 import ora from 'ora';
 import path from 'path';
 import fs from 'fs';
 
-const exec = childP.execSync;
+const exec = childProcess.execSync;
 
 
 /**
@@ -47,7 +46,6 @@ function getGitInfo() {
  * @return {Object} 解析的结果对象
  */
 const parseSchema = async function (schema) {
-
     let params = {};
     let keys = Object.keys(schema.properties);
 
@@ -66,6 +64,9 @@ const parseSchema = async function (schema) {
             if (key === 'author' || key === 'email') {
                 let userInfo = await getGitInfo();
                 con.default = (key === 'author') ? userInfo.defaultAuthorName : userInfo.defaultEmail;
+            }
+            if (key === 'dirPath') {
+                con.default = process.cwd();
             }
             opts = {
                 'type': 'input',
@@ -86,13 +87,21 @@ const parseSchema = async function (schema) {
             };
         }
         else if (type === 'list') {
+            let srcList = [];
             let list = [];
 
-            con.list.forEach(item => list.push({
+            if (!con.dependence) {
+                srcList = con.list;
+            }
+            else if (con.depLevel > 0) {
+                srcList = schema.properties[con.dependence][con.ref];
+            }
+
+            srcList.forEach(item => list.push({
                 'value': item.value,
                 'name': item.value
-                    + ((item.url || item.img)
-                        ? ' [' + log.chalk.yellow.bold.underline(item.url || item.img) + ']'
+                    + ((item.url || item.imgs || item.img)
+                        ? ' [' + log.chalk.yellow.bold.underline(item.url || item.imgs[0].src || item.img) + ']'
                         : ''
                     ),
                 'short': item.value
@@ -108,18 +117,18 @@ const parseSchema = async function (schema) {
         }
 
         let data = await inquirer.prompt([opts]);
-        Object.assign(params, data);
+        params = Object.assign(params, data);
     }
 
     return params;
 };
 
 
-function exportProject(params) {
+async function exportProject(params) {
     let spinner = ora('正在导出工程..');
     spinner.start();
-    bpwa.exportProject(params);
-    setTimeout(() => spinner.stop(), 2000);
+    await bpwa.exportProject(params);
+    spinner.stop();
 }
 
 
@@ -128,7 +137,7 @@ function exportProject(params) {
  *
  * @param {Object} conf 初始化配置
  */
-const initConfig = async function (conf) {
+export default (async function (conf) {
 
     log.info(`欢迎使用 ${log.chalk.green('bpwa')} 解决方案`);
     log.info('新建一个 pwa 项目\n');
@@ -141,7 +150,7 @@ const initConfig = async function (conf) {
     if (fs.existsSync(projectTargetPath)) {
         if (conf.force) {
             // 直接覆盖当前项目
-            exportProject(params);
+            await exportProject(params);
         }
         else {
             let ret = await inquirer.prompt([{
@@ -152,17 +161,13 @@ const initConfig = async function (conf) {
             }]);
 
             if (ret.isForce) {
-                exportProject(params);
+                await exportProject(params);
             }
         }
     }
     else {
-        exportProject(params);
+        await exportProject(params);
     }
 
-};
+});
 
-
-export default function (conf) {
-    initConfig(conf);
-}

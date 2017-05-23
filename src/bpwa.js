@@ -5,9 +5,9 @@
 
 
 import program from 'commander';
-import log  from './lib/log';
+import log  from './log';
 
-import initCommand from './lib/init/command';
+import initCommand from './init/command';
 
 const version = process.env.VERSION || require('../package.json').version;
 
