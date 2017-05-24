@@ -5,125 +5,19 @@
 
 import log from '../log';
 import inquirer from 'inquirer';
-import childProcess from 'child_process';
 import bpwa from 'bpwa';
 import ora from 'ora';
 import path from 'path';
 import fs from 'fs';
-
-const exec = childProcess.execSync;
-
-
-/**
- * 获取当前用户的 git 账号信息
- *
- * @return {Promise} promise 对象
- */
-function getGitInfo() {
-
-    return new Promise((resolve, reject) => {
-        let defaultAuthorName = '';
-        let defaultEmail = '';
-        try {
-            // 尝试从 git 配置中获取
-            defaultAuthorName = exec('git config --get user.name');
-            defaultEmail = exec('git config --get user.email');
-        }
-        catch (e) {}
-        defaultAuthorName = defaultAuthorName && defaultAuthorName.toString().trim();
-        defaultEmail = defaultEmail && defaultEmail.toString().trim();
-        resolve({defaultAuthorName, defaultEmail});
-    });
-}
-
-
+import formQ from './formQuestion';
 
 
 /**
- * 解析 bpwa schema
+ * 导出工程
  *
- * @param  {Object} schema schema object
- * @return {Object} 解析的结果对象
+ * @param  {Object} params 导出工程所需的参数
+ * @return {Promise}       导出完成后的 promise
  */
-const parseSchema = async function (schema) {
-    let params = {};
-    let keys = Object.keys(schema.properties);
-
-    for (let i = 0, len = keys.length; i < len; i++) {
-        let key = keys[i];
-        let con = schema.properties[key];
-        let type = con.type;
-        let name = con.name || con.description;
-        let opts = {};
-
-        // 这里做一下 schema 到 question 所需参数的适配，实现对 bpwa schema 有一定要求
-        // 必须包含 dirPath, name, email 等字段，其他字段可以自定义
-        if (type === 'string' || type === 'number') {
-
-            // 如果输入项是 author 或者 email 的，尝试的去 git config 中拿默认的内容
-            if (key === 'author' || key === 'email') {
-                let userInfo = await getGitInfo();
-                con.default = (key === 'author') ? userInfo.defaultAuthorName : userInfo.defaultEmail;
-            }
-            if (key === 'dirPath') {
-                con.default = process.cwd();
-            }
-            opts = {
-                'type': 'input',
-                'message': `请输入${name}: `,
-                'default': con.default,
-                'name': key,
-                'validate': con.validate || function () {
-                    return true;
-                }
-            };
-        }
-        else if (type === 'boolean') {
-            opts = {
-                'type': 'confirm',
-                'message': `${name}? :`,
-                'default': false,
-                'name': key
-            };
-        }
-        else if (type === 'list') {
-            let srcList = [];
-            let list = [];
-
-            if (!con.dependence) {
-                srcList = con.list;
-            }
-            else if (con.depLevel > 0) {
-                srcList = schema.properties[con.dependence][con.ref];
-            }
-
-            srcList.forEach(item => list.push({
-                'value': item.value,
-                'name': item.value
-                    + ((item.url || item.imgs || item.img)
-                        ? ' [' + log.chalk.yellow.bold.underline(item.url || item.imgs[0].src || item.img) + ']'
-                        : ''
-                    ),
-                'short': item.value
-            }));
-
-            opts = {
-                'type': 'list',
-                'message': `选择一个${name}: `,
-                'choices': list,
-                'default': list[0],
-                'name': key
-            };
-        }
-
-        let data = await inquirer.prompt([opts]);
-        params = Object.assign(params, data);
-    }
-
-    return params;
-};
-
-
 async function exportProject(params) {
     let spinner = ora('正在导出工程..');
     spinner.start();
@@ -143,8 +37,7 @@ export default (async function (conf) {
     log.info('新建一个 pwa 项目\n');
 
     let schema = await bpwa.getSchema();
-    let params = await parseSchema(schema);
-
+    let params = await formQ(schema);
     let projectTargetPath = path.resolve(params.dirPath, params.name);
 
     if (fs.existsSync(projectTargetPath)) {
