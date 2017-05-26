@@ -8,7 +8,7 @@ import inquirer from 'inquirer';
 import bpwa from 'bpwa';
 import ora from 'ora';
 import path from 'path';
-import fs from 'fs';
+import fs from 'fs-extra';
 import formQ from './formQuestion';
 
 
@@ -43,6 +43,7 @@ export default (async function (conf) {
     if (fs.existsSync(projectTargetPath)) {
         if (conf.force) {
             // 直接覆盖当前项目
+            fs.removeSync(projectTargetPath);
             await exportProject(params);
         }
         else {
@@ -54,6 +55,7 @@ export default (async function (conf) {
             }]);
 
             if (ret.isForce) {
+                fs.removeSync(projectTargetPath);
                 await exportProject(params);
             }
         }
