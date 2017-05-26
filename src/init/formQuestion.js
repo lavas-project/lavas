@@ -81,8 +81,8 @@ function questionList(key, schema, params) {
         'name': key,
         'message': `选择一个${con.name}: `,
         'choices': choiceList,
-        'default': choiceList[0]
-
+        'default': choiceList[0],
+        'checked': !!con.checkbox
     };
 }
 
@@ -150,7 +150,7 @@ async function questionInput(key, schema, params) {
     }
 
     return {
-        'type': 'input',
+        'type': con.type === 'password' ? 'password' : 'input',
         'name': key,
         'message': `请输入${name}: `,
         'default': con.default,
@@ -176,6 +176,7 @@ export default (async function (schema) {
         switch (type) {
             case 'string':
             case 'number':
+            case 'password':
                 opts = await questionInput(key, schema, params);
                 break;
             case 'boolean':
