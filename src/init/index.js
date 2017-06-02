@@ -5,6 +5,7 @@
 
 import log from '../log';
 import inquirer from 'inquirer';
+// import bpwa from '../../../bpwa/index';
 import bpwa from 'bpwa';
 import ora from 'ora';
 import path from 'path';
