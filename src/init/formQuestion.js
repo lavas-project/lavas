@@ -66,12 +66,30 @@ function questionList(key, schema, params) {
 
     sourceList.forEach(item => {
 
-        let url = item.url || (item.imgs && item.imgs[0] && item.imgs[0].src) || item.img;
-        let extText = url ? log.chalk.yellow.bold.underline(url) : '';
+        let url = '';
+        let desc = '\n\n    ' + item.desc;
+
+        if (item.url) {
+            url = '\n\n    - ' + log.chalk.yellow.bold.underline(item.url);
+        }
+        else if (item.imgs && item.imgs[0]) {
+            item.imgs.forEach(imgO => {
+                let item = '\n\n    - '
+                    + log.chalk.yellow.bold.underline(imgO.src)
+                    + (imgO.alt ? ' - ' + imgO.alt : '');
+                url += item;
+            });
+        }
+        else if (item.img) {
+            url = '\n\n    - ' + log.chalk.yellow.bold.underline(item.img);
+        }
+        else {
+            desc = '';
+        }
 
         choiceList.push({
             'value': item.value,
-            'name': `${item.value} ${extText}`,
+            'name': `${item.value}${desc}${url}`,
             'short': item.value
         });
     });
@@ -82,7 +100,8 @@ function questionList(key, schema, params) {
         'message': `选择一个${con.name}: `,
         'choices': choiceList,
         'default': choiceList[0],
-        'checked': !!con.checkbox
+        'checked': !!con.checkbox,
+        'pageSize': 1000
     };
 }
 

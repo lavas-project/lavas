@@ -6,6 +6,7 @@
 'use strict';
 
 /* eslint-disable no-console */
+/* eslint-disable fecs-use-computed-property */
 
 import chalk from 'chalk';
 import util from 'util';
