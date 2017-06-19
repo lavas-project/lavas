@@ -6,3 +6,4 @@ node_modules
 *.swp
 .idea
 dist
+tmp
