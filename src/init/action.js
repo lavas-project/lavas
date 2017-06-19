@@ -22,7 +22,7 @@ import formQ from './formQuestion';
 async function exportProject(params) {
     let spinner = ora('正在导出工程..');
     spinner.start();
-    const aaa = await lavasScaffold.exportProject(params);
+    await lavasScaffold.exportProject(params);
     spinner.stop();
 }
 

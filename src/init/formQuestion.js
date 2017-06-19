@@ -56,16 +56,16 @@ function questionList(key, schema, params) {
         let dependence = con.dependence;
         let ref = con.ref;
         let depList = schema.properties[dependence].list;
+        let depValue = params[dependence] || schema.properties[dependence].list[0].value;
 
         for (let depItem of depList) {
-            if (depItem.value === params[dependence]) {
-                sourceList = depItem.subList[ref];
+            if (depItem.value === depValue) {
+                sourceList = (depItem.subList && depItem.subList[ref]) ? depItem.subList[ref] : [];
             }
         }
     }
 
     sourceList.forEach(item => {
-
         let url = '';
         let desc = '\n\n    ' + item.desc;
 
@@ -133,7 +133,6 @@ function questionYesOrNo(key, schema, params) {
  * @return {Object}        question 需要的参数
  */
 async function questionInput(key, schema, params) {
-    let userInfo = await getGitInfo();
     let con = schema.properties[key];
     let name = con.name;
 
@@ -144,6 +143,7 @@ async function questionInput(key, schema, params) {
 
     // 如果输入项是 author 或者 email 的，尝试的去 git config 中拿默认的内容
     if (key === 'author' || key === 'email') {
+        let userInfo = await getGitInfo();
         con.default = userInfo[key] || con.default;
     }
     if (key === 'dirPath') {
@@ -191,6 +191,7 @@ export default (async function (schema) {
         let con = schema.properties[key];
         let type = con.type;
         let opts = {};
+        let data = {};
 
         switch (type) {
             case 'string':
@@ -206,8 +207,11 @@ export default (async function (schema) {
                 break;
         }
 
-        let data = await inquirer.prompt([opts]);
-        params = Object.assign(params, data);
+        if (!con.disable) {
+            data = await inquirer.prompt([opts]);
+        }
+
+        params = Object.assign({}, params, data);
     }
 
     return params;
