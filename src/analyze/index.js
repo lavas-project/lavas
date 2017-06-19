@@ -7,7 +7,7 @@ import analyze from './action';
 
 export default function (program) {
 
-    // 定义 bpwa analyze 命令
+    // 定义 lavas analyze 命令
     program
         .command('analyze')
         .alias('a')

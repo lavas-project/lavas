@@ -7,7 +7,7 @@ import install from './action';
 
 export default function (program) {
 
-    // 定义 bpwa install 命令
+    // 定义 lavas install 命令
     program
         .command('install')
         .alias('i')

@@ -7,7 +7,7 @@ import server from './action';
 
 export default function (program) {
 
-    // 定义 bpwa server 命令
+    // 定义 lavas server 命令
     program
         .command('server')
         .alias('s')

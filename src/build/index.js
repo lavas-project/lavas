@@ -7,7 +7,7 @@ import build from './action';
 
 export default function (program) {
 
-    // 定义 bpwa init 命令
+    // 定义 lavas build 命令
     program
         .command('build')
         .alias('b')

@@ -5,7 +5,7 @@
 
 import log from '../log';
 import inquirer from 'inquirer';
-import bpwa from 'bpwa';
+import lavasScaffold from 'lavas-scaffold';
 import ora from 'ora';
 import path from 'path';
 import fs from 'fs-extra';
@@ -22,7 +22,7 @@ import formQ from './formQuestion';
 async function exportProject(params) {
     let spinner = ora('正在导出工程..');
     spinner.start();
-    await bpwa.exportProject(params);
+    await lavasScaffold.exportProject(params);
     spinner.stop();
 }
 
@@ -35,10 +35,10 @@ async function exportProject(params) {
  */
 export default (async function (conf) {
 
-    log.info(`欢迎使用 ${log.chalk.green('bpwa')} 解决方案`);
+    log.info(`欢迎使用 ${log.chalk.green('Lavas')} 解决方案`);
     log.info('新建一个 pwa 项目\n');
 
-    let schema = await bpwa.getSchema();
+    let schema = await lavasScaffold.getSchema();
     let params = await formQ(schema);
 
     let projectTargetPath = path.resolve(params.dirPath, params.name);

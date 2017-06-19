@@ -1,7 +1,7 @@
 {
-  "name": "bpwa-cli",
-  "version": "1.0.9",
-  "description": "baidu pwa project solution cli",
+  "name": "lavas-cli",
+  "version": "1.0.0",
+  "description": "pwa project solution cli tool",
   "main": "dist/index.js",
   "scripts": {
     "pretest": "",
@@ -13,13 +13,14 @@
     "prepublish": "npm run build"
   },
   "bin": {
-    "bpwa": "./bin/bpwa-cli.js"
+    "lavas": "./bin/lavas-cli.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/searchfe/bpwa-cli.git"
+    "url": "https://github.com/searchfe/lavas-cli.git"
   },
   "keywords": [
+    "lavas",
     "pwa",
     "cli",
     "vue"
@@ -30,7 +31,7 @@
     "babel-core": "^6.24.1",
     "babel-plugin-transform-async-to-generator": "^6.24.1",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
-    "bpwa": "^1.1.9",
+    "lavas-scaffold": "^1.0.0",
     "chalk": "^1.1.3",
     "child_process": "^1.0.2",
     "commander": "^2.9.0",

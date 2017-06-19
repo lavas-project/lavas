@@ -14,7 +14,7 @@ export default {
             os.platform() === 'win32'
                 ? 'APPDATA'
                 : 'HOME'
-            ] + path.sep + '.bpwa-cli';
+            ] + path.sep + '.lavas-cli';
 
         // 如果这个目录不存在，则创建这个目录
         !fs.existsSync(dir) && fs.mkdirSync(dir);

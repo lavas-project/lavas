@@ -7,7 +7,7 @@ import init from './action';
 
 export default function (program) {
 
-    // 定义 bpwa init 命令
+    // 定义 lavas init 命令
     program
         .command('init')
         .description('初始化 pwa 项目')

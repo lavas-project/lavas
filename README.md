@@ -1,2 +1,2 @@
-bpwa-cli
+lavas-cli
 ==

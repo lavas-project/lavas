@@ -17,7 +17,7 @@ import serverCommand from './server';
 const version = process.env.VERSION || require('../package.json').version;
 
 if (!process.argv[2]) {
-    log.info('请查看 \`bpwa --help\`');
+    log.info('请查看 \`lavas --help\`');
 }
 else {
     let argv = process.argv[2];
@@ -27,7 +27,7 @@ else {
 }
 
 
-// 定义 bpwa 命令
+// 定义 lavas 命令
 program
     // .version(version)
     .usage('[commands] [options]')
@@ -35,13 +35,13 @@ program
     .option('-v, --version', '查看当前版本')
     .action((cmd, env) => {
         if (env) {
-            log.error(`\`bpwa ${cmd} '${env}\` 命令不存在`);
+            log.error(`\`lavas ${cmd} '${env}\` 命令不存在`);
         }
         else {
-            log.error('`bpwa ' + cmd + '` 命令不存在');
+            log.error('`lavas ' + cmd + '` 命令不存在');
         }
 
-        log.info('请查看 `bpwa --help`');
+        log.info('请查看 `lavas --help`');
     })
 ;
 
