@@ -10,6 +10,7 @@ import ora from 'ora';
 import path from 'path';
 import fs from 'fs-extra';
 import formQ from './formQuestion';
+import shelljs from 'shelljs';
 // import utils from '../utils';
 
 
@@ -38,34 +39,39 @@ export default (async function (conf) {
     log.info(`欢迎使用 ${log.chalk.green('Lavas')} 解决方案`);
     log.info('新建一个 pwa 项目\n');
 
-    let schema = await lavasScaffold.getSchema();
-    let params = await formQ(schema);
+    if (shelljs.which('git')) {
 
-    let projectTargetPath = path.resolve(params.dirPath, params.name);
+        let schema = await lavasScaffold.getSchema();
+        let params = await formQ(schema);
 
-    if (fs.existsSync(projectTargetPath)) {
-        if (conf.force) {
-            // 直接覆盖当前项目
-            fs.removeSync(projectTargetPath);
-            await exportProject(params);
-        }
-        else {
-            let ret = await inquirer.prompt([{
-                'type': 'confirm',
-                'message': '存在同名项目，是否覆盖?',
-                'default': false,
-                'name': 'isForce'
-            }]);
+        let projectTargetPath = path.resolve(params.dirPath, params.name);
 
-            if (ret.isForce) {
+        if (fs.existsSync(projectTargetPath)) {
+            if (conf.force) {
+                // 直接覆盖当前项目
                 fs.removeSync(projectTargetPath);
                 await exportProject(params);
             }
+            else {
+                let ret = await inquirer.prompt([{
+                    'type': 'confirm',
+                    'message': '存在同名项目，是否覆盖?',
+                    'default': false,
+                    'name': 'isForce'
+                }]);
+
+                if (ret.isForce) {
+                    fs.removeSync(projectTargetPath);
+                    await exportProject(params);
+                }
+            }
+        }
+        else {
+            await exportProject(params);
         }
     }
     else {
-        await exportProject(params);
+        log.info('当前环境下没有检测到 git 命令，请确认是否安装 git');
     }
-
 });
 
