@@ -5,19 +5,29 @@
 
 import program from 'commander';
 import log  from './log';
+import cp from 'child_process';
+
 import initCommand from './init';
 // import analyzeCommand from './analyze';
 // import installCommand from './install';
 // import serverCommand from './server';
 // import buildCommand from './build';
-// import lintCommand from './lint';
+import lintCommand from './lint';
 // import testCommand from './test';
 
 
 const version = process.env.VERSION || require('../package.json').version;
 
 if (!process.argv[2]) {
-    log.info('请查看 \`lavas --help\`');
+    cp.exec('lavas -h', (err, stdout, stderr) => {
+        if (err) {
+            throw err;
+        }
+        else {
+            /* eslint-disable no-console */
+            console.log(stdout);
+        }
+    });
 }
 else {
     let argv = process.argv[2];
@@ -52,7 +62,7 @@ initCommand(program);
 // installCommand(program);
 // serverCommand(program);
 // buildCommand(program);
-// lintCommand(program);
+lintCommand(program);
 // testCommand(program);
 
 

@@ -48,13 +48,13 @@ let logTypes = [
 
 let flag = {
     set() {
-        global.BPWA_LOG_FLAG = true;
+        global.LAVAS_LOG_FLAG = true;
     },
     has() {
-        return global.BPWA_LOG_FLAG === true;
+        return global.LAVAS_LOG_FLAG === true;
     },
     clear() {
-        global.BPWA_LOG_FLAG = false;
+        global.LAVAS_LOG_FLAG = false;
     }
 };
 
@@ -71,7 +71,7 @@ logTypes.forEach(function (item) {
 
         let msg = util.format.apply(null, arguments);
 
-        if (process.env.BPWA_LOG_SILENT) {
+        if (process.env.LAVAS_LOG_SILENT) {
             return;
         }
 
@@ -98,7 +98,7 @@ logTypes.forEach(function (item) {
 log.raw = function (format, varArgs) {
     let msg = util.format.apply(null, arguments);
 
-    if (process.env.BPWA_LOG_SILENT === '1') {
+    if (process.env.LAVAS_LOG_SILENT === '1') {
         return;
     }
 
@@ -134,7 +134,7 @@ log.clear = function () {
 log.write = function (format, varArgs) {
     let msg = util.format.apply(null, arguments);
 
-    if (process.env.BPWA_LOG_SILENT) {
+    if (process.env.LAVAS_LOG_SILENT) {
         return;
     }
 

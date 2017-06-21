@@ -13,7 +13,9 @@ export default {
     format: 'cjs',
     plugins: [
         resolve({
-            jail: path.resolve(__dirname, 'src')
+            jail: path.resolve(__dirname, 'src'),
+            jsNext: true,
+            main: true
         }),
         babel({
             runtimeHelpers: true,
