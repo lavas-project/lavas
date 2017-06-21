@@ -12,11 +12,8 @@ export default function (program) {
         .command('init')
         .description('初始化 pwa 项目')
         .option('-f, --force', '是否覆盖已有项目')
-        .action(options => {
-
-            init({
-                force: options.force
-            });
-        })
+        .action(options => init({
+            force: options.force
+        }))
     ;
 }

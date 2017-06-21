@@ -8,4 +8,4 @@ require('../dist');
 //     ]
 // });
 
-// require('../src/bpwa');
+// require('../src/index');

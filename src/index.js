@@ -6,9 +6,9 @@
 import program from 'commander';
 import log  from './log';
 import initCommand from './init';
-import analyzeCommand from './analyze';
+// import analyzeCommand from './analyze';
 // import installCommand from './install';
-import serverCommand from './server';
+// import serverCommand from './server';
 // import buildCommand from './build';
 // import lintCommand from './lint';
 // import testCommand from './test';
@@ -48,9 +48,9 @@ program
 
 
 initCommand(program);
-analyzeCommand(program);
+// analyzeCommand(program);
 // installCommand(program);
-serverCommand(program);
+// serverCommand(program);
 // buildCommand(program);
 // lintCommand(program);
 // testCommand(program);

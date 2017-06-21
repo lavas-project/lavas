@@ -80,7 +80,7 @@ logTypes.forEach(function (item) {
             flag.clear();
         }
         if (msg) {
-            console.log((log.prefix || 'BPWA') + ' ' + item.color(item.name.toUpperCase()) + ' ' + msg);
+            console.log((log.prefix || 'LAVAS') + ' ' + item.color(item.name.toUpperCase()) + ' ' + msg);
         }
         else {
             console.log();
