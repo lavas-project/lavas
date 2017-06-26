@@ -13,6 +13,9 @@ import formQ from './formQuestion';
 import shelljs from 'shelljs';
 
 
+const cwd = process.cwd();
+
+
 /**
  * 导出工程
  *
@@ -30,7 +33,7 @@ async function exportProject(params) {
     /* eslint-enable no-console */
     log.info(''
         + '项目创建已成功，您可以操作如下命令开始开发工程：\n\n'
-        + log.chalk.green('cd ' + path.resolve(params.dirPath, params.name) + '\n'
+        + log.chalk.green('cd ' + params.name + '\n'
         + 'npm install'
     ));
 }
@@ -52,7 +55,7 @@ export default (async function (conf) {
         let schema = await lavasScaffold.getSchema();
         let params = await formQ(schema);
 
-        let projectTargetPath = path.resolve(params.dirPath, params.name);
+        let projectTargetPath = path.resolve(params.dirPath || cwd, params.name);
 
         if (fs.existsSync(projectTargetPath)) {
             if (conf.force) {

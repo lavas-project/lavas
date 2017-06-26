@@ -146,7 +146,7 @@ async function questionInput(key, schema, params) {
     if (key === 'dirPath') {
         con.default = path.resolve(process.cwd(), con.default || '');
         con.validate = value => {
-            const nowPath = path.resolve(process.cwd(), value);
+            const nowPath = path.resolve(process.cwd(), value || '');
 
             if (!fs.existsSync(nowPath)) {
                 return con.invalidate || '输入不符合规范';
