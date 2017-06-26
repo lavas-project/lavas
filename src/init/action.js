@@ -11,7 +11,6 @@ import path from 'path';
 import fs from 'fs-extra';
 import formQ from './formQuestion';
 import shelljs from 'shelljs';
-// import utils from '../utils';
 
 
 /**
@@ -25,6 +24,15 @@ async function exportProject(params) {
     spinner.start();
     await lavasScaffold.exportProject(params);
     spinner.stop();
+
+    /* eslint-disable no-console */
+    console.log('');
+    /* eslint-enable no-console */
+    log.info(''
+        + '项目创建已成功，您可以操作如下命令开始开发工程：\n\n'
+        + log.chalk.green('cd ' + path.resolve(params.dirPath, params.name) + '\n'
+        + 'npm install'
+    ));
 }
 
 
@@ -37,7 +45,7 @@ async function exportProject(params) {
 export default (async function (conf) {
 
     log.info(`欢迎使用 ${log.chalk.green('Lavas')} 解决方案`);
-    log.info('新建一个 pwa 项目\n');
+    log.info('新建一个 PWA 项目\n');
 
     if (shelljs.which('git')) {
 

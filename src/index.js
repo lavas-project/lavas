@@ -8,15 +8,9 @@ import log from './log';
 import cp from 'child_process';
 
 import initCommand from './init';
-// import analyzeCommand from './analyze';
-// import installCommand from './install';
-// import serverCommand from './server';
-// import buildCommand from './build';
-import lintCommand from './lint';
-// import testCommand from './test';
 
 
-const version = process.env.VERSION || import('../package.json').version;
+const version = process.env.VERSION || require('../package.json').version;
 
 if (!process.argv[2]) {
     cp.exec('lavas -h', (err, stdout, stderr) => {
@@ -58,13 +52,6 @@ program
 
 
 initCommand(program);
-// analyzeCommand(program);
-// installCommand(program);
-// serverCommand(program);
-// buildCommand(program);
-lintCommand(program);
-// testCommand(program);
-
 
 
 program.parse(process.argv);
