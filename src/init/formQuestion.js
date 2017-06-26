@@ -94,7 +94,7 @@ function questionList(key, schema, params) {
     return {
         'type': 'list',
         'name': key,
-        'message': `选择一个${con.name} (${log.chalk.green('上下键选择')}): `,
+        'message': `选择一个${con.name} (${log.chalk.green('按上下键选择')}): `,
         'choices': choiceList,
         'default': choiceList[0],
         'checked': !!con.checkbox,
