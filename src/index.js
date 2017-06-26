@@ -4,7 +4,7 @@
  */
 
 import program from 'commander';
-import log  from './log';
+import log from './log';
 import cp from 'child_process';
 
 import initCommand from './init';
@@ -16,7 +16,7 @@ import lintCommand from './lint';
 // import testCommand from './test';
 
 
-const version = process.env.VERSION || require('../package.json').version;
+const version = process.env.VERSION || import('../package.json').version;
 
 if (!process.argv[2]) {
     cp.exec('lavas -h', (err, stdout, stderr) => {
