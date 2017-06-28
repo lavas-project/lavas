@@ -1,16 +1,10 @@
 {
   "name": "lavas-cli",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "pwa project solution cli tool",
-  "main": "dist/index.js",
+  "main": "lib/index.js",
   "scripts": {
-    "pretest": "",
-    "test": "cross-env FORCE_COLOR=1 jest --coverage",
-    "test:watch": "jest --watch",
-    "posttest": "npm run lint",
-    "lint": "eslint --ignore-path ./.gitignore bin src test",
-    "build": "cross-env BABEL_ENV=production rollup -c",
-    "prepublish": "npm run build"
+    "build": "sh build.sh"
   },
   "bin": {
     "lavas": "./bin/lavas-cli.js",
@@ -41,17 +35,7 @@
     "shelljs": "^0.7.8"
   },
   "devDependencies": {
-    "clone": "^2.1.1",
-    "cross-env": "^4.0.0",
-    "eslint": "^3.18.0",
-    "eslint-config-peerigon": "^10.1.1",
-    "eslint-plugin-import": "^2.2.0",
-    "eslint-plugin-jest": "^19.0.1",
-    "eslint-plugin-jsdoc": "^3.0.0",
-    "jest": "^19.0.2",
-    "sinon": "^2.1.0",
-    "stream-buffers": "^3.0.1",
-    "temp": "^0.8.3",
-    "wrap-ansi": "^2.1.0"
+    "babel-cli": "^6.24.1",
+    "babel-preset-env": "^1.5.2"
   }
 }
