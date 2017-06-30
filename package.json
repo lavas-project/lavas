@@ -22,6 +22,10 @@
   ],
   "author": "sfe-sy <sfe-sy@baidu.com>",
   "license": "ISC",
+  "engines": {
+    "node": ">= 4.0.0",
+    "npm": ">= 3.0.0"
+  },
   "dependencies": {
     "babel-runtime": "^6.23.0",
     "chalk": "^1.1.3",
