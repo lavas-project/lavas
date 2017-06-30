@@ -34,7 +34,7 @@
     "commander": "^2.9.0",
     "fs-extra": "^3.0.1",
     "inquirer": "^3.0.6",
-    "lavas-scaffold": "^1.0.4",
+    "lavas-scaffold": "^1.0.5",
     "ora": "^1.2.0",
     "shelljs": "^0.7.8"
   },
