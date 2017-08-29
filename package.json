@@ -36,6 +36,7 @@
     "inquirer": "^3.0.6",
     "lavas-scaffold": "^1.0.5",
     "ora": "^1.2.0",
+    "request-promise": "^4.2.1",
     "shelljs": "^0.7.8"
   },
   "devDependencies": {
