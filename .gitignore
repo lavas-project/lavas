@@ -8,5 +8,3 @@ node_modules
 dist
 tmp
 *-lock.json
-/lib/build
-/lib/server
