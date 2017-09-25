@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<% meta = meta.inject() %>
+<html lang="zh-CN" data-vue-meta-server-rendered {{{ meta.htmlAttrs.text() }}}>
+    <head>
+        <meta charset="utf-8">
+        {{{ meta.title.text() }}}
+        {{{ meta.meta.text() }}}
+        {{{ meta.link.text() }}}
+        {{{ meta.style.text() }}}
+        {{{ meta.script.text() }}}
+        {{{ meta.noscript.text() }}}
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="manifest" href="/static/manifest.json">
+        <meta name="theme-color" content="#2874f0">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <meta name="apple-mobile-web-app-title" content="*__ name __*">
+        <link rel="apple-touch-icon" href="/static/img/icons/apple-touch-icon-152x152.png">
+        <meta name="msapplication-TileImage" content="/static/img/icons/msapplication-icon-144x144.png">
+        <meta name="msapplication-TileColor" content="#000000">
+    </head>
+    <body {{{ meta.bodyAttrs.text() }}}>
+        <!--vue-ssr-outlet-->
+        <% if (isProd) { %>
+        <script>
+            // window.onload = function () {
+            //     var script = document.createElement('script');
+            //     var firstScript = document.getElementsByTagName('script')[0];
+            //     script.type = 'text/javascript';
+            //     script.async = true;
+            //     script.src = '/dist/sw-register.js?v=' + Date.now();
+            //     firstScript.parentNode.insertBefore(script, firstScript);
+            // };
+        </script>
+        <% } %>
+    </body>
+</html>
