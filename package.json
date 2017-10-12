@@ -1,6 +1,6 @@
 {
   "name": "lavas",
-  "version": "2.0.0",
+  "version": "2.0.0-alpha",
   "description": "pwa project solution cli tool",
   "main": "lib/index.js",
   "scripts": {
@@ -38,6 +38,7 @@
     "inquirer": "^3.0.6",
     "koa": "^2.3.0",
     "lavas-core": "^1.0.6",
+    "lavas-scaffold": "^2.0.0-alpha",
     "ora": "^1.2.0",
     "request-promise": "^4.2.1",
     "semver": "^5.4.1",
