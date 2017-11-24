@@ -8,3 +8,8 @@ node_modules
 dist
 tmp
 *-lock.json
+core/lib
+coverage
+.nyc_output
+core/test/fixtures/dist/
+core/test/fixtures/.lavas/

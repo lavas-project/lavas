@@ -1,0 +1,100 @@
+{
+    "additionalProperties": true,
+    "required": ["globals"],
+    "properties": {
+        "globals": {
+            "description": "global props",
+            "required": ["rootDir"],
+            "properties": {
+                "rootDir": {
+                    "type": "string"
+                }
+            }
+        },
+        "router": {
+            "description": "router props",
+            "properties": {
+                "routes": {
+                    "type": "array",
+                    "items": [
+                        {
+                            "required": ["name"],
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "path": {
+                                    "type": "string"
+                                },
+                                "pagename": {
+                                    "type": "string"
+                                },
+                                "chunkname": {
+                                    "type": "string"
+                                },
+                                "lazyLoading": {
+                                    "type": "boolean"
+                                },
+                                "prerender": {
+                                    "type": "boolean"
+                                },
+                                "skeleton": {
+                                    "type": "string"
+                                },
+                                "template": {
+                                    "type": "string"
+                                },
+                                "meta": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "webpack": {
+            "description": "webpack config",
+            "properties": {
+                "base": {
+                    "output": {
+                        "properties": {
+                            "path": {
+                                "type": "string"
+                            },
+                            "publicPath": {
+                                "type": "string"
+                            },
+                            "filename": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "shortcuts": {
+                    "additionalProperties": true,
+                    "properties": {
+                        "assetsDir": {
+                            "type": "string"
+                        },
+                        "copyDir": {
+                            "type": "string"
+                        },
+                        "cssExtract": {
+                            "type": "boolean"
+                        },
+                        "cssMinimize": {
+                            "type": "boolean"
+                        },
+                        "cssSourceMap": {
+                            "type": "boolean"
+                        },
+                        "jsSourceMap": {
+                            "type": "boolean"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

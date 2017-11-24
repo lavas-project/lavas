@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh_CN">
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <% if (renderManifestFlag) { %>
+        <!-- Add to home screen for Android and modern mobile browsers -->
+        <link rel="manifest" href="/<%= '\<%= htmlWebpackPlugin.options.config.webpack.shortcuts.assetsDir %\>/manifest.json?v=\<%= htmlWebpackPlugin.options.config.buildVersion %\>' %>">
+        <meta name="theme-color" content="<%= '\<%= htmlWebpackPlugin.options.config.manifest.theme_color %\>' %>">
+        <!-- Add to home screen for Safari on iOS -->
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <meta name="apple-mobile-web-app-title" content="<%= '\<%= htmlWebpackPlugin.options.config.manifest.short_name || htmlWebpackPlugin.options.config.manifest.name %\>' %>">
+        <link rel="apple-touch-icon" href="<%= '\<%= htmlWebpackPlugin.options.config.manifest.icons && htmlWebpackPlugin.options.config.manifest.icons[0] &&  htmlWebpackPlugin.options.config.manifest.icons[0].src %\>' %>">
+        <!-- Add to home screen for Windows -->
+        <meta name="msapplication-TileImage" content="<%= '\<%= htmlWebpackPlugin.options.config.manifest.icons && htmlWebpackPlugin.options.config.manifest.icons[0] &&  htmlWebpackPlugin.options.config.manifest.icons[0].src %\>' %>">
+        <meta name="msapplication-TileColor" content="<%= '\<%= htmlWebpackPlugin.options.config.manifest.theme_color %\>' %>">
+        <% } %>
+
+        <%= "\<% for (var jsFilePath of htmlWebpackPlugin.files.js) { %\>" %>
+            <link rel="preload" href="<%= '\<%= jsFilePath %\>' %>" as="script">
+        <%= "\<% } %\>" %>
+        <%= "\<% for (var cssFilePath of htmlWebpackPlugin.files.css) { %\>" %>
+            <link rel="preload" href="<%= '\<%= cssFilePath %\>' %>" as="style">
+        <%= "\<% } %\>" %>
+
+        {{{ renderResourceHints() }}}
+        {{{ renderStyles() }}}
+
+        <!-- @CUSTOM_HEAD@ -->
+    </head>
+    <body>
+        <!-- @CUSTOM_BODY_BEFORE@ -->
+
+        <div id="app"></div>
+
+        {{{ renderScripts() }}}
+        {{{ renderState() }}}
+
+        <!-- @CUSTOM_BODY_AFTER@ -->
+    </body>
+</html>

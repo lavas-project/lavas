@@ -1,0 +1,75 @@
+{
+  "name": "*__name__*",
+  "version": "2.0.0-alpha-0",
+  "description": "*__desc__*",
+  "author": "*__author__* <*__email__*>",
+  "private": true,
+  "scripts": {
+    "dev": "npm run build:core && cross-env NODE_ENV=development node server.dev.js",
+    "build:minify": "npm run build && cd dist && echo [Lavas] remove devDependencies && npm prune --production && echo [Lavas] all complete",
+    "build": "npm run build:core && cross-env NODE_ENV=production node build.js",
+    "start": "cross-env NODE_ENV=production node dist/server.js",
+    "dev:express": "npm run build:core && cross-env NODE_ENV=development node server.express.js",
+    "dev:core": "cross-env NODE_ENV=development node server.core.js",
+    "test": "npm run build:core && ./node_modules/.bin/nyc ava",
+    "lint": "fecs ./ --rule --type 'vue,js,css'",
+    "build:core": "babel build --out-dir lib --copy-files",
+    "build:server": "webpack"
+  },
+  "ava": {
+    "concurrency": 1,
+    "failFast": true,
+    "files": [
+      "test/unit/middlewares.test.js"
+    ],
+    "require": [
+      "babel-register"
+    ]
+  },
+  "dependencies": {
+    "express": "^4.15.4",
+    "iscroll": "*",
+    "koa": "^2.3.0",
+    "lavas-core": "^1.0.10",
+    "normalize.css": "^7.0.0",
+    "webpack-hot-middleware": "^2.19.1",
+    "querystring": "^0.2.0",
+    "sw-precache-webpack-plugin": "^0.11.4",
+    "sw-register-webpack-plugin": "^1.0.11",
+    "url-loader": "^0.5.9",
+    "vue": "^2.4.2",
+    "vue-meta": "^1.0.5",
+    "vue-router": "^2.7.0",
+    "vue-server-renderer": "^2.3.4",
+    "vuex": "^2.3.1"
+  },
+  "devDependencies": {
+    "ava": "^0.18.2",
+    "babel-core": "^6.25.0",
+    "babel-loader": "^7.1.1",
+    "babel-helper-explode-class": "^6.24.1",
+    "babel-plugin-add-module-exports": "^0.2.0",
+    "babel-plugin-dynamic-import-node": "^1.0.2",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-decorators": "^6.24.1",
+    "babel-plugin-transform-runtime": "^6.22.0",
+    "babel-polyfill": "^6.23.0",
+    "babel-preset-env": "^1.3.2",
+    "babel-preset-stage-2": "^6.22.0",
+    "babel-cli": "^6.24.0",
+    "babel-register": "^6.23.0",
+    "cross-env": "^5.0.5",
+    "fecs": "^1.4.0",
+    "nyc": "^10.3.2",
+    "superkoa": "^1.0.3"
+  },
+  "engines": {
+    "node": ">= 7.0.0",
+    "npm": ">= 4.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 8"
+  ]
+}
