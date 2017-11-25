@@ -7,12 +7,9 @@
                     "node": 4
                 }
             }
-        ],
-        "stage-2"
+        ]
     ],
     "plugins": [
-        "transform-runtime",
-        "add-module-exports",
-        "dynamic-import-node"
+        "transform-runtime"
     ]
 }
