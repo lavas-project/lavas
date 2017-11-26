@@ -2,6 +2,6 @@ coverage
 node_modules
 dist
 bin
-_old
-core/build/templates
+test
+core/templates
 *.html

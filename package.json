@@ -1,11 +1,19 @@
 {
   "name": "lavas",
-  "version": "2.0.1-alpha",
+  "version": "2.0.2",
   "description": "pwa project solution cli tool",
-  "main": "core/lib/index.js",
+  "main": "dist/core/index.js",
+  "files": [
+    "bin",
+    "dist"
+  ],
   "scripts": {
-    "build": "sh build.sh",
-    "lint": "fecs --ignore=./.gitignore lib --rule"
+    "build": "npm run build:cli && npm run build:core",
+    "build:cli": "babel cli --out-dir dist/cli --copy-files",
+    "build:core": "babel core --out-dir dist/core --copy-files",
+    "lint": "fecs ./ --rule --type 'vue,js,css'",
+    "prepublish": "npm run build",
+    "test": "npm run build:core && nyc ava"
   },
   "bin": {
     "lavas": "./bin/lavas-cli.js",
@@ -13,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/lavas-project/lavas-cli.git"
+    "url": "https://github.com/lavas-project/lavas.git"
   },
   "keywords": [
     "lavas",
@@ -36,8 +44,11 @@
     "concurrency": 1,
     "failFast": true,
     "files": [
-      "core/test/unit/config-reader.test.js",
-      "core/test/unit/utils/*"
+      "test/integration/*",
+      "test/unit/utils/*"
+    ],
+    "backupFiles": [
+      "test/unit/config-reader.test.js"
     ],
     "require": [
       "babel-register"
