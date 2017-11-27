@@ -100,7 +100,7 @@ export default class BaseBuilder {
      */
     async writeRuntimeConfig() {
         let filteredConfig = JsonUtil.deepPick(this.config, RUMTIME_ITEMS);
-        await this.writeFileToLavasDir('config.json', JsonUtil.stringify(filteredConfig));
+        await this.writeFileToLavasDir('config.json', JsonUtil.stringify(filteredConfig, null, 4));
     }
 
     /**

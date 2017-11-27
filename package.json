@@ -1,6 +1,6 @@
 {
   "name": "lavas",
-  "version": "2.0.2",
+  "version": "2.0.1",
   "description": "pwa project solution cli tool",
   "main": "dist/core/index.js",
   "files": [
@@ -51,7 +51,8 @@
       "test/unit/config-reader.test.js"
     ],
     "require": [
-      "babel-register"
+      "babel-register",
+      "babel-polyfill"
     ]
   },
   "dependencies": {
@@ -146,6 +147,6 @@
     "superkoa": "^1.0.3"
   },
   "peerDependencies": {
-    "webpack": "^2.0.0"
+    "webpack": "^2.7.0"
   }
 }

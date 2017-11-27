@@ -13,13 +13,9 @@ const jsonInstance = superJson.create({
     ]
 });
 
-export function stringify(obj) {
-    return jsonInstance.stringify(obj);
-}
+export const stringify = jsonInstance.stringify;
 
-export function parse(string) {
-    return jsonInstance.parse(string);
-}
+export const parse = jsonInstance.parse;
 
 /**
  * use _.pick recursively
