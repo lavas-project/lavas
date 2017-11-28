@@ -3,6 +3,7 @@ lavas
 
 [![npm (scoped with tag)](https://img.shields.io/npm/v/lavas/lavas2.svg)]()
 [![Build Status](https://travis-ci.org/lavas-project/lavas.svg?branch=dev-2.0)](https://travis-ci.org/lavas-project/lavas)
+[![Coverage Status](https://coveralls.io/repos/github/lavas-project/lavas/badge.svg?branch=dev-2.0)](https://coveralls.io/github/lavas-project/lavas?branch=dev-2.0)
 
 基于 Vue 的 PWA 解决方案，帮助开发者快速搭建 PWA 应用，解决开发 PWA 过程中遇到的各种问题。
 
