@@ -28,7 +28,7 @@ const DEFAULT_CONFIG = {
         cssSourceMap: true,
         jsSourceMap: true,
         bundleAnalyzerReport: false,
-        compress: true,
+        compress: false,
         defines: {
             base: {},
             client: {},
@@ -67,7 +67,8 @@ const DEFAULT_CONFIG = {
     serviceWorker: null,
     production: {
         build: {
-            cssExtract: true
+            cssExtract: true,
+            compress: true
         }
     },
     development: {

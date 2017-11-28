@@ -78,7 +78,7 @@ export default class LavasCore extends EventEmitter {
         let spinner = ora();
         spinner.start();
 
-        if (this.isDev) {
+        if (!this.isProd) {
             this.setupInternalMiddlewares();
         }
         await this.builder.build();
@@ -91,8 +91,11 @@ export default class LavasCore extends EventEmitter {
      *
      */
     setupInternalMiddlewares() {
-        // gzip compression
-        this.internalMiddlewares.push(compression());
+        if (this.config.build
+            && this.config.build.compress) {
+            // gzip compression
+            this.internalMiddlewares.push(compression());
+        }
         // serve favicon
         let faviconPath = posix.join(this.cwd, ASSETS_DIRNAME_IN_DIST, 'img/icons/favicon.ico');
         this.internalMiddlewares.push(favicon(faviconPath));

@@ -13,7 +13,7 @@ module.exports = function (program) {
     program
         .command('build')
         .alias('b')
-        .description('构建 Lavas 项目')
+        .description('为生产环境构建 Lavas 项目')
         .action(options => buildAction({
             // some options
         }))

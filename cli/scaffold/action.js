@@ -38,7 +38,7 @@ async function exportProject(params, templateConf) {
     log.info('您可以操作如下命令快速开始开发 Lavas 工程：\n\n'
         + log.chalk.green('cd ' + params.name + '\n'
         + 'npm install\n'
-        + 'npm run dev'
+        + 'lavas dev'
     ));
 }
 
