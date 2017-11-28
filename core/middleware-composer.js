@@ -1,3 +1,8 @@
+/**
+ * @file MiddlewareComposer.js
+ * @author lavas
+ */
+
 import {join, posix, basename} from 'path';
 import {parse} from 'url';
 import {isFromCDN, removeTrailingSlash} from './utils/path';
