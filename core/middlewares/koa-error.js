@@ -6,12 +6,10 @@
 /**
  * generate error middleware
  *
- * @param {Object} core lavas core
+ * @param {string} errPath errPath
  * @return {Function} koa middleware
  */
-export default function (core) {
-
-    const errPath = core.config.errorHandler.errorPath;
+export default function (errPath) {
 
     return async (ctx, next) => {
         if (ctx.req.lavasIgnoreFlag) {

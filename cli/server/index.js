@@ -34,7 +34,9 @@ module.exports = function (program) {
             }
             else {
                 process.env.NODE_ENV = 'development';
-                process.env.PORT = port;
+                if (port) {
+                    process.env.PORT = Number(port);
+                }
                 require(serverScriptPath);
             }
         });
@@ -59,7 +61,9 @@ module.exports = function (program) {
             }
             else {
                 process.env.NODE_ENV = 'production';
-                process.env.PORT = port;
+                if (port) {
+                    process.env.PORT = Number(port);
+                }
                 require(serverScriptPath);
             }
         });

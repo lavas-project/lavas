@@ -1,10 +1,8 @@
 lavas
 =========
 
-[![npm version](https://badge.fury.io/js/lavas.svg)](https://badge.fury.io/js/lavas)
-[![Build Status](https://travis-ci.org/lavas-project/lavas.svg?branch=master)](https://travis-ci.org/lavas-project/lavas)
-
-[![NPM](https://nodei.co/npm/lavas.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/lavas/)
+[![npm (scoped with tag)](https://img.shields.io/npm/v/lavas/lavas2.svg)]()
+[![Build Status](https://travis-ci.org/lavas-project/lavas.svg?branch=dev-2.0)](https://travis-ci.org/lavas-project/lavas)
 
 基于 Vue 的 PWA 解决方案，帮助开发者快速搭建 PWA 应用，解决开发 PWA 过程中遇到的各种问题。
 

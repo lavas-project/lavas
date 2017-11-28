@@ -67,15 +67,11 @@ export default class DevBuilder extends BaseBuilder {
     }
 
     /**
-     * rebuild the whole webpack process
+     * reload global config
      */
-    async rebuild() {
+    startRebuild() {
         console.log('[Lavas] config changed, start rebuilding...');
-        let newConfig = await this.core.configReader.read();
-        this.core.config = newConfig;
-        this.init(newConfig);
-        this.core.internalMiddlewares = [];
-        this.core.emit('rebuild');
+        this.core.emit('start-rebuild');
     }
 
     /**
@@ -117,16 +113,12 @@ export default class DevBuilder extends BaseBuilder {
 
         // watch files provides by user
         if (build.watch) {
-            this.addWatcher(build.watch, 'change', async () => {
-                await this.rebuild();
-            });
+            this.addWatcher(build.watch, 'change', this.startRebuild);
         }
 
         // watch lavas.config.js, rebuild whole process
         let configDir = join(globals.rootDir, LAVAS_CONFIG_FILE);
-        this.addWatcher(configDir, 'change', async () => {
-            await this.rebuild();
-        });
+        this.addWatcher(configDir, 'change', this.startRebuild);
     }
 
     /**
@@ -246,7 +238,7 @@ export default class DevBuilder extends BaseBuilder {
              * we should put this middleware in front of dev middleware since
              * it will rewrite req.url to xxx.html based on options.rewrites
              */
-            this.core.internalMiddlewares.push(historyMiddleware({
+            this.core.middlewareComposer.add(historyMiddleware({
                 htmlAcceptHeaders: ['text/html'],
                 disableDotRule: false, // ignore paths with dot inside
                 // verbose: true,
@@ -255,8 +247,8 @@ export default class DevBuilder extends BaseBuilder {
         }
 
         // add dev & hot-reload middlewares
-        this.core.internalMiddlewares.push(this.devMiddleware);
-        this.core.internalMiddlewares.push(hotMiddleware);
+        this.core.middlewareComposer.add(this.devMiddleware);
+        this.core.middlewareComposer.add(hotMiddleware);
 
         // wait until webpack building finished
         await new Promise(resolve => {

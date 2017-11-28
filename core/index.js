@@ -7,32 +7,10 @@ import Renderer from './renderer';
 import ConfigReader from './config-reader';
 import ProdBuilder from './builder/prod-builder';
 import DevBuilder from './builder/dev-builder';
-
-import ssrFactory from './middlewares/ssr';
-import koaErrorFactory from './middlewares/koa-error';
-import expressErrorFactory from './middlewares/express-error';
-import staticFactory from './middlewares/static';
+import MiddlewareComposer from './middleware-composer';
 
 import ora from 'ora';
-
-import {compose} from 'compose-middleware';
-import composeKoa from 'koa-compose';
-import c2k from 'koa-connect';
-import mount from 'koa-mount';
-import koaStatic from 'koa-static';
-import send from 'koa-send';
-
-import {Router} from 'express';
-import serveStatic from 'serve-static';
-import favicon from 'serve-favicon';
-import compression from 'compression';
-
-import {join, posix, basename} from 'path';
 import EventEmitter from 'events';
-import {parse} from 'url';
-import {isFromCDN, removeTrailingSlash} from './utils/path';
-
-import {ASSETS_DIRNAME_IN_DIST} from './constants';
 
 export default class LavasCore extends EventEmitter {
     constructor(cwd = process.cwd()) {
@@ -64,10 +42,33 @@ export default class LavasCore extends EventEmitter {
             this.config = await this.configReader.readConfigFile();
         }
 
-        this.internalMiddlewares = [];
+        this.middlewareComposer = new MiddlewareComposer(this);
         this.renderer = new Renderer(this);
         this.builder = this.isProd
             ? new ProdBuilder(this) : new DevBuilder(this);
+
+        // expose Koa & express middleware factory function
+        this.koaMiddleware = this.middlewareComposer.koa
+            .bind(this.middlewareComposer);
+        this.expressMiddleware = this.middlewareComposer.express
+            .bind(this.middlewareComposer);
+
+        if (!this.isProd) {
+            // register rebuild listener
+            this.on('start-rebuild', async () => {
+                // read config again
+                let newConfig = await this.configReader.read();
+
+                // init builder again
+                this.builder.init(newConfig);
+
+                // clean middlewares
+                this.middlewareComposer.clean();
+
+                // notify the server that it needs to restart
+                this.emit('rebuild');
+            });
+        }
     }
 
     /**
@@ -79,7 +80,7 @@ export default class LavasCore extends EventEmitter {
         spinner.start();
 
         if (!this.isProd) {
-            this.setupInternalMiddlewares();
+            this.middlewareComposer.setup();
         }
         await this.builder.build();
 
@@ -87,169 +88,14 @@ export default class LavasCore extends EventEmitter {
     }
 
     /**
-     * setup some internal middlewares
-     *
-     */
-    setupInternalMiddlewares() {
-        if (this.config.build
-            && this.config.build.compress) {
-            // gzip compression
-            this.internalMiddlewares.push(compression());
-        }
-        // serve favicon
-        let faviconPath = posix.join(this.cwd, ASSETS_DIRNAME_IN_DIST, 'img/icons/favicon.ico');
-        this.internalMiddlewares.push(favicon(faviconPath));
-    }
-
-    /**
      * must run after build in prod mode
      *
      */
     async runAfterBuild() {
-        this.setupInternalMiddlewares();
+        this.middlewareComposer.setup();
         this.renderer = new Renderer(this);
         // create with bundle & manifest
         await this.renderer.createWithBundle();
-    }
-
-    /**
-     * compose all the middlewares
-     *
-     * @return {Function} koa middleware
-     */
-    koaMiddleware() {
-        let {entry, build: {publicPath}, serviceWorker} = this.config;
-        let ssrExists = entry.some(e => e.ssr);
-        let entryBases = entry.map(e => removeTrailingSlash(e.base || '/'));
-
-        // transform express/connect style middleware to koa style
-        let middlewares = [
-            koaErrorFactory(this),
-            async (ctx, next) => {
-                // koa defaults to 404 when it sees that status is unset
-                ctx.status = 200;
-                await next();
-            },
-            ...this.internalMiddlewares.map(c2k)
-        ];
-
-        // Redirect without trailing slash.
-        middlewares.push(async (ctx, next) => {
-            if (entryBases.includes(ctx.path)) {
-                ctx.redirect(ctx.path + '/' + ctx.search);
-            }
-            else {
-                await next();
-            }
-        });
-
-        if (ssrExists) {
-            /**
-             * Add static files middleware only in prod mode,
-             * because we already have webpack-dev-middleware in dev mode.
-             * Don't need this middleware when CDN being used to serve static files.
-             */
-            if (this.isProd && !isFromCDN(publicPath)) {
-                // serve /static
-                middlewares.push(mount(
-                    posix.join(publicPath, ASSETS_DIRNAME_IN_DIST),
-                    koaStatic(join(this.cwd, ASSETS_DIRNAME_IN_DIST))
-                ));
-
-                // serve sw-register.js & sw.js
-                let swFiles = [
-                    basename(serviceWorker.swDest),
-                    'sw-register.js'
-                ].map(f => posix.join(publicPath, f));
-                middlewares.push(async (ctx, next) => {
-                    let done = false;
-                    if (swFiles.includes(ctx.path)) {
-                        // Don't cache service-worker.js & sw-register.js.
-                        ctx.set('Cache-Control', 'private, no-cache, no-store');
-                        done = await send(ctx, ctx.path.substring(publicPath.length), {
-                            root: this.cwd
-                        });
-                    }
-                    if (!done) {
-                        await next();
-                    }
-                });
-            }
-            middlewares.push(c2k(ssrFactory(this)));
-        }
-
-        return composeKoa(middlewares);
-    }
-
-    /**
-     * compose all the middlewares
-     *
-     * @return {Function} express middleware
-     */
-    expressMiddleware() {
-        let expressRouter = Router;
-        let {entry, build: {publicPath}, serviceWorker} = this.config;
-        let ssrExists = entry.some(e => e.ssr);
-
-        let middlewares = Array.from(this.internalMiddlewares);
-
-        // Redirect without trailing slash.
-        let rootRouter = expressRouter();
-        rootRouter.get(
-            entry.map(e => removeTrailingSlash(e.base || '/')),
-            (req, res, next) => {
-                let url = parse(req.url);
-                if (!url.pathname.endsWith('/')) {
-                    res.redirect(301, url.pathname + '/' + (url.search || ''));
-                }
-                else {
-                    next();
-                }
-            }
-        );
-        middlewares.unshift(rootRouter);
-
-        if (ssrExists) {
-            /**
-             * Add static files middleware only in prod mode,
-             * because we already have webpack-dev-middleware in dev mode.
-             * Don't need this middleware when CDN being used to serve static files.
-             */
-            if (this.isProd && !isFromCDN(publicPath)) {
-                // Serve /static.
-                let staticRouter = expressRouter();
-                staticRouter.get(
-                    posix.join(publicPath, ASSETS_DIRNAME_IN_DIST, '*'),
-                    staticFactory(publicPath)
-                );
-                middlewares.push(staticRouter);
-                // Don't use etag or cache-control.
-                middlewares.push(serveStatic(this.cwd, {
-                    cacheControl: false,
-                    etag: false
-                }));
-
-                // Serve sw-register.js & sw.js.
-                let swFiles = [
-                    basename(serviceWorker.swDest),
-                    'sw-register.js'
-                ].map(f => posix.join(publicPath, f));
-                let swRouter = expressRouter();
-                swRouter.get(swFiles, staticFactory(publicPath));
-                middlewares.push(swRouter);
-                // Use cache-control but not etag.
-                middlewares.push(serveStatic(this.cwd, {
-                    etag: false
-                }));
-            }
-
-            middlewares.push(ssrFactory(this));
-        }
-
-        // Handle errors.
-        middlewares.push(expressErrorFactory(this));
-
-        return compose(middlewares);
     }
 
     /**
