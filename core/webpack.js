@@ -20,7 +20,7 @@ import WorkboxWebpackPlugin from 'workbox-webpack-plugin';
 
 import {vueLoaders, styleLoaders} from './utils/loader';
 import {assetsPath} from './utils/path';
-import {getWorkboxFiles} from './utils/workbox';
+import {WORKBOX_PATH, getWorkboxFiles} from './utils/workbox';
 import {LAVAS_DIRNAME_IN_DIST, SERVER_BUNDLE, ASSETS_DIRNAME_IN_DIST} from './constants';
 
 import fs from 'fs';
@@ -268,8 +268,6 @@ export default class WebpackConfig {
         }];
         // Copy workbox.dev|prod.js from node_modules manually.
         if (this.isProd && workboxConfig) {
-            // node_modules/workbox-sw/build/importScripts/workbox-sw.prod.v2.1.2.js
-            const WORKBOX_PATH = require.resolve('workbox-sw');
             copyList = copyList.concat(
                 getWorkboxFiles(this.isProd)
                     .map(f => {

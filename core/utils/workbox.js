@@ -2,7 +2,9 @@
  * @file utils.workbox.js
  * @author lavas
  */
-import {version} from 'workbox-sw/package.json';
+import {basename} from 'path';
+
+export const WORKBOX_PATH = require.resolve('workbox-sw');
 
 /**
  * get workbox files
@@ -11,8 +13,10 @@ import {version} from 'workbox-sw/package.json';
  * @return {Array} files .js & .map
  */
 export function getWorkboxFiles(isProd) {
+    let filename = isProd
+        ? basename(WORKBOX_PATH) : basename(WORKBOX_PATH).replace('prod', 'dev');
     return [
-        `workbox-sw.${isProd ? 'prod' : 'dev'}.v${version}.js`,
-        `workbox-sw.${isProd ? 'prod' : 'dev'}.v${version}.js.map`
+        filename,
+        `${filename}.map`
     ];
 }
