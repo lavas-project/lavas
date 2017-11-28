@@ -5,7 +5,7 @@
 
 'use strict';
 
-let files = require.context('@/middleware', false, /^\.\/.*\.(js|ts)$/);
+let files = require.context('@/middlewares', false, /^\.\/.*\.(js|ts)$/);
 
 export default files.keys().reduce((middleware, filename) => {
     let name = filename.slice(2, -3);

@@ -5,7 +5,7 @@
 
 import Vue from 'vue';
 import middleware from '@/core/middleware';
-import lavasConfig from '@/lavas.config';
+import lavasConfig from '@/.lavas/config';
 import {createApp} from './app';
 import ProgressBar from '@/components/ProgressBar';
 import {middlewareSeries} from '@/core/utils';

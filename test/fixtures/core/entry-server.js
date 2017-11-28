@@ -4,7 +4,7 @@
  */
 
 import middleware from './middleware';
-import lavasConfig from '@/lavas.config';
+import lavasConfig from '@/.lavas/config';
 import {stringify} from 'querystring';
 import {middlewareSeries, urlJoin} from './utils';
 import {getServerContext} from './context-server';
