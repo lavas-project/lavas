@@ -113,12 +113,12 @@ export default class DevBuilder extends BaseBuilder {
 
         // watch files provides by user
         if (build.watch) {
-            this.addWatcher(build.watch, 'change', this.startRebuild);
+            this.addWatcher(build.watch, 'change', this.startRebuild.bind(this));
         }
 
         // watch lavas.config.js, rebuild whole process
         let configDir = join(globals.rootDir, LAVAS_CONFIG_FILE);
-        this.addWatcher(configDir, 'change', this.startRebuild);
+        this.addWatcher(configDir, 'change', this.startRebuild.bind(this));
     }
 
     /**

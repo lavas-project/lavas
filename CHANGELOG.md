@@ -1,7 +1,6 @@
 # Changelog
 
-## [2.0.3] - 2017-11-29
-- [Fix] express-error.js use `302` rather than `301` as redirect status code.
+## [2.0.5] - 2017-11-29
 
 ### Added
 - Use coveralls for keeping test coverage history. Also integrate it with travis.
@@ -11,3 +10,5 @@
 
 ### Changed
 - [Fix] Use vue-loader@13.0.2 for Node 5.x. The latest vue-loader already drops support for Node 4.x.[ISSUE](https://github.com/vuejs/vue-loader/issues/1010)
+- [Fix] express-error.js use `302` rather than `301` as redirect status code.
+- [Fix] Rebuild when lavas.config.js changed.
