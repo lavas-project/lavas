@@ -35,7 +35,7 @@ export default function (errPath) {
         // redirect to the corresponding url
         let target = `${errPath}?error=${encodeURIComponent(errorMsg)}`;
         if (errPath) {
-            res.writeHead(301, {Location: target});
+            res.writeHead(302, {Location: target});
         }
 
         res.end();

@@ -1,6 +1,7 @@
 # Changelog
 
 ## [2.0.3] - 2017-11-29
+- [Fix] express-error.js use `302` rather than `301` as redirect status code.
 
 ### Added
 - Use coveralls for keeping test coverage history. Also integrate it with travis.
