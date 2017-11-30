@@ -4,17 +4,22 @@
  */
 
 import Vue from 'vue';
+import Meta from 'vue-meta';
 import {createRouter} from '@/.lavas/main/router';
 import {createStore} from '@/core/store';
-import '@/core/meta';
 import AppComponent from './App.vue';
+import LavasLink from '@/.lavas/LavasLink';
 
-let store;
+Vue.use(Meta);
+
+Vue.config.productionTip = false;
+
+Vue.component(LavasLink.name, LavasLink);
 
 /* eslint-disable no-new */
 export function createApp() {
     let router = createRouter();
-    store = createStore();
+    let store = createStore();
     let App = Vue.extend({
         router,
         store,
@@ -24,5 +29,5 @@ export function createApp() {
 }
 
 if (module.hot) {
-    module.hot.accept(['@/core/store'], () => {});
+    module.hot.accept();
 }

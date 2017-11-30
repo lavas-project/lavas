@@ -9,6 +9,9 @@ const path = require('path');
 const BUILD_PATH = path.resolve(__dirname, 'dist');
 
 module.exports = {
+    middleware: {
+        all: ['middleware1', 'middleware2']
+    },
     build: {
         path: BUILD_PATH
     },

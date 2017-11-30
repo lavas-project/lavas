@@ -9,7 +9,7 @@
 
 export default {
     name: 'detail',
-    head: {
+    metaInfo: {
         title: 'Detail Page',
         meta: [
             {name: 'keywords', content: 'lavas PWA'}

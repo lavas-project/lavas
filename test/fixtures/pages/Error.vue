@@ -11,7 +11,7 @@
 <script>
 export default {
     name: 'error',
-    head: {
+    metaInfo: {
         title: '服务器开小差了'
     },
     computed: {

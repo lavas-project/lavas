@@ -1,6 +1,6 @@
 /**
- * @file test case for ConfigValidator.js
- * @author panyuqi (pyqiverson@gmail.com)
+ * @file test case for ConfigReader
+ * @author panyuqi (panyuqi@baidu.com)
  */
 
 /* eslint-disable fecs-use-standard-promise */
@@ -8,19 +8,23 @@
 import merge from 'webpack-merge';
 import {join} from 'path';
 import test from 'ava';
-import LavasCore from '../../lib';
+import LavasCore from '../../dist/core';
+import {syncConfig} from '../utils';
 
 let core;
-
-function syncConfig(lavasCore, config) {
-    lavasCore.config = config;
-    lavasCore.builder.config = config;
-    lavasCore.builder.webpackConfig.config = config;
-}
 
 test.beforeEach('init', async t => {
     core = new LavasCore(join(__dirname, '../fixtures'));
     await core.init('development', true);
+});
+
+test('it should merge middlewares defined in lavas.config.js and defaults correctly', t => {
+    /**
+     * default            all: []
+     * lavas.config.js    all: ['middleware1', 'middleware2']
+     * merged             all: ['middleware1', 'middleware2']
+     */
+    t.deepEqual(core.config.middleware.all, ['middleware1', 'middleware2']);
 });
 
 test('it should add a new alias', async t => {

@@ -3,24 +3,18 @@
  * @author *__ author __*{% if: *__ email __* %}(*__ email __*){% /if %}
  */
 
-import middleware from './middleware';
+import {getMiddlewares, getServerContext, execSeries, createNext} from './middleware';
 import lavasConfig from '@/.lavas/config';
 import {stringify} from 'querystring';
-import {middlewareSeries, urlJoin} from './utils';
-import {getServerContext} from './context-server';
-import Vue from 'vue';
 
-const isDev = process.env.NODE_ENV !== 'production';
-let {middleware: middConf = {}} = lavasConfig;
+const {middleware: middConf = {}} = lavasConfig;
+
+// get all the middlewares defined by user
+const middlewares = getMiddlewares();
 
 // import app.js from all modules
 const apps = getAllApps();
 
-// This exported function will be called by `bundleRenderer`.
-// This is where we perform data-prefetching to determine the
-// state of our application before actually rendering it.
-// Since data fetching is async, this function is expected to
-// return a Promise that resolves to the app instance.
 export default function (context) {
     return new Promise((resolve, reject) => {
         let {url, entryName, config} = context;
@@ -29,52 +23,65 @@ export default function (context) {
             .replace(/^\/+/, '').replace(/\/+$/, '');
         url = url.replace(new RegExp(`^/${base}/?`), '/');
 
+        // create app for current entry
         let createApp = apps[entryName].createApp;
-
         if (!createApp || typeof createApp !== 'function') {
             return reject();
         }
-
         let {App, router, store} = createApp();
         let app = new App();
 
+        // get current url from router
         let fullPath = router.resolve(url).route.fullPath;
-
         if (fullPath !== url) {
             return reject({url: fullPath});
         }
 
+        // set router's location
+        router.push(url);
+
+        // mount store, route and meta on context
         context.store = store;
         context.route = router.currentRoute;
         context.meta = app.$meta();
 
-        // set router's location
-        router.push(url);
-
         // wait until router has resolved possible async hooks
         router.onReady(async () => {
-            let matchedComponents = router.getMatchedComponents();
 
-            // no matched routes
-            if (!matchedComponents.length) {
-                let err = new Error('Not Found');
-                // simulate nodejs file not found
-                err.code = 'ENOENT';
-                err.status = 404;
-                return reject(err);
-            }
-
-            // middleware
-            await execMiddlewares.call(this, matchedComponents, context, app);
-
-            // Call fetchData hooks on components matched by the route.
-            // A preFetch hook dispatches a store action and returns a Promise,
-            // which is resolved when the action is complete and store state has been
-            // updated.
+            // get all the components match current route
+            let matchedComponents = router.getMatchedComponents() || [];
 
             try {
-                let s = isDev && Date.now();
+                // collect names of middlewares from lavas.config & matched components
+                let middlewareNames = [
+                    ...(middConf.all || []),
+                    ...(middConf.server || []),
+                    ...matchedComponents
+                        .filter(({middleware}) => !!middleware)
+                        .reduce((arr, {middleware}) => arr.concat(middleware), [])
+                ];
+                let matchedMiddlewares = middlewareNames.map(name => middlewares[name]);
 
+                // if a middleware is undefined, throw an error
+                let unknowMiddleware = middlewareNames.find(
+                    name => typeof middlewares[name] !== 'function');
+                if (unknowMiddleware) {
+                    reject({
+                        status: 500,
+                        message: `Unknown middleware ${unknowMiddleware}`
+                    });
+                }
+
+                // add next() to context
+                context.next = createNext(context);
+
+                // create a new context for middleware, contains store, route etc.
+                const contextInMiddleware = getServerContext(context, app);
+
+                // exec middlewares
+                await execSeries(matchedMiddlewares, contextInMiddleware);
+
+                // exec asyncData() defined in every matched component
                 await Promise.all(
                     matchedComponents
                     .filter(({asyncData}) => typeof asyncData === 'function')
@@ -84,13 +91,7 @@ export default function (context) {
                     }))
                 );
 
-                isDev && console.log(`data pre-fetch: ${Date.now() - s}ms`);
-                // After all preFetch hooks are resolved, our store is now
-                // filled with the state needed to render the app.
-                // Expose the state on the render context, and let the request handler
-                // inline the state in the HTML response. This allows the client-side
-                // store to pick-up the server-side state without having to duplicate
-                // the initial data fetching on the client.
+                // mount the latest snapshot of store on context
                 context.state = store.state;
                 context.isProd = process.env.NODE_ENV === 'production';
                 resolve(app);
@@ -99,75 +100,7 @@ export default function (context) {
                 reject(err);
             }
         }, reject);
-
     });
-}
-
-/**
- * execute middlewares
- *
- * @param {Array.<*>} components matched components
- * @param {*} context Vue context
- * @param {*} app Vue app
- */
-async function execMiddlewares(components = [], context, app) {
-    // all + server + components middlewares
-    let middlewareNames = [
-        ...(middConf && middConf.all || []),
-        ...(middConf && middConf.server || []),
-        ...components
-            .filter(({middleware}) => !!middleware)
-            .reduce((arr, {middleware}) => arr.concat(middleware), [])
-    ];
-
-    let name = middlewareNames.find(name => typeof middleware[name] !== 'function');
-    if (name) {
-        context.error({
-            statusCode: 500,
-            message: `Unknown middleware ${name}`
-        });
-        return;
-    }
-
-    let matchedMiddlewares = middlewareNames.map(name => middleware[name]);
-
-    context.next = createNext(context);
-    // Update context
-    const ctx = getServerContext(context, app);
-
-    await middlewareSeries(matchedMiddlewares, ctx);
-}
-
-/**
- * create next
- *
- * @param {*} context context
- * @return {Function}
- */
-function createNext(context) {
-    return opts => {
-        context.redirected = opts;
-        if (!context.res) {
-            return;
-        }
-
-        opts.query = stringify(opts.query);
-        opts.path = opts.path + (opts.query ? '?' + opts.query : '');
-        if (opts.path.indexOf('http') !== 0
-            && opts.path.indexOf('/') !== 0
-        ) {
-            opts.path = urlJoin('/', opts.path);
-        }
-        // Avoid loop redirect
-        if (opts.path === context.url) {
-            context.redirected = false;
-            return;
-        }
-        context.res.writeHead(opts.status, {
-            Location: opts.path
-        });
-        context.res.end();
-    };
 }
 
 function getAllApps() {

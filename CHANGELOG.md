@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.0.7] - 2017-11-30
+
+### Changed
+- [Fix] Merge middlewares defined in config correctly. Use `lodash.merge` to concat two arrays during merging.
+- [Fix] lavas.config.router
+    - Apply `rewrite.from` to `route.path`.
+    - Apply `routes.pattern` to `route.fullPath`.
+- [Fix] Simplify `dist/config.json` after production building, only preserve some required options.
+
 ## [2.0.5] - 2017-11-29
 
 ### Added

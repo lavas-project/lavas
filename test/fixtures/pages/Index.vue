@@ -8,7 +8,7 @@
 
 export default {
     name: 'index',
-    head: {
+    metaInfo: {
         title: 'Home',
         meta: [
             {name: 'keywords', content: 'lavas PWA'}

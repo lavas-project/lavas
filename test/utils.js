@@ -1,6 +1,6 @@
 /**
  * @file utils.js
- * @author panyuqi@baidu.com (panyuqi)
+ * @author panyuqi (panyuqi@baidu.com)
  * @desc wrap some useful functions for Koa & express test suites
  */
 
