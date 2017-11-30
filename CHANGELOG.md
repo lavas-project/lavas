@@ -28,6 +28,7 @@
 - [Fix] `config.router` use different strategies under the following scenes:
     - Apply `rewrite.from` to `route.path`.
     - Apply `routes.pattern` to `route.fullPath`.
+- [Fix] Simplify `dist/config.json` after production building, only preserve some required options.
 
 ## [2.0.5] - 2017-11-29
 
