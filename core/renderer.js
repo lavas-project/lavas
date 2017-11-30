@@ -18,7 +18,8 @@ export default class Renderer {
     constructor(core) {
         this.isProd = core.isProd;
         this.config = core.config;
-        this.rootDir = this.config && this.config.globals.rootDir;
+        this.rootDir = this.config.globals
+            && this.config.globals.rootDir;
         this.cwd = core.cwd;
         this.renderer = {};
         this.serverBundle = null;

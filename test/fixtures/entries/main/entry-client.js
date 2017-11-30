@@ -4,12 +4,10 @@
  */
 
 import Vue from 'vue';
-import middleware from '@/core/middleware';
+import {getMiddlewares, execSeries, getClientContext} from '@/core/middleware';
 import lavasConfig from '@/.lavas/config';
 import {createApp} from './app';
 import ProgressBar from '@/components/ProgressBar';
-import {middlewareSeries} from '@/core/utils';
-import {getClientContext} from '@/core/context-client';
 
 import '@/assets/stylus/main.styl';
 
@@ -89,37 +87,38 @@ else {
     app = new App().$mount('#app');
 }
 
-/**
- * execute middlewares
- *
- * @param {Array.<*>} components matched components
- * @param {*} context Vue context
- */
-async function execMiddlewares(components = [], context) {
-    // all + client + components middlewares
-    let middlewareNames = [
-        ...(middConf.all || []),
-        ...(middConf.client || []),
-        ...components
-            .filter(({middleware}) => !!middleware)
-            .reduce((arr, {middleware}) => arr.concat(middleware), [])
-    ];
-
-    let name = middlewareNames.find(name => typeof middleware[name] !== 'function');
-    if (name) {
-        throw new Error(`Unknown middleware ${name}`);
-    }
-
-    await middlewareSeries(middlewareNames.map(name => middleware[name]), context);
-}
-
 function handleMiddlewares() {
+    // get all the middlewares defined by user
+    const middlewares = getMiddlewares();
+
     router.beforeEach(async (to, from, next) => {
         // Avoid loop redirect with next(path)
         const fromPath = from.fullPath.split('#')[0];
         const toPath = to.fullPath.split('#')[0];
         if (fromPath === toPath) {
             return next();
+        }
+
+        let matchedComponents = await router.getMatchedComponents(to);
+
+        if (!matchedComponents.length) {
+            // can't find matched component, use href jump
+            window.location.href = toPath;
+            return next();
+        }
+
+        // all + client + components middlewares
+        let middlewareNames = [
+            ...(middConf.all || []),
+            ...(middConf.client || []),
+            ...matchedComponents
+                .filter(({middleware}) => !!middleware)
+                .reduce((arr, {middleware}) => arr.concat(middleware), [])
+        ];
+
+        let unknowMiddleware = middlewareNames.find(name => typeof middlewares[name] !== 'function');
+        if (unknowMiddleware) {
+            throw new Error(`Unknown middleware ${unknowMiddleware}`);
         }
 
         let nextCalled = false;
@@ -135,23 +134,16 @@ function handleMiddlewares() {
             next(path);
         };
 
-        // Update context
-        const ctx = getClientContext({
+        // create a new context for middleware, contains store, route etc.
+        let contextInMiddleware = getClientContext({
             to,
             from,
             store,
             next: nextRedirect
         }, app);
 
-        let matched = await router.getMatchedComponents(to);
-
-        if (!matched.length) {
-            // can't find matched component, use href jump
-            window.location.href = toPath;
-            return next();
-        }
-
-        await execMiddlewares.call(this, matched, ctx);
+        let matchedMiddlewares = middlewareNames.map(name => middlewares[name]);
+        await execSeries(matchedMiddlewares, contextInMiddleware);
 
         if (!nextCalled) {
             next();

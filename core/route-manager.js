@@ -23,7 +23,7 @@ export default class RouteManager {
         this.config = config;
         this.isDev = env === 'development';
 
-        if (this.config) {
+        if (this.config.globals && this.config.globals.rootDir) {
             this.lavasDir = join(this.config.globals.rootDir, './.lavas');
         }
 
@@ -85,7 +85,7 @@ export default class RouteManager {
             this.flatRoutes.add(route);
 
             // rewrite route path with rules
-            route.path = this.rewriteRoutePath(rewriteRules, route.path);
+            route.rewritePath = this.rewriteRoutePath(rewriteRules, route.path);
             route.fullPath = parentPath ? `${parentPath}/${route.path}` : route.path;
 
             // find error route
@@ -118,7 +118,7 @@ export default class RouteManager {
                 } = routeConfig;
 
                 Object.assign(route, routeConfig, {
-                    path: routePath || route.path,
+                    rewritePath: routePath || route.rewritePath,
                     lazyLoading: lazyLoading || !!chunkname
                 });
             }
@@ -137,9 +137,9 @@ export default class RouteManager {
              * turn route fullpath into regexp
              * eg. /detail/:id => /^\/detail\/[^\/]+\/?$/
              */
-            route.pathRegExp = route.path === '*'
+            route.pathRegExp = route.rewritePath === '*'
                 ? /^.*$/
-                : routes2Reg(route.path);
+                : routes2Reg(route.rewritePath);
 
             // merge recursively
             if (route.children && route.children.length) {
@@ -163,7 +163,7 @@ export default class RouteManager {
                 // see https://github.com/vuejs/vue-router/issues/724
                 // Solution: write a normal path and add alias with '*'
                 return prev + `{
-                    path: '${cur.path}',
+                    path: '${cur.rewritePath}',
                     name: '${cur.name}',
                     component: _${cur.hash},
                     meta: ${JSON.stringify(cur.meta || {})},
@@ -183,7 +183,7 @@ export default class RouteManager {
             }
 
             return prev + `{
-                path: '${cur.path}',
+                path: '${cur.rewritePath}',
                 name: '${cur.name}',
                 component: _${cur.hash},
                 meta: ${JSON.stringify(cur.meta || {})},

@@ -1,6 +1,7 @@
 <template>
     <div>
         <h2 class="gray--text">LAVAS</h2>
+        <span>{{webpackDefineTestVar}}</span>
     </div>
 </template>
 
@@ -8,13 +9,18 @@
 
 export default {
     name: 'index',
-    head: {
+    metaInfo: {
         title: 'Home',
         meta: [
             {name: 'keywords', content: 'lavas PWA'}
         ]
     },
-    async asyncData({store, route}) {}
+    async asyncData({store, route}) {},
+    data() {
+        return {
+            webpackDefineTestVar: DEFINE_TEST_VAR
+        }
+    }
 };
 </script>
 

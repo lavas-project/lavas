@@ -48,8 +48,13 @@ export default class WebpackConfig {
         let {globals, build, babel} = this.config;
         /* eslint-disable fecs-one-var-per-line */
         let {path, publicPath, filenames, cssSourceMap, cssMinimize,
-            cssExtract, jsSourceMap, alias: {base: baseAlias = {}}, extend,
-            plugins: {base: basePlugins = []}} = Object.assign({}, build, buildConfig);
+            cssExtract, jsSourceMap,
+            alias: {base: baseAlias = {}},
+            defines: {base: baseDefines = {}},
+            extend,
+            plugins: {base: basePlugins = []}
+        } = Object.assign({}, build, buildConfig);
+
         /* eslint-enable fecs-one-var-per-line */
         let baseConfig = {
             output: {
@@ -108,31 +113,36 @@ export default class WebpackConfig {
                         }
                     }
                 ]
-            },
-            plugins: this.isProd
-                ? [
-                    new webpack.optimize.UglifyJsPlugin({
-                        compress: {
-                            warnings: false
-                        },
-                        sourceMap: jsSourceMap
-                    }),
-                    new OptimizeCSSPlugin({
-                        cssProcessorOptions: {
-                            safe: true
-                        }
-                    }),
-                    new SWRegisterWebpackPlugin({
-                        filePath: resolve(__dirname, 'templates/sw-register.js'),
-                        prefix: publicPath
-                    }),
-                    ...basePlugins
-                ]
-                : [
-                    new FriendlyErrorsPlugin(),
-                    ...basePlugins
-                ]
+            }
         };
+
+        let pluginsInProd = [
+            new webpack.optimize.UglifyJsPlugin({
+                compress: {
+                    warnings: false
+                },
+                sourceMap: jsSourceMap
+            }),
+            new OptimizeCSSPlugin({
+                cssProcessorOptions: {
+                    safe: true
+                }
+            }),
+            new SWRegisterWebpackPlugin({
+                filePath: resolve(__dirname, 'templates/sw-register.js'),
+                prefix: publicPath
+            })
+        ];
+
+        let pluginsInDev = [
+            new FriendlyErrorsPlugin()
+        ];
+
+        baseConfig.plugins = [
+            ...(this.isProd ? pluginsInProd : pluginsInDev),
+            new webpack.DefinePlugin(baseDefines),
+            ...basePlugins
+        ];
 
         if (cssExtract) {
             baseConfig.plugins.unshift(
@@ -176,10 +186,7 @@ export default class WebpackConfig {
                 chunkFilename: assetsPath(filenames.chunk)
             },
             resolve: {
-                alias: {
-                    ...clientDefines,
-                    ...clientAlias
-                }
+                alias: clientAlias
             },
             module: {
                 rules: styleLoaders({
@@ -191,10 +198,10 @@ export default class WebpackConfig {
             devtool: jsSourceMap ? '#source-map' : false,
             plugins: [
                 // http://vuejs.github.io/vue-loader/en/workflow/production.html
-                new webpack.DefinePlugin({
+                new webpack.DefinePlugin(Object.assign({
                     'process.env.VUE_ENV': '"client"',
                     'process.env.NODE_ENV': `"${this.env}"`
-                }),
+                }, clientDefines)),
 
                 // split vendor js into its own file
                 new webpack.optimize.CommonsChunkPlugin({
@@ -318,10 +325,7 @@ export default class WebpackConfig {
                 libraryTarget: 'commonjs2'
             },
             resolve: {
-                alias: {
-                    ...serverDefines,
-                    ...serverAlias
-                }
+                alias: serverAlias
             },
             module: {
                 /**
@@ -342,10 +346,10 @@ export default class WebpackConfig {
                 whitelist: [...nodeExternalsWhitelist, /\.(css|vue)$/]
             }),
             plugins: [
-                new webpack.DefinePlugin({
+                new webpack.DefinePlugin(Object.assign({
                     'process.env.VUE_ENV': '"server"',
                     'process.env.NODE_ENV': `"${this.env}"`
-                }),
+                }, serverDefines)),
                 new VueSSRServerPlugin({
                     filename: join(LAVAS_DIRNAME_IN_DIST, SERVER_BUNDLE)
                 }),

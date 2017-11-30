@@ -8,7 +8,7 @@
 
 export default {
     name: 'child1',
-    head: {
+    metaInfo: {
         title: 'Child1',
         meta: [
             {name: 'keywords', content: 'lavas PWA'},

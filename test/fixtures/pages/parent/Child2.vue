@@ -8,7 +8,7 @@
 
 export default {
     name: 'child2',
-    head: {
+    metaInfo: {
         title: 'Child2',
         titleTemplate: '%s - Lavas',
         meta: [

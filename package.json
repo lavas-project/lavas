@@ -1,6 +1,6 @@
 {
   "name": "lavas",
-  "version": "2.0.5",
+  "version": "2.0.7",
   "description": "pwa project solution cli tool",
   "main": "dist/core/index.js",
   "files": [
@@ -44,11 +44,12 @@
     "concurrency": 1,
     "failFast": true,
     "files": [
-      "test/integration/*",
-      "test/unit/utils/*"
+        "test/integration/common.js",
+        "test/unit/utils/*",
+        "test/unit/config-reader.test.js",
+        "test/unit/route-manager.test.js"
     ],
     "backupFiles": [
-      "test/unit/config-reader.test.js"
     ],
     "require": [
       "babel-register",

@@ -74,7 +74,7 @@ export default class MiddlewareComposer {
 
         // transform express/connect style middleware to koa style
         let middlewares = [
-            koaErrorFactory(errorHandler.errPath),
+            koaErrorFactory(errorHandler.errorPath),
             async (ctx, next) => {
                 // koa defaults to 404 when it sees that status is unset
                 ctx.status = 200;
@@ -197,7 +197,7 @@ export default class MiddlewareComposer {
         }
 
         // Handle errors.
-        middlewares.push(expressErrorFactory(errorHandler.errPath));
+        middlewares.push(expressErrorFactory(errorHandler.errorPath));
 
         return compose(middlewares);
     }

@@ -1,5 +1,34 @@
 # Changelog
 
+## [2.0.7] - 2017-11-30
+
+### Added
+- [Lavas Core] Simplify `dist/lavas/config.json` after production building, only preserve some runtime-aware options.
+    ```
+    // dist/lavas/config.json
+    {
+        build: {
+            publicPath: true,
+            compress: true
+        },
+        entry: true,
+        middleware: true,
+        router: true,
+        errorHandler: true,
+        manifest: true,
+        serviceWorker: {
+            swDest: true
+        }
+    }
+    ```
+
+### Changed
+- [Fix] Make `config.defines` works and add relative test cases.
+- [Fix] Merge middlewares defined in config correctly. Use `lodash.merge` to concat two arrays during merging.
+- [Fix] `config.router` use different strategies under the following scenes:
+    - Apply `rewrite.from` to `route.path`.
+    - Apply `routes.pattern` to `route.fullPath`.
+
 ## [2.0.5] - 2017-11-29
 
 ### Added

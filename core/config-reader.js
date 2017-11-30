@@ -6,10 +6,16 @@
 import {readFile, pathExists} from 'fs-extra';
 import {join} from 'path';
 import glob from 'glob';
-import {merge} from 'lodash';
+import {merge, isArray} from 'lodash';
 import {CONFIG_FILE, LAVAS_CONFIG_FILE} from './constants';
 import {distLavasPath} from './utils/path';
 import * as JsonUtil from './utils/json';
+
+function mergeArray(a, b) {
+    if (isArray(a)) {
+        return a.concat(b);
+    }
+}
 
 const DEFAULT_CONFIG = {
     build: {
@@ -94,7 +100,11 @@ export const RUMTIME_ITEMS = {
     entry: true,
     middleware: true,
     router: true,
-    manifest: true
+    errorHandler: true,
+    manifest: true,
+    serviceWorker: {
+        swDest: true
+    }
 };
 
 export default class ConfigReader {
@@ -117,10 +127,10 @@ export default class ConfigReader {
                 rootDir: this.cwd
             },
             buildVersion: Date.now()
-        });
+        }, mergeArray);
 
         if (config[this.env]) {
-            merge(config, config[this.env]);
+            merge(config, config[this.env], mergeArray);
         }
 
         // read from lavas.config.js
@@ -128,7 +138,7 @@ export default class ConfigReader {
         if (await pathExists(singleConfigPath)) {
             console.log('[Lavas] read lavas.config.js.');
             delete require.cache[require.resolve(singleConfigPath)];
-            merge(config, await import(singleConfigPath));
+            merge(config, await import(singleConfigPath), mergeArray);
         }
         else {
             let configDir = join(this.cwd, 'config');
@@ -162,14 +172,14 @@ export default class ConfigReader {
                 delete require.cache[require.resolve(configPath)];
                 let exportContent = await import(configPath);
                 cur[name] = typeof exportContent === 'object' && exportContent !== null
-                    ? merge(cur[name], exportContent) : exportContent;
+                    ? merge(cur[name], exportContent, mergeArray) : exportContent;
             }));
 
             let temp = config.env || {};
 
             // merge config according env
             if (temp[this.env]) {
-                merge(config, temp[this.env]);
+                merge(config, temp[this.env], mergeArray);
             }
         }
 
