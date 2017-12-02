@@ -21,10 +21,10 @@ test.beforeEach('init', async t => {
 test('it should merge middlewares defined in lavas.config.js and defaults correctly', t => {
     /**
      * default            all: []
-     * lavas.config.js    all: ['middleware1', 'middleware2']
-     * merged             all: ['middleware1', 'middleware2']
+     * lavas.config.js    all: ['both']
+     * merged             all: ['both']
      */
-    t.deepEqual(core.config.middleware.all, ['middleware1', 'middleware2']);
+    t.deepEqual(core.config.middleware.all, ['both']);
 });
 
 test('it should add a new alias', async t => {
@@ -56,8 +56,7 @@ test('it should use a extend function to modify webpack base config directly', a
     syncConfig(core, config);
 
     let baseConfig = core.builder.webpackConfig.base();
-    t.is(baseConfig.plugins.length, 2);
-    t.is(baseConfig.plugins[1], 'NewCustomPlugin');
+    t.is(baseConfig.plugins[baseConfig.plugins.length - 1], 'NewCustomPlugin');
 });
 
 test('it should use a extend function to modify webpack client config directly', async t => {

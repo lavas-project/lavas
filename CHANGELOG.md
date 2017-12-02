@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.0.7-rc.2] - 2017-12-2
+
+### Changed
+- [Fix] Those server deps required by server-side middlewares shouldn't exist in client side(main.[hash].js) and vice versa.
+
 ## [2.0.7] - 2017-11-30
 
 ### Added
