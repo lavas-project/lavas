@@ -5,14 +5,17 @@
 
 'use strict';
 
-export function getMiddlewares() {
-    let files = require.context('@/middlewares', false, /^\.\/.*\.(js|ts)$/);
-    return files.keys().reduce((middleware, filename) => {
-        let name = filename.slice(2, -3);
-        let file = files(filename);
-        middleware[name] = file.default || file;
-        return middleware;
-    }, {});
+export async function getMiddlewares(names) {
+    let middlewares = {};
+    try {
+        await Promise.all(names.map(async name => {
+            middlewares[name] = (await import(`@/middlewares/${name}.js`)).default;
+        }));
+        return middlewares;
+    }
+    catch (e) {
+        console.log('[Lavas] fail to import middleware: ', e);
+    }
 }
 
 export function getClientContext(context, app) {

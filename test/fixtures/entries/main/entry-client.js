@@ -88,9 +88,6 @@ else {
 }
 
 function handleMiddlewares() {
-    // get all the middlewares defined by user
-    const middlewares = getMiddlewares();
-
     router.beforeEach(async (to, from, next) => {
         // Avoid loop redirect with next(path)
         const fromPath = from.fullPath.split('#')[0];
@@ -115,6 +112,9 @@ function handleMiddlewares() {
                 .filter(({middleware}) => !!middleware)
                 .reduce((arr, {middleware}) => arr.concat(middleware), [])
         ];
+
+        // get all the middlewares defined by user
+        const middlewares = await getMiddlewares(middlewareNames);
 
         let unknowMiddleware = middlewareNames.find(name => typeof middlewares[name] !== 'function');
         if (unknowMiddleware) {

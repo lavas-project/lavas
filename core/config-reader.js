@@ -18,6 +18,7 @@ function mergeArray(a, b) {
 }
 
 const DEFAULT_CONFIG = {
+    buildVersion: null,
     build: {
         publicPath: '/',
         filenames: {
@@ -93,6 +94,7 @@ const DEFAULT_CONFIG = {
  * config items used in runtime
  */
 export const RUMTIME_ITEMS = {
+    buildVersion: true,
     build: {
         publicPath: true,
         compress: true

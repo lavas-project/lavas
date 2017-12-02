@@ -7,11 +7,12 @@
 
 const path = require('path');
 const BUILD_PATH = path.resolve(__dirname, 'dist');
-// const t = JSON.stringify('test-var');
 
 module.exports = {
     middleware: {
-        all: ['middleware1', 'middleware2']
+        server: ['server-only'],
+        client: ['client-only'],
+        all: ['both']
     },
     build: {
         path: BUILD_PATH,

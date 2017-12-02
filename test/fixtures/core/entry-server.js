@@ -9,9 +9,6 @@ import {stringify} from 'querystring';
 
 const {middleware: middConf = {}} = lavasConfig;
 
-// get all the middlewares defined by user
-const middlewares = getMiddlewares();
-
 // import app.js from all modules
 const apps = getAllApps();
 
@@ -60,6 +57,9 @@ export default function (context) {
                         .filter(({middleware}) => !!middleware)
                         .reduce((arr, {middleware}) => arr.concat(middleware), [])
                 ];
+
+                // get all the middlewares defined by user
+                const middlewares = await getMiddlewares(middlewareNames);
                 let matchedMiddlewares = middlewareNames.map(name => middlewares[name]);
 
                 // if a middleware is undefined, throw an error
