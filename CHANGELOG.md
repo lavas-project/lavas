@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.7-rc.3] - 2017-12-5
+
+### Changed
+- [Fix] Make build works when BUILD_PATH in `lavas.config.js` changes to other directory.
+- [Fix] Move manifest from `lavas.config.js` to single JSON file.
+- [Feature] Generate `dist/lavas/routes.json` which contains all router rules.
+
 ## [2.0.7-rc.2] - 2017-12-2
 
 ### Changed
