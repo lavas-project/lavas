@@ -53,7 +53,7 @@ module.exports = function (program) {
                 serverScript || DEFAULT_PROD_SERVER_SCRIPT
             );
 
-            log.info('正在启动 Lavas 调试服务器...');
+            log.info('正在启动 Lavas 正式服务器...');
 
             let isServerScriptExist = await fs.pathExists(serverScriptPath);
             if (!isServerScriptExist) {

@@ -13,7 +13,7 @@ const checkUpdate = require('./utils/checkUpdate');
 const initCommand = require('./scaffold');
 const buildCommand = require('./build');
 const serverCommand = require('./server');
-// const extensionCommand = require('./extensions');
+// const shortcutCommand = require('./shortcut');
 
 let version = process.env.VERSION || require('../../package.json').version;
 
@@ -53,7 +53,7 @@ program
 initCommand(program);
 buildCommand(program);
 serverCommand(program);
-// extensionCommand(program);
+// shortcutCommand(program);
 
 // 检查版本更新
 checkUpdate();

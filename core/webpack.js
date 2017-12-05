@@ -245,11 +245,11 @@ export default class WebpackConfig {
                     chunks: ['vue']
                 }),
 
-                new ManifestJsonWebpackPlugin({
-                    config: manifest,
-                    publicPath,
-                    path: assetsPath('manifest.json')
-                }),
+                // new ManifestJsonWebpackPlugin({
+                //     config: manifest,
+                //     publicPath,
+                //     path: assetsPath('manifest.json')
+                // }),
 
                 // add custom plugins in client side
                 ...clientPlugins

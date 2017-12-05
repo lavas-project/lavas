@@ -18,8 +18,7 @@
         <% } %>
         <% if (renderManifestFlag) { %>
         <!-- Add to home screen for Android and modern mobile browsers -->
-        <link rel="manifest" href="{{ config.build.publicPath }}static/manifest.json?v={{ config.buildVersion }}">
-        <meta name="theme-color" content="{{ config.manifest.theme_color }}">
+        <link rel="manifest" href="static/manifest.json?v={{ config.buildVersion }}">
         <!-- Add to home screen for Safari on iOS -->
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black">
