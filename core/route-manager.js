@@ -291,7 +291,9 @@ export default class RouteManager {
         let routesJson = [];
         this.routes.forEach(route => routesJson.push(generateRoutesJson(route)));
 
-        await outputFile(distLavasPath(this.config.build.path, 'routes.json'), JSON.stringify(routesJson, null, 4));
+        await outputFile(
+            distLavasPath(this.config.build.path, 'routes.json'),
+            JSON.stringify({routes: routesJson}, null, 4));
     }
 
     /**

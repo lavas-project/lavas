@@ -13,7 +13,7 @@ const checkUpdate = require('./utils/checkUpdate');
 const initCommand = require('./scaffold');
 const buildCommand = require('./build');
 const serverCommand = require('./server');
-// const shortcutCommand = require('./shortcut');
+const shortcutCommand = require('./shortcut');
 
 let version = process.env.VERSION || require('../../package.json').version;
 
@@ -41,7 +41,7 @@ program
     .option('-v, --version', '查看当前版本')
     .action((cmd, env) => {
         if (env) {
-            log.error(`\`lavas ${cmd} '${env}\` 命令不存在`);
+            log.error(`\`lavas ${cmd} ${env}\` 命令不存在`);
         }
         else {
             log.error('`lavas ' + cmd + '` 命令不存在');
@@ -53,7 +53,7 @@ program
 initCommand(program);
 buildCommand(program);
 serverCommand(program);
-// shortcutCommand(program);
+shortcutCommand(program);
 
 // 检查版本更新
 checkUpdate();
