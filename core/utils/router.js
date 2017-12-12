@@ -2,7 +2,7 @@
  * @file utils.router.js
  * @author lavas
  */
-import {resolve, dirname, basename, posix} from 'path';
+import {resolve, dirname, basename} from 'path';
 import glob from 'glob';
 import pathToRegexp from 'path-to-regexp';
 
@@ -74,16 +74,13 @@ function mapDirsInfo(dirs, baseDir) {
             type: isFolder(dir, dirs) ? 'folder' : 'file'
         };
 
-        let capitalizedBasename = basename(dir)
-            .replace(/^(.)/, match => match.toUpperCase());
-        let capitalizedDir = posix.join(dir, '..', capitalizedBasename);
+        if (info.type === 'folder') {
+            let file = dirs.find(d => d.toLowerCase() === `${dir.toLowerCase()}.vue`);
 
-        if (info.type === 'folder'
-            && (
-                dirs.indexOf(dir + '.vue') > -1
-                || dirs.indexOf(capitalizedDir + '.vue') > -1
-            )) {
-            info.nested = true;
+            if (file) {
+                info.nested = true;
+                info.nestedFileName = basename(file);
+            }
         }
 
         return info;
@@ -92,17 +89,11 @@ function mapDirsInfo(dirs, baseDir) {
         if (type === 'folder') {
             return true;
         }
-
+        // filter nested case vue file
         let suffix = dir.slice(-4);
-        let originalDir = dir.slice(0, -4);
-        let lowerCaseBasename = basename(originalDir)
-            .replace(/^(.)/, match => match.toLowerCase());
-        let lowerCaseDir = posix.join(originalDir, '..', lowerCaseBasename);
+        let originalDir = dir.slice(0, -4).toLowerCase();
 
-        if (suffix === '.vue'
-            && dirs.indexOf(originalDir) === -1
-            && dirs.indexOf(lowerCaseDir) === -1
-        ) {
+        if (suffix === '.vue' && dirs.every(d => d.toLowerCase() !== originalDir)) {
             return true;
         }
 
@@ -172,21 +163,16 @@ function treeToRouter(tree, parent) {
 
         let route = {
             path: info.dir.slice(parent.dir.length)
-                .replace(/^\/(.)/, match => match.toLowerCase())
+                .toLowerCase()
                 .replace(/_/g, ':')
                 .replace(/(\/?index)?\.vue$/, ''),
-            component: info.level.map(function (l, i) {
-                return i === info.level.length - 1
-                    ? l.replace(/^(.)/, match => match.toUpperCase()) : l;
-            }).join('/'),
-            name: info.level.slice(1).map(function (cur, i) {
-                return cur
-                    .replace(/_/g, '')
-                    .replace(/\.vue$/, '')
-                    .replace(/^(.)/, function (match) {
-                        return i === 0 ? match.toLowerCase() : match.toUpperCase();
-                    });
-            }).join('')
+
+            // camel case
+            name: info.level.slice(1).join('-')
+                .replace(/_/g, '')
+                .replace(/\.vue$/, '')
+                .replace(/(.)-(.)/g, (full, w1, w2) => `${w1}${w2.toUpperCase()}`)
+                .replace(/^([A-Z])/, (full, w1) => `${w1.toLowerCase()}`)
         };
 
         if (parent.nested) {
@@ -197,8 +183,13 @@ function treeToRouter(tree, parent) {
         }
 
         if (children) {
-            route.component += '.vue';
+            // nested case should use the real file name to generate component props
+            // to avoid case sensitive problem
+            route.component = [...info.level.slice(0, -1), info.nestedFileName].join('/');
             route.children = treeToRouter(children, info);
+        }
+        else {
+            route.component = info.level.join('/');
         }
 
         router.push(route);
