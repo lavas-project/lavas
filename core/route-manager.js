@@ -14,6 +14,7 @@ import template from 'lodash.template';
 
 import {generateRoutes, matchUrl, routes2Reg} from './utils/router';
 import {writeFileInDev} from './utils/webpack';
+import {distLavasPath} from './utils/path';
 
 const routerTemplate = join(__dirname, './templates/router.tmpl');
 
@@ -201,6 +202,7 @@ export default class RouteManager {
      */
     async writeRoutesSourceFile() {
         let writeFile = this.isDev ? writeFileInDev : outputFile;
+
         await Promise.all(this.config.entry.map(async entryConfig => {
             let {
                 name: entryName,
@@ -266,6 +268,34 @@ export default class RouteManager {
         }));
     }
 
+    async writeRouresJsonFile() {
+        let generateRoutesJson = route => {
+            let tmpRoute = {
+                path: route.rewritePath,
+                name: route.name,
+                meta: route.meta || {}
+            };
+
+            if (route.alias) {
+                tmpRoute.alias = route.alias;
+            }
+
+            if (route.children) {
+                tmpRoute.children = [];
+                route.children.forEach(child => tmpRoute.children.push(generateRoutesJson(child)));
+            }
+
+            return tmpRoute;
+        };
+
+        let routesJson = [];
+        this.routes.forEach(route => routesJson.push(generateRoutesJson(route)));
+
+        await outputFile(
+            distLavasPath(this.config.build.path, 'routes.json'),
+            JSON.stringify({routes: routesJson}, null, 4));
+    }
+
     /**
      * output routes.js into .lavas according to /pages
      *
@@ -284,6 +314,10 @@ export default class RouteManager {
 
         // write routes for each entry
         await this.writeRoutesSourceFile();
+
+        if (!this.isDev) {
+            await this.writeRouresJsonFile();
+        }
 
         console.log('[Lavas] all routes are already generated.');
     }

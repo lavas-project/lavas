@@ -54,7 +54,9 @@ async function runCommonTestCases(t) {
     res = await request(app)
         .get('/static/manifest.json');
     t.is(200, res.status);
-    t.true(res.text.startsWith(`{"start_url":"/?utm_source=homescreen",`));
+    t.true(res.text.startsWith(`{
+    "start_url": "/?utm_source=homescreen",
+`));
 
     // render error page for invalid route path
     let errorPageTitle = '<title data-vue-meta="true">服务器开小差了</title>';

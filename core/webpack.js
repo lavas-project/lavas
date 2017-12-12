@@ -14,7 +14,6 @@ import OptimizeCSSPlugin from 'optimize-css-assets-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import VueSSRServerPlugin from 'vue-server-renderer/server-plugin';
 import {BundleAnalyzerPlugin} from 'webpack-bundle-analyzer';
-import ManifestJsonWebpackPlugin from './plugins/manifest-json-webpack-plugin';
 import SWRegisterWebpackPlugin from 'sw-register-webpack-plugin';
 import WorkboxWebpackPlugin from 'workbox-webpack-plugin';
 
@@ -243,12 +242,6 @@ export default class WebpackConfig {
                 new webpack.optimize.CommonsChunkPlugin({
                     name: 'manifest',
                     chunks: ['vue']
-                }),
-
-                new ManifestJsonWebpackPlugin({
-                    config: manifest,
-                    publicPath,
-                    path: assetsPath('manifest.json')
                 }),
 
                 // add custom plugins in client side

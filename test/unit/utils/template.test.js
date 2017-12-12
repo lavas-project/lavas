@@ -30,7 +30,6 @@ test('it should generate normal client template html', async t => {
 
                 <!-- Add to home screen for Android and modern mobile browsers -->
                 <link rel="manifest" href="<%= htmlWebpackPlugin.options.config.build.publicPath %>static/manifest.json?v=<%= htmlWebpackPlugin.options.config.buildVersion %>">
-                <meta name="theme-color" content="<%= htmlWebpackPlugin.options.config.manifest.theme_color %>">
                 <!-- Add to home screen for Safari on iOS -->
                 <meta name="apple-mobile-web-app-capable" content="yes">
                 <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -84,7 +83,6 @@ test('it should generate client customized template html', async t => {
 
                 <!-- Add to home screen for Android and modern mobile browsers -->
                 <link rel="manifest" href="<%= htmlWebpackPlugin.options.config.build.publicPath %>static/manifest.json?v=<%= htmlWebpackPlugin.options.config.buildVersion %>">
-                <meta name="theme-color" content="<%= htmlWebpackPlugin.options.config.manifest.theme_color %>">
                 <!-- Add to home screen for Safari on iOS -->
                 <meta name="apple-mobile-web-app-capable" content="yes">
                 <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -147,7 +145,6 @@ test('it should generate normal server template html', async t => {
 
                 <!-- Add to home screen for Android and modern mobile browsers -->
                 <link rel="manifest" href="{{ config.build.publicPath }}static/manifest.json?v={{ config.buildVersion }}">
-                <meta name="theme-color" content="{{ config.manifest.theme_color }}">
                 <!-- Add to home screen for Safari on iOS -->
                 <meta name="apple-mobile-web-app-capable" content="yes">
                 <meta name="apple-mobile-web-app-status-bar-style" content="black">

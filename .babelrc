@@ -14,5 +14,8 @@
         "transform-runtime",
         "add-module-exports",
         "dynamic-import-node"
+    ],
+    "ignore": [
+        "core/templates"
     ]
 }
