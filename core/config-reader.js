@@ -70,7 +70,6 @@ const DEFAULT_CONFIG = {
         server: [],
         client: []
     },
-    manifest: {},
     serviceWorker: null,
     production: {
         build: {
