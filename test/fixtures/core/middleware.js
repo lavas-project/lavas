@@ -8,7 +8,6 @@
 export async function getMiddlewares(names) {
     let middlewares = {};
     try {
-        // let filter = new RegExp('^\\.\\/.*\\.js$');
         await Promise.all(names.map(async name => {
             middlewares[name] = (await import(`@/middlewares/${name}.js`)).default;
         }));

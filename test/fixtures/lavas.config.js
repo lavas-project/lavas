@@ -35,21 +35,6 @@ module.exports = {
             }
         }
     ],
-    manifest: {
-        start_url: '/?utm_source=homescreen',
-        name: 'lavas-test',
-        short_name: 'lavas-test',
-        icons: [
-            {
-                src: 'static/img/icons/android-chrome-192x192.png',
-                type: 'image/png',
-                size: '192x192'
-            }
-        ],
-        display: 'standalone',
-        background_color: '#000000',
-        theme_color: '#278fef'
-    },
     serviceWorker: {
         swSrc: path.join(__dirname, 'core/service-worker.js'),
         swDest: path.join(BUILD_PATH, 'service-worker.js'),
