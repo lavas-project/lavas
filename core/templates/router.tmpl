@@ -8,9 +8,7 @@ import _<%- route.hash %> from '@/<%- route.component %>';
     <% } %>
 <% }); %>
 
-let routes = [
-    <%= routesContent %>
-];
+let routes = <%= routesContent %>;
 
 Vue.use(Router);
 

@@ -92,6 +92,8 @@ export default class RouteManager {
             // find error route
             if (route.fullPath === this.config.errorHandler.errorPath) {
                 this.errorRoute = route;
+                // add default error route alias
+                this.errorRoute.alias = '*';
             }
             // map entry to every route
             else {
@@ -124,15 +126,12 @@ export default class RouteManager {
                 });
             }
 
-            if (route.name) {
-                /**
-                 * generate hash for each route which will be used in routes.js template,
-                 * an underscore "_" will be added in front of each hash, because JS variables can't
-                 * start with numbers
-                 */
-                route.hash = timestamp
-                    + createHash('md5').update(route.name).digest('hex');
-            }
+            /**
+             * generate hash for each route which will be used in routes.js template,
+             * an underscore "_" will be added in front of each hash, because JS variables can't
+             * start with numbers
+             */
+            route.hash = timestamp + createHash('md5').update(route.component).digest('hex');
 
             /**
              * turn route fullpath into regexp
@@ -154,46 +153,36 @@ export default class RouteManager {
      * based on nested routes
      *
      * @param {Array} routes route list
-     * @param {boolean} recursive need recursive?
      * @return {string} content
      */
-    generateRoutesContent(routes, recursive) {
-        let commonRoutes = routes.reduce((prev, cur, index) => {
-            if (!recursive && index === routes.length - 1) {
-                // Call `this.$router.replace({name: xxx})` when path of 'xxx' contains '*' will throw error
-                // see https://github.com/vuejs/vue-router/issues/724
-                // Solution: write a normal path and add alias with '*'
-                return prev + `{
-                    path: '${cur.rewritePath}',
-                    name: '${cur.name}',
-                    component: _${cur.hash},
-                    meta: ${JSON.stringify(cur.meta || {})},
-                    alias: '*'
-                },`;
+    generateRoutesContent(routes) {
+        const generate = routes => routes.map(cur => {
+            // Call `this.$router.replace({name: xxx})` when path of 'xxx' contains '*' will throw error
+            // see https://github.com/vuejs/vue-router/issues/724
+            // Solution: write a normal path and add alias with '*'
+            let route = {
+                path: cur.rewritePath,
+                component: `_${cur.hash}`,
+                meta: cur.meta || {}
+            };
+
+            if (cur.name) {
+                route.name = cur.name;
             }
 
-            let childrenContent = '';
-            let aliasContent = '';
-            if (cur.children) {
-                childrenContent = `children: [
-                    ${this.generateRoutesContent(cur.children, true)}
-                ]`;
-            }
             if (cur.alias) {
-                aliasContent = `alias: '${cur.alias}',`;
+                route.alias = cur.alias;
             }
 
-            return prev + `{
-                path: '${cur.rewritePath}',
-                name: '${cur.name}',
-                component: _${cur.hash},
-                meta: ${JSON.stringify(cur.meta || {})},
-                ${aliasContent}
-                ${childrenContent}
-            },`;
-        }, '');
+            if (cur.children) {
+                route.children = generate(cur.children);
+            }
 
-        return commonRoutes;
+            return route;
+        });
+
+        return JSON.stringify(generate(routes), undefined, 4)
+            .replace(/"component": "(_.+)"/mg, '"component": $1');
     }
 
     /**
@@ -301,13 +290,13 @@ export default class RouteManager {
      *
      */
     async buildRoutes() {
-        const {routes: routesConfig = [], rewrite: rewriteRules = []} = this.config.router;
+        const {routes: routesConfig = [], rewrite: rewriteRules = [], pathRule} = this.config.router;
         this.flatRoutes = new Set();
 
         console.log('[Lavas] auto compile routes...');
 
         // generate routes according to pages dir
-        this.routes = await generateRoutes(join(this.lavasDir, '../pages'));
+        this.routes = await generateRoutes(join(this.lavasDir, '../pages'), {routerOption: {pathRule}});
 
         // merge with routes' config
         this.mergeWithConfig(this.routes, routesConfig, rewriteRules);

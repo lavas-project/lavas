@@ -36,7 +36,23 @@ test('it should generate routes according to the structure of directory', async 
     t.deepEqual(routes[2], {
         path: '/',
         component: 'pages/Index.vue',
-        name: 'index'
+        children: [
+            {
+                component: "pages/index/_other.vue",
+                name: "indexOther",
+                path: ":other"
+            },
+            {
+                component: "pages/index/index/Index.vue",
+                name: "index",
+                path: ""
+            },
+            {
+                component: "pages/index/normal.vue",
+                name: "indexNormal",
+                path: "normal"
+            },
+        ]
     });
 
     // nested routes
@@ -46,25 +62,25 @@ test('it should generate routes according to the structure of directory', async 
         name: 'parent',
         children: [
             {
-                component: "pages/parent/Child2.vue",
-                name: "parentChild2",
-                path: "child2",
-            },
-            {
                 component: "pages/parent/Child1.vue",
                 name: "parentChild1",
                 path: "child1",
+            },
+            {
+                component: "pages/parent/Child2.vue",
+                name: "parentChild2",
+                path: "child2",
             }
         ]
     });
 
-    t.deepEqual(routes[4], {
+    t.deepEqual(routes[5], {
         component: "pages/test/Index.vue",
-        name: "testIndex",
+        name: "test",
         path: "/test",
     });
 
-    t.deepEqual(routes[5], {
+    t.deepEqual(routes[4], {
         component: "pages/test/_id.vue",
         name: "testId",
         path: "/test/:id",
