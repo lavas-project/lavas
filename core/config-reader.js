@@ -30,6 +30,10 @@ const DEFAULT_CONFIG = {
             img: 'img/[name].[hash:8].[ext]',
             fonts: 'fonts/[name].[hash:8].[ext]'
         },
+        babel: {
+            presets: ['vue-app'],
+            babelrc: false
+        },
         cssExtract: false,
         cssMinimize: true,
         cssSourceMap: true,
@@ -56,10 +60,6 @@ const DEFAULT_CONFIG = {
         extend: null,
         ssrCopy: []
     },
-    babel: {
-        presets: ['vue-app'],
-        babelrc: false
-    },
     entry: [],
     router: {},
     errorHandler: {
@@ -82,10 +82,10 @@ const DEFAULT_CONFIG = {
         build: {
             filenames: {
                 entry: 'js/[name].[hash:8].js'
+            },
+            babel: {
+                cacheDirectory: true
             }
-        },
-        babel: {
-            cacheDirectory: true
         }
     }
 };

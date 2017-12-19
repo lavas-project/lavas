@@ -44,9 +44,9 @@ export default class WebpackConfig {
      * @return {Object} webpack base config
      */
     base(buildConfig = {}) {
-        let {globals, build, babel} = this.config;
+        let {globals, build} = this.config;
         /* eslint-disable fecs-one-var-per-line */
-        let {path, publicPath, filenames, cssSourceMap, cssMinimize,
+        let {path, publicPath, filenames, babel, cssSourceMap, cssMinimize,
             cssExtract, jsSourceMap,
             alias: {base: baseAlias = {}},
             defines: {base: baseDefines = {}},
@@ -194,7 +194,7 @@ export default class WebpackConfig {
                     cssExtract
                 })
             },
-            devtool: jsSourceMap ? '#source-map' : false,
+            devtool: jsSourceMap ? (this.isDev ? 'cheap-module-eval-source-map' : 'nosources-source-map') : false,
             plugins: [
                 // http://vuejs.github.io/vue-loader/en/workflow/production.html
                 new webpack.DefinePlugin(Object.assign({
