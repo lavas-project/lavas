@@ -33,11 +33,6 @@ test('it should generate normal client template html', async t => {
                 <!-- Add to home screen for Safari on iOS -->
                 <meta name="apple-mobile-web-app-capable" content="yes">
                 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-                <meta name="apple-mobile-web-app-title" content="<%= htmlWebpackPlugin.options.config.manifest.short_name || htmlWebpackPlugin.options.config.manifest.name %>">
-                <link rel="apple-touch-icon" href="<%= htmlWebpackPlugin.options.config.manifest.icons && htmlWebpackPlugin.options.config.manifest.icons[0] &&  htmlWebpackPlugin.options.config.manifest.icons[0].src %>">
-                <!-- Add to home screen for Windows -->
-                <meta name="msapplication-TileImage" content="<%= htmlWebpackPlugin.options.config.manifest.icons && htmlWebpackPlugin.options.config.manifest.icons[0] &&  htmlWebpackPlugin.options.config.manifest.icons[0].src %>">
-                <meta name="msapplication-TileColor" content="<%= htmlWebpackPlugin.options.config.manifest.theme_color %>">
 
                 <% for (var jsFilePath of htmlWebpackPlugin.files.js) { %>
                     <link rel="preload" href="<%= jsFilePath %>" as="script">
@@ -85,12 +80,6 @@ test('it should generate client customized template html', async t => {
                 <link rel="manifest" href="<%= htmlWebpackPlugin.options.config.build.publicPath %>static/manifest.json?v=<%= htmlWebpackPlugin.options.config.buildVersion %>">
                 <!-- Add to home screen for Safari on iOS -->
                 <meta name="apple-mobile-web-app-capable" content="yes">
-                <meta name="apple-mobile-web-app-status-bar-style" content="black">
-                <meta name="apple-mobile-web-app-title" content="<%= htmlWebpackPlugin.options.config.manifest.short_name || htmlWebpackPlugin.options.config.manifest.name %>">
-                <link rel="apple-touch-icon" href="<%= htmlWebpackPlugin.options.config.manifest.icons && htmlWebpackPlugin.options.config.manifest.icons[0] &&  htmlWebpackPlugin.options.config.manifest.icons[0].src %>">
-                <!-- Add to home screen for Windows -->
-                <meta name="msapplication-TileImage" content="<%= htmlWebpackPlugin.options.config.manifest.icons && htmlWebpackPlugin.options.config.manifest.icons[0] &&  htmlWebpackPlugin.options.config.manifest.icons[0].src %>">
-                <meta name="msapplication-TileColor" content="<%= htmlWebpackPlugin.options.config.manifest.theme_color %>">
 
                 <% for (var jsFilePath of htmlWebpackPlugin.files.js) { %>
                     <link rel="preload" href="<%= jsFilePath %>" as="script">
@@ -148,11 +137,6 @@ test('it should generate normal server template html', async t => {
                 <!-- Add to home screen for Safari on iOS -->
                 <meta name="apple-mobile-web-app-capable" content="yes">
                 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-                <meta name="apple-mobile-web-app-title" content="{{ config.manifest.short_name || config.manifest.name }}">
-                <link rel="apple-touch-icon" href="{{ config.manifest.icons && config.manifest.icons[0] && config.manifest.icons[0].src }}">
-                <!-- Add to home screen for Windows -->
-                <meta name="msapplication-TileImage" content="{{ config.manifest.icons && config.manifest.icons[0] && config.manifest.icons[0].src }}">
-                <meta name="msapplication-TileColor" content="{{ config.manifest.theme_color}}">
 
                 {{{ renderResourceHints() }}}
                 {{{ renderStyles() }}}
