@@ -13,8 +13,7 @@ export const isKoaSupport = semver.gte(process.versions.node, '7.6.0');
 
 export function syncConfig(lavasCore, config) {
     lavasCore.config = config;
-    lavasCore.builder.config = config;
-    lavasCore.builder.webpackConfig.config = config;
+    lavasCore.builder.init(config);
 }
 
 /**

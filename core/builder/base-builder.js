@@ -44,8 +44,8 @@ export default class BaseBuilder {
         this.config = config;
         this.webpackConfig.config = config;
         this.routeManager.config = config;
-        this.ssrExists = config.entry.some(e => e.ssr);
-        this.mpaExists = config.entry.some(e => !e.ssr);
+        this.ssrExists = config.entry && config.entry.some(e => e.ssr);
+        this.mpaExists = config.entry && config.entry.some(e => !e.ssr);
     }
 
     /**
