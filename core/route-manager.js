@@ -289,11 +289,26 @@ export default class RouteManager {
         };
 
         let routesJson = [];
-        this.routes.forEach(route => routesJson.push(generateRoutesJson(route)));
+        this.config.entry.forEach(entry => {
+            let entryConfig = {
+                name: entry.name,
+                ssr: entry.ssr,
+                mode: entry.mode,
+                base: entry.base,
+                routes: entry.routes.toString(),
+                routeArr: []
+            };
+
+            this.routes
+                .filter(route => route.entryName === entry.name)
+                .forEach(route => entryConfig.routeArr.push(generateRoutesJson(route)));
+
+            routesJson.push(entryConfig);
+        });
 
         await outputFile(
             distLavasPath(this.config.build.path, 'routes.json'),
-            JSON.stringify({routes: routesJson}, null, 4));
+            JSON.stringify(routesJson, null, 4));
     }
 
     /**
