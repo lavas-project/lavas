@@ -84,27 +84,32 @@ module.exports = function (program) {
             let routesJsonPath = path.resolve(utils.getLavasProjectRoot(), 'lavas/routes.json');
             // If routes.json exists, set rewrite rules for SPA/MPA.
             if (fs.pathExistsSync(routesJsonPath)) {
-                let routes = fs.readJsonSync(routesJsonPath);
-                let rewrites = routes
-                    .filter(entry => !entry.ssr)
-                    .map(entry => {
-                        let {name, routes, base} = entry;
-                        return {
-                            from: routes2Reg(routes),
-                            to: path.posix.join(base, `/${name}.html`)
-                        };
-                    });
+                try {
+                    let routes = fs.readJsonSync(routesJsonPath);
+                    let rewrites = routes
+                        .filter(entry => !entry.ssr)
+                        .map(entry => {
+                            let {name, routes, base} = entry;
+                            return {
+                                from: routes2Reg(routes),
+                                to: path.posix.join(base, `/${name}.html`)
+                            };
+                        });
 
-                if (rewrites.length !== 0) {
-                    app.use(historyMiddleware({
-                        htmlAcceptHeaders: ['text/html'],
-                        disableDotRule: false, // ignore paths with dot inside
-                        rewrites
-                    }));
+                    if (rewrites.length !== 0) {
+                        app.use(historyMiddleware({
+                            htmlAcceptHeaders: ['text/html'],
+                            disableDotRule: false, // ignore paths with dot inside
+                            rewrites
+                        }));
+                    }
+                }
+                catch () {
+                    // When routes.json is not valid, start as a normal static server.
                 }
             }
 
-            // Else, start a normal static server
+            // Else, start as a normal static server
             app.use(express.static(utils.getLavasProjectRoot()));
 
             app.listen(port, () => {
