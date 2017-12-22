@@ -104,7 +104,7 @@ module.exports = function (program) {
                         }));
                     }
                 }
-                catch () {
+                catch (e) {
                     // When routes.json is not valid, start as a normal static server.
                 }
             }
