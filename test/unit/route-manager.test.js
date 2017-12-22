@@ -26,10 +26,10 @@ test.serial('it should generate main/router.js in .lavas directory', async t => 
 
     let content = await readFile(join(__dirname, '../fixtures/.lavas/main/router.js'), 'utf8');
 
-    t.true(content.indexOf('path: \':id\'') > -1
-        && content.indexOf('name: \'detailId\'') > -1
-        && content.indexOf('path: \'/\'') > -1
-        && content.indexOf('name: \'index\'') > -1);
+    t.true(content.indexOf('"path": ":id"') > -1
+        && content.indexOf('"name": "detailId"') > -1
+        && content.indexOf('"path": "/"') > -1
+        && content.indexOf('"name": "index"') > -1);
 });
 
 /**
@@ -69,10 +69,14 @@ test.serial('it should modify route objects based on router config', async t => 
     t.true(content.indexOf('() => import(/* webpackChunkName: \"my-chunk\" */\'@/pages/detail/_id.vue\');') > -1);
 
     // rewrite route path
-    t.true(content.indexOf('path: \'/rewrite/detail\'') > -1);
+    t.true(content.indexOf('"path": "/rewrite/detail"') > -1);
 
     // support route meta
-    t.true(content.indexOf('meta: {"keepAlive":true}') > -1);
+    t.true(content.indexOf(
+        `"meta": {
+            "keepAlive": true
+        }`
+    ) > -1);
 });
 
 // function emptyRegExp(routes) {
