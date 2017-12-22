@@ -2,7 +2,7 @@
  * @file utils.router.js
  * @author lavas
  */
-import {resolve, dirname, basename, posix} from 'path';
+import {resolve, dirname, basename, extname} from 'path';
 import glob from 'glob';
 import pathToRegexp from 'path-to-regexp';
 
@@ -38,15 +38,15 @@ export function matchUrl(routes, url) {
  * generate router by the structure of pages/
  *
  * @param {string} baseDir root folder path
- * @param {Object} options glob options
+ * @param {Object} options generate options
  * @return {Promise} resolve generated router, reject error
  */
-export function generateRoutes(baseDir, options) {
-    return getDirs(baseDir, '.vue', options)
+export function generateRoutes(baseDir, {globOptions, routerOption} = {}) {
+    return getDirs(baseDir, '.vue', globOptions)
         .then(dirs => {
             let tree = mapDirsInfo(dirs, baseDir)
-                .reduce((tree, info) => appendToTree(tree, info.level, info), []);
-            return treeToRouter(tree[0].children, {dir: baseDir});
+                .reduce((tree, info) => appendToTree(tree, info.levels, info), []);
+            return treeToRouter(tree[0].children, {dir: basename(baseDir)}, routerOption);
         });
 }
 
@@ -67,59 +67,40 @@ function getDirs(baseDir, ext = '', options) {
 function mapDirsInfo(dirs, baseDir) {
     let baseFolder = basename(baseDir);
 
-    return dirs.map(dir => {
-        let info = {
-            dir: dir,
-            level: generateDirLevel(dir, {baseDir, baseFolder}),
-            type: isFolder(dir, dirs) ? 'folder' : 'file'
-        };
+    let infos = dirs.reduce((list, dir) => {
+        let type;
 
-        let capitalizedBasename = basename(dir)
-            .replace(/^(.)/, match => match.toUpperCase());
-        let capitalizedDir = posix.join(dir, '..', capitalizedBasename);
+        if (extname(dir) === '.vue') {
+            let regex = new RegExp(`^${dir.slice(0, -4)}$`, 'i');
 
-        if (info.type === 'folder'
-            && (
-                dirs.indexOf(dir + '.vue') > -1
-                || dirs.indexOf(capitalizedDir + '.vue') > -1
-            )) {
-            info.nested = true;
+            if (dirs.some(d => regex.test(d))) {
+                type = 'nested';
+            }
+        }
+        else {
+            let regex = new RegExp(`^${dir}.vue$`, 'i');
+
+            if (dirs.some(d => regex.test(d))) {
+                return list;
+            }
+
+            type = 'flat';
         }
 
-        return info;
-    })
-    .filter(({type, dir}) => {
-        if (type === 'folder') {
-            return true;
-        }
+        dir = baseFolder + dir.slice(baseDir.length).replace(/\.vue$/, '');
+        let levels = dir.split('/');
 
-        let suffix = dir.slice(-4);
-        let originalDir = dir.slice(0, -4);
-        let lowerCaseBasename = basename(originalDir)
-            .replace(/^(.)/, match => match.toLowerCase());
-        let lowerCaseDir = posix.join(originalDir, '..', lowerCaseBasename);
+        list.push({
+            dir,
+            type,
+            levels
+        });
 
-        if (suffix === '.vue'
-            && dirs.indexOf(originalDir) === -1
-            && dirs.indexOf(lowerCaseDir) === -1
-        ) {
-            return true;
-        }
+        return list;
+    }, [])
+    .sort((a, b) => a.dir.localeCompare(b.dir));
 
-        return false;
-    })
-    .sort((a, b) => a.level.length - b.level.length);
-}
-
-function generateDirLevel(dir, {baseDir, baseFolder = basename(baseDir)}) {
-    return [baseFolder]
-        .concat(dir.slice(baseDir.length).split('/'))
-        .filter(str => str !== '');
-}
-
-function isFolder(dir, dirs) {
-    dir = dir.replace(/\/$/, '') + '/';
-    return dirs.some(fileDir => fileDir.indexOf(dir) === 0);
+    return infos;
 }
 
 function appendToTree(tree, levels, info) {
@@ -128,10 +109,11 @@ function appendToTree(tree, levels, info) {
 
     for (let i = 0; i < levelLen; i++) {
         let nodeLen = node.length;
+        let regex = new RegExp(`^${levels[i]}$`, 'i');
         let j;
 
         for (j = 0; j < nodeLen; j++) {
-            if (node[j].name === levels[i]) {
+            if (regex.test(node[j].name)) {
                 if (i === levelLen - 1) {
                     node[j].info = info;
                 }
@@ -164,44 +146,81 @@ function appendToTree(tree, levels, info) {
     return tree;
 }
 
-function treeToRouter(tree, parent) {
-    return tree.reduce((router, {info, children}) => {
-        if (info.type === 'folder' && !info.nested) {
-            return router.concat(treeToRouter(children, parent));
+function treeToRouter(tree, parent, {pathRule = 'kebabCase'} = {}) {
+    let rr = tree.reduce((router, {info, children}) => {
+        if (info.type === 'flat') {
+            return router.concat(treeToRouter(children, parent, {pathRule}));
         }
 
         let route = {
-            path: info.dir.slice(parent.dir.length)
-                .replace(/^\/(.)/, match => match.toLowerCase())
-                .replace(/_/g, ':')
-                .replace(/(\/?index)?\.vue$/, ''),
-            component: info.level.map(function (l, i) {
-                return i === info.level.length - 1
-                    ? l.replace(/^(.)/, match => match.toUpperCase()) : l;
-            }).join('/'),
-            name: info.level.slice(1).map(function (cur, i) {
-                return cur
-                    .replace(/_/g, '')
-                    .replace(/\.vue$/, '')
-                    .replace(/^(.)/, function (match) {
-                        return i === 0 ? match.toLowerCase() : match.toUpperCase();
-                    });
-            }).join('')
+            path: generatePath(info, parent, pathRule),
+            component: info.dir + '.vue'
         };
 
-        if (parent.nested) {
-            route.path = route.path.replace(/^\//, '');
-        }
-        else if (route.path === '') {
-            route.path = '/';
+        if (!children || children.every(child => !/(\/index)+$/i.test(child.info.dir))) {
+            route.name = generateName(info.dir);
         }
 
         if (children) {
-            route.component += '.vue';
-            route.children = treeToRouter(children, info);
+            route.children = treeToRouter(children, info, {pathRule});
         }
 
         router.push(route);
         return router;
     }, []);
+
+    return rr;
+}
+
+function generatePath(info, parent, rule) {
+    let path = info.dir.slice(parent.dir.length)
+        .replace(/_/g, ':')
+        .replace(/((^|\/)index)+$/i, '');
+
+    switch (rule) {
+        case 'raw':
+            break;
+
+        case 'camelCase':
+            path = path.replace(/(^|\/)([A-Z]+)/g, (full, w1, w2) => `${w1}${w2.toLowerCase()}`);
+
+        case 'lowerCase':
+            path = path.replace(/(^|\/)([^:\/]+)/g, (full, w1, w2) => full.toLowerCase());
+
+        default:
+            // default is kebabCase
+            path = path.replace(
+                /(^|\/)([^:\/]+)/g,
+                (full, w1, w2) => (
+                    w1 + w2.replace(/([a-z0-9])([A-Z]+)/g, '$1-$2').toLowerCase()
+                )
+            );
+    }
+
+    if (parent.type === 'nested') {
+        path = path.replace(/^\//, '');
+    }
+    else if (path === '') {
+        path = '/';
+    }
+
+    return path;
+}
+
+function generateName(dir) {
+    let name = dir
+        .replace(/((^|\/)index)+$/i, '')
+        .split('/').slice(1)
+        .map((name, i) => {
+            name = name.replace(/_/g, '');
+
+            if (i === 0) {
+                return name.replace(/^[A-Z]+/, w => w.toLowerCase());
+            }
+
+            return name.replace(/^[a-z]/, w => w.toUpperCase());
+        })
+        .join('');
+
+    return name || 'index';
 }
