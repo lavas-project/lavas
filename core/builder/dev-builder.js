@@ -40,7 +40,7 @@ export default class DevBuilder extends BaseBuilder {
 
     /**
      * set chokidar watchers, following directories and files will be watched:
-     * /pages, /config, /entries/[entry]/index.html.tmpl
+     * /pages, /config, /core/index.html.tmpl
      *
      * @param {string|Array.<string>} paths paths
      * @param {string|Array.<string>} events events
@@ -136,10 +136,9 @@ export default class DevBuilder extends BaseBuilder {
         let noop = () => {};
 
         await this.routeManager.buildRoutes();
-        await this.writeLavasLink();
         await this.writeRuntimeConfig();
 
-        if (this.ssrExists) {
+        if (this.ssr) {
             console.log('[Lavas] SSR build starting...');
             clientConfig = this.webpackConfig.client();
             serverConfig = this.webpackConfig.server();
@@ -169,7 +168,7 @@ export default class DevBuilder extends BaseBuilder {
             });
         }
 
-        if (this.mpaExists) {
+        if (!this.ssr) {
             console.log('[Lavas] MPA build starting...');
             // create mpa config first
             mpaConfig = await this.createMPAConfig(true);
@@ -193,7 +192,7 @@ export default class DevBuilder extends BaseBuilder {
         // set memory-fs used by devMiddleware
         clientMFS = this.devMiddleware.fileSystem;
         clientCompiler.outputFileSystem = clientMFS;
-        if (this.ssrExists) {
+        if (this.ssr) {
             this.renderer.clientMFS = clientMFS;
         }
 
@@ -224,7 +223,7 @@ export default class DevBuilder extends BaseBuilder {
          * in mpa, we use connect-history-api-fallback middleware
          * in ssr, ssr middleware will handle it instead
          */
-        if (!this.ssrExists) {
+        if (!this.ssr) {
             let mpaEntries = this.config.entry.filter(e => !e.ssr);
             let rewrites = mpaEntries
                 .map(entry => {
@@ -253,10 +252,10 @@ export default class DevBuilder extends BaseBuilder {
         // wait until webpack building finished
         await new Promise(resolve => {
             this.devMiddleware.waitUntilValid(async () => {
-                if (this.mpaExists) {
+                if (!this.ssr) {
                     console.log('[Lavas] MPA build completed.');
                 }
-                if (this.ssrExists) {
+                if (this.ssr) {
                     await this.renderer.refreshFiles();
                     console.log('[Lavas] SSR build completed.');
                 }

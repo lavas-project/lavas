@@ -68,9 +68,8 @@ export default class MiddlewareComposer {
         const koaStatic = require('koa-static');
         const send = require('koa-send');
 
-        let {entry, build: {publicPath}, serviceWorker, errorHandler} = this.config;
-        let ssrExists = entry.some(e => e.ssr);
-        let entryBases = entry.map(e => removeTrailingSlash(e.base || '/'));
+        let {router: {ssr, base}, build: {publicPath}, serviceWorker, errorHandler} = this.config;
+        base = removeTrailingSlash(base || '/');
 
         // transform express/connect style middleware to koa style
         let middlewares = [
@@ -85,15 +84,15 @@ export default class MiddlewareComposer {
 
         // Redirect without trailing slash.
         middlewares.push(async (ctx, next) => {
-            if (entryBases.includes(ctx.path)) {
-                ctx.redirect(ctx.path + '/' + ctx.search);
+            if (base === ctx.path) {
+                ctx.redirect(`${ctx.path}/${ctx.search}`);
             }
             else {
                 await next();
             }
         });
 
-        if (ssrExists) {
+        if (ssr) {
             /**
              * Add static files middleware only in prod mode,
              * because we already have webpack-dev-middleware in dev mode.
@@ -138,15 +137,15 @@ export default class MiddlewareComposer {
      */
     express() {
         let expressRouter = Router;
-        let {entry, build: {publicPath}, serviceWorker, errorHandler} = this.config;
-        let ssrExists = entry.some(e => e.ssr);
+        let {router: {ssr, base}, build: {publicPath}, serviceWorker, errorHandler} = this.config;
+        base = removeTrailingSlash(base || '/');
 
         let middlewares = Array.from(this.internalMiddlewares);
 
         // Redirect without trailing slash.
         let rootRouter = expressRouter();
         rootRouter.get(
-            entry.map(e => removeTrailingSlash(e.base || '/')),
+            base,
             (req, res, next) => {
                 let url = parse(req.url);
                 if (!url.pathname.endsWith('/')) {
@@ -159,7 +158,7 @@ export default class MiddlewareComposer {
         );
         middlewares.unshift(rootRouter);
 
-        if (ssrExists) {
+        if (ssr) {
             /**
              * Add static files middleware only in prod mode,
              * because we already have webpack-dev-middleware in dev mode.

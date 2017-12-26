@@ -74,55 +74,55 @@ module.exports = function (program) {
         });
 
     // lavas static
-    program
-        .command('static')
-        .description('启动 Lavas 内置简易服务器')
-        .option('-p, --port <port>', '指定 port')
-        .action(async ({port}) => {
-            port = process.env.PORT || 3000;
+    // program
+    //     .command('static')
+    //     .description('启动 Lavas 内置简易服务器')
+    //     .option('-p, --port <port>', '指定 port')
+    //     .action(async ({port}) => {
+    //         port = process.env.PORT || 3000;
 
-            let routesJsonPath = path.resolve(utils.getLavasProjectRoot(), 'lavas/routes.json');
-            // If routes.json exists, set rewrite rules for SPA/MPA.
-            if (fs.pathExistsSync(routesJsonPath)) {
-                try {
-                    let routes = fs.readJsonSync(routesJsonPath);
-                    let rewrites = routes
-                        .filter(entry => !entry.ssr)
-                        .map(entry => {
-                            let {name, routes, base} = entry;
-                            return {
-                                from: routes2Reg(routes),
-                                to: path.posix.join(base, `/${name}.html`)
-                            };
-                        });
+    //         let routesJsonPath = path.resolve(utils.getLavasProjectRoot(), 'lavas/routes.json');
+    //         // If routes.json exists, set rewrite rules for SPA/MPA.
+    //         if (fs.pathExistsSync(routesJsonPath)) {
+    //             try {
+    //                 let routes = fs.readJsonSync(routesJsonPath);
+    //                 let rewrites = routes
+    //                     .filter(entry => !entry.ssr)
+    //                     .map(entry => {
+    //                         let {name, routes, base} = entry;
+    //                         return {
+    //                             from: routes2Reg(routes),
+    //                             to: path.posix.join(base, `/${name}.html`)
+    //                         };
+    //                     });
 
-                    if (rewrites.length !== 0) {
-                        app.use(historyMiddleware({
-                            htmlAcceptHeaders: ['text/html'],
-                            disableDotRule: false, // ignore paths with dot inside
-                            rewrites
-                        }));
-                    }
-                }
-                catch (e) {
-                    // When routes.json is not valid, start as a normal static server.
-                }
-            }
+    //                 if (rewrites.length !== 0) {
+    //                     app.use(historyMiddleware({
+    //                         htmlAcceptHeaders: ['text/html'],
+    //                         disableDotRule: false, // ignore paths with dot inside
+    //                         rewrites
+    //                     }));
+    //                 }
+    //             }
+    //             catch (e) {
+    //                 // When routes.json is not valid, start as a normal static server.
+    //             }
+    //         }
 
-            // Else, start as a normal static server
-            app.use(express.static(utils.getLavasProjectRoot()));
+    //         // Else, start as a normal static server
+    //         app.use(express.static(utils.getLavasProjectRoot()));
 
-            app.listen(port, () => {
-                console.log('server started at localhost:' + port);
-            });
+    //         app.listen(port, () => {
+    //             console.log('server started at localhost:' + port);
+    //         });
 
-            // catch promise error
-            process.on('unhandledRejection', (err, promise) => {
-                console.log('in unhandledRejection');
-                console.log(err);
-                // cannot redirect without ctx!
-            });
-        });
+    //         // catch promise error
+    //         process.on('unhandledRejection', (err, promise) => {
+    //             console.log('in unhandledRejection');
+    //             console.log(err);
+    //             // cannot redirect without ctx!
+    //         });
+    //     });
 };
 
 function routes2Reg(routes) {

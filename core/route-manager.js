@@ -79,9 +79,9 @@ export default class RouteManager {
          * webpack hot middleware will throw a "Duplicate declaration" error.
          */
         let timestamp = this.isDev ? (new Date()).getTime() : '';
+        let errorIndex;
 
-        routes.forEach(route => {
-
+        routes.forEach((route, index) => {
             // add to set
             this.flatRoutes.add(route);
 
@@ -94,16 +94,7 @@ export default class RouteManager {
                 this.errorRoute = route;
                 // add default error route alias
                 this.errorRoute.alias = '*';
-            }
-            // map entry to every route
-            else {
-                let entry = this.config.entry.find(
-                    entryConfig => matchUrl(entryConfig.routes, route.fullPath)
-                );
-
-                if (entry) {
-                    route.entryName = entry.name;
-                }
+                errorIndex = index;
             }
 
             // find route in config
@@ -134,7 +125,7 @@ export default class RouteManager {
             route.hash = timestamp + createHash('md5').update(route.component).digest('hex');
 
             /**
-             * turn route fullpath into regexp
+             * turn route fullPath into regexp
              * eg. /detail/:id => /^\/detail\/[^\/]+\/?$/
              */
             route.pathRegExp = route.rewritePath === '*'
@@ -146,6 +137,11 @@ export default class RouteManager {
                 this.mergeWithConfig(route.children, routesConfig, rewriteRules, route.fullPath);
             }
         });
+
+        // remove errorRoute and add it to the end
+        if (errorIndex !== undefined) {
+            routes.splice(errorIndex, 1);
+        }
     }
 
     /**
@@ -186,75 +182,62 @@ export default class RouteManager {
     }
 
     /**
-     * write routes.js for each entry
+     * write routes.js
      *
      */
     async writeRoutesSourceFile() {
+        // add errorRoute to the end
+        this.routes.push(this.errorRoute);
+
         let writeFile = this.isDev ? writeFileInDev : outputFile;
+        let {
+            mode = 'history',
+            base = '/',
+            pageTransition = {enable: false},
+            scrollBehavior
+        } = this.config.router;
 
-        await Promise.all(this.config.entry.map(async entryConfig => {
-            let {
-                name: entryName,
-                mode = 'history',
-                base = '/',
-                pageTransition = {enable: false},
-                scrollBehavior
-            } = entryConfig;
+        // set page transition, support 2 types: slide|fade
+        let transitionType = pageTransition.type;
+        if (transitionType === 'slide') {
+            pageTransition = Object.assign({
+                enable: true,
+                slideLeftClass: 'slide-left',
+                slideRightClass: 'slide-right',
+                alwaysBackPages: ['index'],
+                alwaysForwardPages: []
+            }, pageTransition);
+        }
+        else if (transitionType) {
+            pageTransition = Object.assign({
+                enable: true,
+                transitionClass: transitionType
+            }, pageTransition);
+        }
+        else {
+            console.log('[Lavas] page transition type is required.');
+            pageTransition = {enable: false};
+        }
 
-            let entryRoutes = this.routes.filter(route => route.entryName === entryName);
-            let entryFlatRoutes = new Set();
-            this.flatRoutes.forEach(flatRoute => {
-                if (flatRoute.entryName === entryName) {
-                    entryFlatRoutes.add(flatRoute);
-                }
-            });
+        // scrollBehavior
+        if (scrollBehavior) {
+            scrollBehavior = serialize(scrollBehavior).replace('scrollBehavior(', 'function(');
+        }
 
-            // set page transition, support 2 types: slide|fade
-            let transitionType = pageTransition.type;
-            if (transitionType === 'slide') {
-                pageTransition = Object.assign({
-                    enable: true,
-                    slideLeftClass: 'slide-left',
-                    slideRightClass: 'slide-right',
-                    alwaysBackPages: ['index'],
-                    alwaysForwardPages: []
-                }, pageTransition);
-            }
-            else if (transitionType) {
-                pageTransition = Object.assign({
-                    enable: true,
-                    transitionClass: transitionType
-                }, pageTransition);
-            }
-            else {
-                console.log('[Lavas] page transition type is required.');
-                pageTransition = {enable: false};
-            }
+        let routesFilePath = join(this.lavasDir, `router.js`);
+        let routesContent = this.generateRoutesContent(this.routes);
 
-            // add error route
-            entryRoutes.push(this.errorRoute);
-            entryFlatRoutes.add(this.errorRoute);
-
-            // scrollBehavior
-            if (scrollBehavior) {
-                scrollBehavior = serialize(scrollBehavior).replace('scrollBehavior(', 'function(');
-            }
-
-            let routesFilePath = join(this.lavasDir, `${entryName}/router.js`);
-            let routesContent = this.generateRoutesContent(entryRoutes);
-
-            let routesFileContent = template(await readFile(routerTemplate, 'utf8'))({
-                router: {
-                    mode,
-                    base,
-                    routes: entryFlatRoutes,
-                    scrollBehavior,
-                    pageTransition
-                },
-                routesContent
-            });
-            await writeFile(routesFilePath, routesFileContent);
-        }));
+        let routesFileContent = template(await readFile(routerTemplate, 'utf8'))({
+            router: {
+                mode,
+                base,
+                routes: this.flatRoutes,
+                scrollBehavior,
+                pageTransition
+            },
+            routesContent
+        });
+        await writeFile(routesFilePath, routesFileContent);
     }
 
     async writeRouresJsonFile() {
@@ -277,27 +260,20 @@ export default class RouteManager {
             return tmpRoute;
         };
 
-        let routesJson = [];
-        this.config.entry.forEach(entry => {
-            let entryConfig = {
-                name: entry.name,
-                ssr: entry.ssr,
-                mode: entry.mode,
-                base: entry.base,
-                routes: entry.routes.toString(),
-                routeArr: []
-            };
+        let routerConfig = this.config.router;
+        let routesJson = {
+            ssr: routerConfig.ssr,
+            mode: routerConfig.mode,
+            base: routerConfig.base,
+            routes: []
+        };
 
-            this.routes
-                .filter(route => route.entryName === entry.name)
-                .forEach(route => entryConfig.routeArr.push(generateRoutesJson(route)));
-
-            routesJson.push(entryConfig);
-        });
+        this.routes.forEach(route => routesJson.routes.push(generateRoutesJson(route)));
 
         await outputFile(
             distLavasPath(this.config.build.path, 'routes.json'),
-            JSON.stringify(routesJson, null, 4));
+            JSON.stringify(routesJson, null, 4)
+        );
     }
 
     /**
@@ -316,10 +292,11 @@ export default class RouteManager {
         // merge with routes' config
         this.mergeWithConfig(this.routes, routesConfig, rewriteRules);
 
-        // write routes for each entry
+        // write route.js
         await this.writeRoutesSourceFile();
 
         if (!this.isDev) {
+            // write routes.json
             await this.writeRouresJsonFile();
         }
 

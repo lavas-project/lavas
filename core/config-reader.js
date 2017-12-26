@@ -60,7 +60,6 @@ const DEFAULT_CONFIG = {
         presets: ['vue-app'],
         babelrc: false
     },
-    entry: [],
     router: {},
     errorHandler: {
         errorPath: '/error'
@@ -98,7 +97,6 @@ export const RUMTIME_ITEMS = {
         publicPath: true,
         compress: true
     },
-    entry: true,
     middleware: true,
     router: true,
     errorHandler: true,

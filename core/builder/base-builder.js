@@ -44,8 +44,9 @@ export default class BaseBuilder {
         this.config = config;
         this.webpackConfig.config = config;
         this.routeManager.config = config;
-        this.ssrExists = config.entry.some(e => e.ssr);
-        this.mpaExists = config.entry.some(e => !e.ssr);
+        this.ssr = config.router.ssr;
+        // this.ssrExists = config.entry.some(e => e.ssr);
+        // this.mpaExists = config.entry.some(e => !e.ssr);
     }
 
     /**
@@ -106,26 +107,15 @@ export default class BaseBuilder {
     }
 
     /**
-     * write LavasLink component
-     */
-    async writeLavasLink() {
-        let lavasLinkTemplate = await readFile(this.templatesPath('LavasLink.js.tmpl'), 'utf8');
-        await this.writeFileToLavasDir('LavasLink.js', template(lavasLinkTemplate)({
-            entryConfig: JsonUtil.stringify(this.config.entry)
-        }));
-    }
-
-    /**
      * write an entry file for a skeleton component
      *
-     * @param {string} entryName entryName
      * @param {string} skeletonPath used as import
      * @return {string} entryPath
      */
-    async writeSkeletonEntry(entryName, skeletonPath) {
+    async writeSkeletonEntry(skeletonPath) {
         const skeletonEntryTemplate = this.templatesPath('entry-skeleton.tmpl');
         return await this.writeFileToLavasDir(
-            `${entryName}/skeleton.js`,
+            'skeleton.js',
             template(await readFile(skeletonEntryTemplate, 'utf8'))({
                 skeleton: {
                     path: skeletonPath
@@ -223,7 +213,7 @@ export default class BaseBuilder {
                 let skeletonPath = join(rootDir, `entries/${entryName}/Skeleton.vue`);
                 let skeletonImportPath = `@/entries/${entryName}/Skeleton.vue`;
                 if (await pathExists(skeletonPath)) {
-                    let entryPath = await this.writeSkeletonEntry(entryName, skeletonImportPath);
+                    let entryPath = await this.writeSkeletonEntry(skeletonImportPath);
                     skeletonEntries[entryName] = [entryPath];
                 }
             }

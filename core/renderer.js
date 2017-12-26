@@ -23,54 +23,46 @@ export default class Renderer {
         this.cwd = core.cwd;
         this.renderer = {};
         this.serverBundle = null;
-        this.clientManifest = {};
-        this.templates = {};
+        this.clientManifest = null;
+        this.templates = null;
         this.resolve = null;
         this.readyPromise = new Promise(r => this.resolve = r);
-        this.entries = this.config.entry.map(e => e.name);
     }
 
     /**
-     * get template path for entry
+     * get template path
      *
-     * @param {string} entryName entry name
      * @return {string} template path
      */
-    getTemplatePathByEntry(entryName) {
-        let templateName = this.getTemplateName(entryName);
-        return join(this.rootDir, `entries/${entryName}/${templateName}`);
+    getTemplatePath() {
+        return join(this.rootDir, `core/${this.getTemplateName()}`);
+    }
+
+    /**
+     * get template name
+     *
+     * @return {string} template path
+     */
+    getTemplateName() {
+        return this.config.router.templateFile || TEMPLATE_HTML;
     }
 
     /**
      * return ssr template
      *
-     * @param {string} entryName entry name
-     * @param {string} baseUrl entry base url
+     * @param {string} base base url
      * @return {string} templateContent
      */
-    async getTemplate(entryName, baseUrl = '/') {
-        let templatePath = this.getTemplatePathByEntry(entryName);
+    async getTemplate(base = '/') {
+        let templatePath = this.getTemplatePath();
         if (!await pathExists(templatePath)) {
-            throw new Error(`${templatePath} required for entry: ${entryName}`);
+            throw new Error(`${templatePath} required`);
         }
+
         return templateUtil.server(
             await readFile(templatePath, 'utf8'),
-            baseUrl
+            base
         );
-    }
-
-    /**
-     * get template name from entry config
-     *
-     * @param {string} entryName entryName
-     * @return {string} template name
-     */
-    getTemplateName(entryName) {
-        let entryConfig = this.config.entry.find(entry => entry.name === entryName);
-        if (entryConfig && entryConfig.templateFile) {
-            return entryConfig.templateFile;
-        }
-        return TEMPLATE_HTML;
     }
 
     /**
@@ -79,7 +71,7 @@ export default class Renderer {
     addSSRClientPlugin() {
         this.clientConfig.plugins.push(
             new VueSSRClientPlugin({
-                filename: join(LAVAS_DIRNAME_IN_DIST, `[entryName]/${CLIENT_MANIFEST}`)
+                filename: join(LAVAS_DIRNAME_IN_DIST, CLIENT_MANIFEST)
             })
         );
     }
@@ -90,15 +82,13 @@ export default class Renderer {
     async createWithBundle() {
         this.serverBundle = await readJson(distLavasPath(this.cwd, SERVER_BUNDLE));
 
-        await Promise.all(this.config.entry.map(async entry => {
-            let {name: entryName, ssr} = entry;
-            let templatePath = distLavasPath(this.cwd, `${entryName}/${this.getTemplateName(entryName)}`);
-            let manifestPath = distLavasPath(this.cwd, `${entryName}/${CLIENT_MANIFEST}`);
-            if (ssr) {
-                this.templates[entryName] = await readFile(templatePath, 'utf-8');
-                this.clientManifest[entryName] = await readJson(manifestPath);
-            }
-        }));
+        let {ssr} = this.config.router;
+        let templatePath = distLavasPath(this.cwd, this.getTemplateName());
+        let manifestPath = distLavasPath(this.cwd, CLIENT_MANIFEST);
+        if (ssr) {
+            this.templates = await readFile(templatePath, 'utf-8');
+            this.clientManifest = await readJson(manifestPath);
+        }
 
         await this.createRenderer();
     }
@@ -109,29 +99,25 @@ export default class Renderer {
         // start to build client & server configs
         await webpackCompile([this.clientConfig, this.serverConfig]);
 
-        // copy index.template.html to dist/lavas/{entryName}/
-        await Promise.all(this.config.entry.map(async entryConfig => {
-            if (entryConfig.ssr) {
-                let {name: entryName, base: baseUrl} = entryConfig;
-                let templateContent = await this.getTemplate(entryName, baseUrl);
-                let distTemplatePath = distLavasPath(
-                    this.config.build.path,
-                    `${entryName}/${this.getTemplateName(entryName)}`
-                );
-                await outputFile(distTemplatePath, templateContent);
-            }
-        }));
+        // copy index.template.html to dist/lavas/
+        if (this.config.router.ssr) {
+            let templateContent = await this.getTemplate(this.config.router.base);
+            let distTemplatePath = distLavasPath(
+                this.config.build.path,
+                this.getTemplateName()
+            );
+
+            await outputFile(distTemplatePath, templateContent);
+        }
     }
 
     async buildDev() {
         let lavasDir = join(this.rootDir, './.lavas');
 
         // add watcher for each template
-        this.entries.map(entryName => {
-            let templatePath = this.getTemplatePathByEntry(entryName);
-            this.addWatcher(templatePath, 'change', async () => {
-                await this.refreshFiles(true);
-            });
+        let templatePath = this.getTemplatePath();
+        this.addWatcher(templatePath, 'change', async () => {
+            await this.refreshFiles(true);
         });
 
         await enableHotReload(lavasDir, this.clientConfig, true);
@@ -149,17 +135,15 @@ export default class Renderer {
 
         let changed = false;
         let templateChanged = false;
-        this.clientManifest = this.entries.reduce((prev, entryName) => {
-            let clientManifestPath = distLavasPath(this.clientConfig.output.path, `${entryName}/${CLIENT_MANIFEST}`);
-            if (this.clientMFS.existsSync(clientManifestPath)) {
-                let clientManifestContent = this.clientMFS.readFileSync(clientManifestPath, 'utf-8');
-                if (prev[entryName] && JSON.stringify(prev[entryName]) !== clientManifestContent) {
-                    changed = true;
-                }
-                prev[entryName] = JSON.parse(clientManifestContent);
+
+        let clientManifestPath = distLavasPath(this.clientConfig.output.path, CLIENT_MANIFEST);
+        if (this.clientMFS.existsSync(clientManifestPath)) {
+            let clientManifestContent = this.clientMFS.readFileSync(clientManifestPath, 'utf-8');
+            if (this.clientManifest && JSON.stringify(this.clientManifest) !== clientManifestContent) {
+                changed = true;
             }
-            return prev;
-        }, {});
+            this.clientManifest = JSON.parse(clientManifestContent);
+        }
 
         let serverBundlePath = distLavasPath(this.serverConfig.output.path, SERVER_BUNDLE);
         if (this.serverMFS.existsSync(serverBundlePath)) {
@@ -170,16 +154,12 @@ export default class Renderer {
             this.serverBundle = JSON.parse(serverBundleContent);
         }
 
-        this.templates = {};
-        await Promise.all(this.config.entry.map(async entryConfig => {
-            let {name: entryName, base: baseUrl} = entryConfig;
-            let templateContent = await this.getTemplate(entryName, baseUrl);
-            if (this.templates[entryName] !== templateContent) {
-                changed = true;
-                templateChanged = true;
-            }
-            this.templates[entryName] = templateContent;
-        }));
+        let templateContent = await this.getTemplate(this.config.router.base);
+        if (this.templates !== templateContent) {
+            changed = true;
+            templateChanged = true;
+        }
+        this.templates = templateContent;
 
         if (changed) {
             await this.createRenderer();
@@ -212,19 +192,10 @@ export default class Renderer {
     setWebpackEntries() {
         // set context in both configs first
         this.clientConfig.context = this.rootDir;
-        this.serverConfig.context = this.rootDir;
-
-        // each entry should have an independent client entry
-        this.clientConfig.entry = {};
         this.clientConfig.name = 'ssrclient';
-        this.config.entry.forEach(entryConfig => {
-            if (!this.isProd || (this.isProd && entryConfig.ssr)) {
-                let entryName = entryConfig.name;
-                this.clientConfig.entry[entryName] = [`./entries/${entryName}/entry-client.js`];
-            }
-        });
+        this.clientConfig.entry = './core/entry-client.js';
 
-        // only one entry in server side
+        this.serverConfig.context = this.rootDir;
         this.serverConfig.entry = './core/entry-server.js';
     }
 
@@ -232,38 +203,36 @@ export default class Renderer {
      * create renderer
      */
     async createRenderer() {
-        if (this.serverBundle && Object.keys(this.clientManifest).length) {
-            await Promise.all(this.entries.map(async entryName => {
-                if (this.clientManifest[entryName]) {
-                    let first = !this.renderer[entryName];
-                    this.renderer[entryName] = createBundleRenderer(
-                        this.serverBundle,
-                        {
-                            template: this.templates[entryName],
-                            clientManifest: this.clientManifest[entryName],
-                            runInNewContext: false,
-                            inject: false
-                        }
-                    );
-                    if (first) {
-                        this.resolve(this.renderer[entryName]);
-                    }
+        if (this.serverBundle && this.clientManifest) {
+            let isFirstTime = !this.renderer;
+            this.renderer = createBundleRenderer(
+                this.serverBundle,
+                {
+                    template: this.templates,
+                    clientManifest: this.clientManifest,
+                    runInNewContext: false,
+                    inject: false
                 }
-            }));
+            );
+
+            // If this is the first time, use resolve
+            if (isFirstTime) {
+                this.resolve(this.renderer);
+            }
         }
     }
 
     /**
      * get vue server renderer
      *
-     * @param {string} entryName entryName
      * @return {Promise.<*>}
      */
-    getRenderer(entryName) {
-        if (this.renderer[entryName]) {
-            return Promise.resolve(this.renderer[entryName]);
+    getRenderer() {
+        if (this.renderer) {
+            return Promise.resolve(this.renderer);
         }
 
+        // If this is the first time, wait for resolve
         return this.readyPromise;
     }
 }
