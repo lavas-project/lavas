@@ -73,9 +73,9 @@ module.exports = function (program) {
             }
         });
 
-    // lavas server
+    // lavas static
     program
-        .command('server')
+        .command('static')
         .description('启动 Lavas 内置简易服务器')
         .option('-p, --port <port>', '指定 port')
         .action(async ({port}) => {
@@ -104,7 +104,7 @@ module.exports = function (program) {
                         }));
                     }
                 }
-                catch () {
+                catch (e) {
                     // When routes.json is not valid, start as a normal static server.
                 }
             }
