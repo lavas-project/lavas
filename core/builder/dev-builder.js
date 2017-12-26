@@ -92,7 +92,7 @@ export default class DevBuilder extends BaseBuilder {
             resource: entriesWithSkeleton.map(e => join(rootDir, `.lavas/${e.name}/router`)),
             options: {
                 entry: entriesWithSkeleton.map(e => e.name),
-                importTemplate: 'import [nameCap] from \'@/entries/[name]/Skeleton.vue\';',
+                importTemplate: 'import [nameHash] from \'@/entries/[name]/Skeleton.vue\';',
                 routePathTemplate: '/skeleton-[name]',
                 insertAfter: 'let routes = ['
             }
