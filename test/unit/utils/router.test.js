@@ -38,11 +38,6 @@ test('it should generate routes according to the structure of directory', async 
         component: 'pages/Index.vue',
         children: [
             {
-                component: "pages/index/_other.vue",
-                name: "indexOther",
-                path: ":other"
-            },
-            {
                 component: "pages/index/index/Index.vue",
                 name: "index",
                 path: ""
