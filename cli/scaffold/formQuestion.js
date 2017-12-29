@@ -11,7 +11,7 @@ const childProcess = require('child_process');
 const path = require('path');
 const fs = require('fs-extra');
 
-const log = require('../utils/log');
+const log = require('../../lib/utils/log');
 
 /**
  * 获取当前用户的 git 账号信息

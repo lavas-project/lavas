@@ -7,8 +7,8 @@
 
 const LavasCore = require('../../core');
 
-const utils = require('../utils');
-const log = require('../utils/log');
+const utils = require('../../lib/utils');
+const log = require('../../lib/utils/log');
 
 /**
  * 处理 build 构建逻辑

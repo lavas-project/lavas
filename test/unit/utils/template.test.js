@@ -80,6 +80,7 @@ test('it should generate client customized template html', async t => {
                 <link rel="manifest" href="<%= htmlWebpackPlugin.options.config.build.publicPath %>static/manifest.json?v=<%= htmlWebpackPlugin.options.config.buildVersion %>">
                 <!-- Add to home screen for Safari on iOS -->
                 <meta name="apple-mobile-web-app-capable" content="yes">
+                <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
                 <% for (var jsFilePath of htmlWebpackPlugin.files.js) { %>
                     <link rel="preload" href="<%= jsFilePath %>" as="script">

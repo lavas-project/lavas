@@ -9,7 +9,6 @@ import {join} from 'path';
 import test from 'ava';
 import LavasCore from '../../dist/core';
 import {readFile} from 'fs-extra';
-import {syncConfig} from '../utils';
 
 let core;
 
@@ -40,24 +39,26 @@ test.serial('it should generate main/router.js in .lavas directory', async t => 
  */
 test.serial('it should modify route objects based on router config', async t => {
 
-    syncConfig(core, Object.assign(core.config.router, {
-        rewrite: [
-            {
-                from: '/detail',
-                to: '/rewrite/detail'
-            }
-        ],
-        routes: [
-            {
-                pattern: /\/detail/,
-                lazyLoading: true,
-                chunkname: 'my-chunk',
-                meta: {
-                    keepAlive: true
-                }
-            }
-        ]
-    }));
+    Object.assign(core.builder.routeManager.config, {
+        router: {
+            rewrite: [
+               {
+                   from: '/detail',
+                   to: '/rewrite/detail'
+               }
+            ],
+            routes: [
+               {
+                   pattern: /\/detail/,
+                   lazyLoading: true,
+                   chunkname: 'my-chunk',
+                   meta: {
+                       keepAlive: true
+                   }
+               }
+            ]
+        }
+    });
 
     await core.builder.routeManager.buildRoutes();
 

@@ -14,7 +14,7 @@ import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
 
-import {LAVAS_CONFIG_FILE, STORE_FILE} from '../constants';
+import {LAVAS_CONFIG_FILE, STORE_FILE, DEFAULT_ENTRY_NAME} from '../constants';
 import {enableHotReload, writeFileInDev} from '../utils/webpack';
 import {routes2Reg} from '../utils/router';
 
