@@ -12,8 +12,8 @@ const pathToRegexp = require('path-to-regexp');
 const historyMiddleware = require('connect-history-api-fallback');
 
 const app = express();
-const log = require('../utils/log');
-const utils = require('../utils');
+const log = require('../../lib/utils/log');
+const utils = require('../../lib/utils');
 const DEFAULT_DEV_SERVER_SCRIPT = 'server.dev.js';
 const DEFAULT_PROD_SERVER_SCRIPT = 'server.prod.js';
 

@@ -7,15 +7,14 @@
 
 const inquirer = require('inquirer');
 const shelljs = require('shelljs');
-// const lavasScaffold = require('../../../lavas-scaffold/dist');
-const lavasScaffold = require('lavas-scaffold');
+const lavasScaffold = require('../../lib/scaffold');
 const ora = require('ora');
 const path = require('path');
 const fs = require('fs-extra');
 
 const formQ = require('./formQuestion');
-const log = require('../utils/log');
-const utils = require('../utils');
+const log = require('../../lib/utils/log');
+const utils = require('../../lib/utils');
 
 let cwd = process.cwd();
 

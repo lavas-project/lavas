@@ -7,8 +7,8 @@
 
 const path = require('path');
 const fs = require('fs-extra');
-const utils = require('../utils');
-const log = require('../utils/log');
+const utils = require('../../lib/utils');
+const log = require('../../lib/utils/log');
 
 module.exports = function (program) {
 
