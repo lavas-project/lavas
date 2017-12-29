@@ -28,6 +28,14 @@ export default class ProdBuilder extends BaseBuilder {
 
         await this.routeManager.buildRoutes();
         await this.writeRuntimeConfig();
+        await this.writeFileToLavasDir(
+            MIDDLEWARE_FILE,
+            readFileSync(join(__dirname, `../templates/${MIDDLEWARE_FILE}`))
+        );
+        await this.writeFileToLavasDir(
+            STORE_FILE,
+            readFileSync(join(__dirname, `../templates/${STORE_FILE}`))
+        );
 
         // SSR build process
         if (this.ssr) {
