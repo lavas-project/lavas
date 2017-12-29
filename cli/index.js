@@ -8,8 +8,8 @@
 const program = require('commander');
 const cp = require('child_process');
 
-const log = require('./utils/log');
-const checkUpdate = require('./utils/checkUpdate');
+const log = require('../lib/utils/log');
+const checkUpdate = require('../lib/utils/checkUpdate');
 const initCommand = require('./scaffold');
 const buildCommand = require('./build');
 const serverCommand = require('./server');
