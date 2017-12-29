@@ -6,7 +6,7 @@
 import {emptyDir, outputFile, copy} from 'fs-extra';
 import {join} from 'path';
 
-import {CONFIG_FILE} from '../constants';
+import {CONFIG_FILE, MIDDLEWARE_FILE, STORE_FILE} from '../constants';
 import {webpackCompile} from '../utils/webpack';
 import {distLavasPath} from '../utils/path';
 
