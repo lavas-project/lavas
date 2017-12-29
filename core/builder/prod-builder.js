@@ -3,7 +3,7 @@
  * @author lavas
  */
 
-import {emptyDir, outputFile, copy} from 'fs-extra';
+import {emptyDir, outputFile, copy, readFileSync} from 'fs-extra';
 import {join} from 'path';
 
 import {CONFIG_FILE, MIDDLEWARE_FILE, STORE_FILE} from '../constants';
