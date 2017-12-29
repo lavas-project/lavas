@@ -14,7 +14,7 @@ import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
 
-import {LAVAS_CONFIG_FILE, MIDDLEWARE_FILE, STORE_FILE} from '../constants';
+import {LAVAS_CONFIG_FILE, STORE_FILE} from '../constants';
 import {enableHotReload, writeFileInDev} from '../utils/webpack';
 import {routes2Reg} from '../utils/router';
 
@@ -129,10 +129,7 @@ export default class DevBuilder extends BaseBuilder {
 
         await this.routeManager.buildRoutes();
         await this.writeRuntimeConfig();
-        await this.writeFileToLavasDir(
-            MIDDLEWARE_FILE,
-            readFileSync(join(__dirname, `../templates/${MIDDLEWARE_FILE}`))
-        );
+        await this.writeMiddleware();
         await this.writeFileToLavasDir(
             STORE_FILE,
             readFileSync(join(__dirname, `../templates/${STORE_FILE}`))

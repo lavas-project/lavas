@@ -104,16 +104,17 @@ export default class BaseBuilder {
         await this.writeFileToLavasDir('config.json', JsonUtil.stringify(filteredConfig, null, 4));
     }
 
-    // async writeMiddleware() {
-    //     const middlewareTemplate = this.templatesPath('middleware.tmpl');
-    //     let isEmpty = this.config.
-    //     await this.writeFileToLavasDir(
-    //         'middleware.js',
-    //         template(await readFile(middlewareTemplate, 'utf8'))({
-    //             isEmpty
-    //         })
-    //     );
-    // }
+    async writeMiddleware() {
+        const middlewareTemplate = this.templatesPath('middleware.tmpl');
+        let isEmpty = !(await pathExists(join(this.config.globals.rootDir, 'middlewares')));
+
+        await this.writeFileToLavasDir(
+            'middleware.js',
+            template(await readFile(middlewareTemplate, 'utf8'))({
+                isEmpty
+            })
+        );
+    }
 
     /**
      * write an entry file for a skeleton component

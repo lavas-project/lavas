@@ -6,7 +6,7 @@
 import {emptyDir, outputFile, copy, readFileSync} from 'fs-extra';
 import {join} from 'path';
 
-import {CONFIG_FILE, MIDDLEWARE_FILE, STORE_FILE} from '../constants';
+import {CONFIG_FILE, STORE_FILE} from '../constants';
 import {webpackCompile} from '../utils/webpack';
 import {distLavasPath} from '../utils/path';
 
@@ -28,10 +28,7 @@ export default class ProdBuilder extends BaseBuilder {
 
         await this.routeManager.buildRoutes();
         await this.writeRuntimeConfig();
-        await this.writeFileToLavasDir(
-            MIDDLEWARE_FILE,
-            readFileSync(join(__dirname, `../templates/${MIDDLEWARE_FILE}`))
-        );
+        await this.writeMiddleware();
         await this.writeFileToLavasDir(
             STORE_FILE,
             readFileSync(join(__dirname, `../templates/${STORE_FILE}`))

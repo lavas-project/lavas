@@ -14,4 +14,3 @@ export const TEMPLATE_HTML = 'index.html.tmpl';
 export const CONFIG_FILE = 'config.json';
 export const DEFAULT_ENTRY_NAME = 'index';
 export const STORE_FILE = 'store.js';
-export const MIDDLEWARE_FILE = 'middleware.js';
