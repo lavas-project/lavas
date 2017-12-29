@@ -8,6 +8,7 @@ import {pathExists, readFile, readJson, outputFile} from 'fs-extra';
 import {createBundleRenderer} from 'vue-server-renderer';
 import VueSSRClientPlugin from './plugins/ssr-client-plugin';
 
+import {DEFAULT_ENTRY_NAME} from './constants';
 import {distLavasPath} from './utils/path';
 import {webpackCompile, enableHotReload} from './utils/webpack';
 import templateUtil from './utils/template';
@@ -116,7 +117,7 @@ export default class Renderer {
         // add watcher for each template
         let templatePath = this.getTemplatePath();
         this.addWatcher(templatePath, 'change', async () => {
-            await this.refreshFiles(true);
+            await this.refreshFiles();
         });
 
         await enableHotReload(lavasDir, this.clientConfig, true);
@@ -192,7 +193,7 @@ export default class Renderer {
         // set context in both configs first
         this.clientConfig.context = this.rootDir;
         this.clientConfig.name = 'ssrclient';
-        this.clientConfig.entry = './core/entry-client.js';
+        this.clientConfig.entry = {[DEFAULT_ENTRY_NAME]: ['./core/entry-client.js']};
 
         this.serverConfig.context = this.rootDir;
         this.serverConfig.entry = './core/entry-server.js';
