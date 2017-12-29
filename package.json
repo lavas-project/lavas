@@ -91,11 +91,8 @@
     "lodash": "^4.17.4",
     "lodash.template": "^4.4.0",
     "lodash.uniq": "^4.5.0",
-<<<<<<< HEAD
-=======
     "lru-cache": "^4.1.1",
     "mz": "^2.7.0",
->>>>>>> a9327ab75b383cf9f1453bcfd30c7261a43d7492
     "normalize.css": "^7.0.0",
     "optimize-css-assets-webpack-plugin": "^3.0.0",
     "ora": "^1.3.0",
@@ -127,11 +124,7 @@
     "webpack-hot-middleware": "^2.19.0",
     "webpack-merge": "^4.1.0",
     "webpack-node-externals": "^1.6.0",
-<<<<<<< HEAD
-    "workbox-webpack-plugin": "2.1.2"
-=======
     "workbox-webpack-plugin": "3.0.0-alpha.3"
->>>>>>> a9327ab75b383cf9f1453bcfd30c7261a43d7492
   },
   "devDependencies": {
     "ava": "^0.18.2",
