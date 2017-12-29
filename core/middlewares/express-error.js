@@ -26,7 +26,7 @@ export default function (errPath) {
             console.log(errorMsg);
         }
 
-        if (errPath === req.url) {
+        if (errPath === req.url.replace(/\?.+$/, '')) {
             // if already in error procedure, then end this request immediately, avoid infinite loop
             res.end();
             return;

@@ -34,7 +34,7 @@ export default function (errPath) {
                 return;
             }
 
-            if (errPath === ctx.path) {
+            if (errPath === ctx.path.replace(/\?.+$/, '')) {
                 // if already in error procedure, then end this request immediately, avoid infinite loop
                 ctx.res.end();
                 return;
