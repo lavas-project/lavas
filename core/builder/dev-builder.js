@@ -14,7 +14,7 @@ import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
 
-import {LAVAS_CONFIG_FILE, STORE_FILE} from '../constants';
+import {LAVAS_CONFIG_FILE, STORE_FILE, DEFAULT_ENTRY_NAME} from '../constants';
 import {enableHotReload, writeFileInDev} from '../utils/webpack';
 import {routes2Reg} from '../utils/router';
 
@@ -84,7 +84,7 @@ export default class DevBuilder extends BaseBuilder {
             resource: [join(this.config.globals.rootDir, `.lavas/router`)],
             options: {
                 entry: [DEFAULT_ENTRY_NAME],
-                importTemplate: 'import [nameCap] from \'@/core/Skeleton.vue\';',
+                importTemplate: 'import [nameHash] from \'@/core/Skeleton.vue\';',
                 routePathTemplate: '/skeleton-[name]',
                 insertAfter: 'let routes = ['
             }
@@ -241,7 +241,7 @@ export default class DevBuilder extends BaseBuilder {
         await new Promise(resolve => {
             this.devMiddleware.waitUntilValid(async () => {
                 if (!this.ssr) {
-                    console.log('[Lavas] MPA build completed.');
+                    console.log('[Lavas] SPA build completed.');
                 }
                 if (this.ssr) {
                     await this.renderer.refreshFiles();

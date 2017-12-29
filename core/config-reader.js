@@ -61,7 +61,6 @@ const DEFAULT_CONFIG = {
         extend: null,
         ssrCopy: []
     },
-    entry: [],
     router: {},
     errorHandler: {
         errorPath: '/error'
