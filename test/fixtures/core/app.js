@@ -5,18 +5,15 @@
 
 import Vue from 'vue';
 import Meta from 'vue-meta';
-import {createRouter} from '@/.lavas/main/router';
+
+import {createRouter} from '@/.lavas/router';
 import {createStore} from '@/core/store';
 import AppComponent from './App.vue';
-import LavasLink from '@/.lavas/LavasLink';
 
 Vue.use(Meta);
 
 Vue.config.productionTip = false;
 
-Vue.component(LavasLink.name, LavasLink);
-
-/* eslint-disable no-new */
 export function createApp() {
     let router = createRouter();
     let store = createStore();

@@ -14,7 +14,7 @@ import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
 
-import {LAVAS_CONFIG_FILE} from '../constants';
+import {LAVAS_CONFIG_FILE, DEFAULT_ENTRY_NAME} from '../constants';
 import {enableHotReload, writeFileInDev} from '../utils/webpack';
 import {routes2Reg} from '../utils/router';
 
@@ -80,19 +80,11 @@ export default class DevBuilder extends BaseBuilder {
      * @param {Object} clientConfig webpack client config
      */
     addSkeletonRoutes(clientConfig) {
-        let {globals: {rootDir}, entry} = this.config;
-        // only pages in MPA need skeleton
-        let entriesWithSkeleton = entry.filter(async e => {
-            let {name, ssr} = e;
-            let skeletonPath = join(rootDir, `entries/${name}/Skeleton.vue`);
-            return !ssr && await pathExists(skeletonPath);
-        });
-
         clientConfig.module.rules.push(SkeletonWebpackPlugin.loader({
-            resource: entriesWithSkeleton.map(e => join(rootDir, `.lavas/${e.name}/router`)),
+            resource: [join(this.config.globals.rootDir, `.lavas/router`)],
             options: {
-                entry: entriesWithSkeleton.map(e => e.name),
-                importTemplate: 'import [nameHash] from \'@/entries/[name]/Skeleton.vue\';',
+                entry: [DEFAULT_ENTRY_NAME],
+                importTemplate: 'import [nameCap] from \'@/core/Skeleton.vue\';',
                 routePathTemplate: '/skeleton-[name]',
                 insertAfter: 'let routes = ['
             }
@@ -169,8 +161,8 @@ export default class DevBuilder extends BaseBuilder {
         }
 
         if (!this.ssr) {
-            console.log('[Lavas] MPA build starting...');
-            // create mpa config first
+            console.log('[Lavas] SPA build starting...');
+            // create spa config first
             mpaConfig = await this.createMPAConfig(true);
 
             // enable hotreload in every entry in dev mode
@@ -224,15 +216,6 @@ export default class DevBuilder extends BaseBuilder {
          * in ssr, ssr middleware will handle it instead
          */
         if (!this.ssr) {
-            let mpaEntries = this.config.entry.filter(e => !e.ssr);
-            let rewrites = mpaEntries
-                .map(entry => {
-                    let {name, routes, base} = entry;
-                    return {
-                        from: routes2Reg(routes),
-                        to: posix.join(base, `/${name}.html`)
-                    };
-                });
             /**
              * we should put this middleware in front of dev middleware since
              * it will rewrite req.url to xxx.html based on options.rewrites
@@ -241,7 +224,7 @@ export default class DevBuilder extends BaseBuilder {
                 htmlAcceptHeaders: ['text/html'],
                 disableDotRule: false, // ignore paths with dot inside
                 // verbose: true,
-                rewrites
+                index: `/${DEFAULT_ENTRY_NAME}.html`
             }));
         }
 

@@ -20,6 +20,7 @@ function mergeArray(a, b) {
 const DEFAULT_CONFIG = {
     buildVersion: null,
     build: {
+        ssr: true,
         publicPath: '/',
         filenames: {
             entry: 'js/[name].[chunkhash:8].js',
@@ -29,6 +30,10 @@ const DEFAULT_CONFIG = {
             css: 'css/[name].[contenthash:8].css',
             img: 'img/[name].[hash:8].[ext]',
             fonts: 'fonts/[name].[hash:8].[ext]'
+        },
+        babel: {
+            presets: ['vue-app'],
+            babelrc: false
         },
         cssExtract: false,
         cssMinimize: true,
@@ -56,10 +61,6 @@ const DEFAULT_CONFIG = {
         extend: null,
         ssrCopy: []
     },
-    babel: {
-        presets: ['vue-app'],
-        babelrc: false
-    },
     router: {},
     errorHandler: {
         errorPath: '/error'
@@ -80,10 +81,10 @@ const DEFAULT_CONFIG = {
         build: {
             filenames: {
                 entry: 'js/[name].[hash:8].js'
+            },
+            babel: {
+                cacheDirectory: true
             }
-        },
-        babel: {
-            cacheDirectory: true
         }
     }
 };
@@ -94,13 +95,13 @@ const DEFAULT_CONFIG = {
 export const RUMTIME_ITEMS = {
     buildVersion: true,
     build: {
+        ssr: true,
         publicPath: true,
         compress: true
     },
     middleware: true,
     router: true,
     errorHandler: true,
-    manifest: true,
     serviceWorker: {
         swDest: true
     }

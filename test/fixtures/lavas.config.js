@@ -9,6 +9,7 @@ const path = require('path');
 const BUILD_PATH = path.resolve(__dirname, 'dist');
 
 module.exports = {
+    ssr: true,
     middleware: {
         server: ['server-only'],
         client: ['client-only'],
@@ -22,19 +23,14 @@ module.exports = {
             }
         }
     },
-    entry: [
-        {
-            name: 'main',
-            ssr: true,
-            mode: 'history',
-            base: '/',
-            routes: /^.*$/,
-            pageTransition: {
-                type: 'fade',
-                transitionClass: 'fade'
-            }
+    router: {
+        mode: 'history',
+        base: '/',
+        pageTransition: {
+            type: 'fade',
+            transitionClass: 'fade'
         }
-    ],
+    },
     serviceWorker: {
         swSrc: path.join(__dirname, 'core/service-worker.js'),
         swDest: path.join(BUILD_PATH, 'service-worker.js'),

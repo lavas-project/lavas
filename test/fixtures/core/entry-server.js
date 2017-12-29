@@ -5,26 +5,20 @@
 
 import {getMiddlewares, getServerContext, execSeries, createNext} from './middleware';
 import lavasConfig from '@/.lavas/config';
-import {stringify} from 'querystring';
+import {createApp} from './app';
 
 const {middleware: middConf = {}} = lavasConfig;
 
-// import app.js from all modules
-const apps = getAllApps();
-
 export default function (context) {
     return new Promise((resolve, reject) => {
-        let {url, entryName, config} = context;
+        let {url, config} = context;
         // remove base first
-        let base = config.entry.find(e => e.name === entryName).base
-            .replace(/^\/+/, '').replace(/\/+$/, '');
+        let base = config.router.base
+            .replace(/^\/+/, '')
+            .replace(/\/+$/, '');
         url = url.replace(new RegExp(`^/${base}/?`), '/');
 
-        // create app for current entry
-        let createApp = apps[entryName].createApp;
-        if (!createApp || typeof createApp !== 'function') {
-            return reject();
-        }
+        // create app
         let {App, router, store} = createApp();
         let app = new App();
 
@@ -101,20 +95,4 @@ export default function (context) {
             }
         }, reject);
     });
-}
-
-function getAllApps() {
-    let apps = {};
-    let context = require.context('../entries', true, /^.*\/app\.js$/);
-
-    context.keys().forEach(filename => {
-        let match = filename.match(/\/(.+)\/app\.js$/);
-
-        if (match) {
-            let entry = match[1];
-            apps[entry] = context(filename);
-        }
-    });
-
-    return apps;
 }

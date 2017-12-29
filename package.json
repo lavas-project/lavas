@@ -1,6 +1,6 @@
 {
   "name": "lavas",
-  "version": "2.0.7-rc.3",
+  "version": "2.1.0-rc.2",
   "description": "pwa project solution cli tool",
   "main": "dist/core/index.js",
   "files": [
@@ -44,12 +44,12 @@
     "concurrency": 1,
     "failFast": true,
     "files": [
-        "test/unit/utils/*",
-        "test/unit/config-reader.test.js",
-        "test/unit/route-manager.test.js",
         "test/integration/common.js"
     ],
     "backupFiles": [
+        "test/unit/utils/*",
+        "test/unit/config-reader.test.js",
+        "test/unit/route-manager.test.js"
     ],
     "require": [
       "babel-register",
@@ -119,7 +119,7 @@
     "webpack-hot-middleware": "^2.19.0",
     "webpack-merge": "^4.1.0",
     "webpack-node-externals": "^1.6.0",
-    "workbox-webpack-plugin": "^2.1.1"
+    "workbox-webpack-plugin": "2.1.2"
   },
   "devDependencies": {
     "ava": "^0.18.2",

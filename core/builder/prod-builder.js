@@ -71,11 +71,11 @@ export default class ProdBuilder extends BaseBuilder {
             console.log('[Lavas] SSR build completed.');
         }
 
-        // MPA build process
+        // SPA build process
         if (!this.ssr) {
-            console.log('[Lavas] MPA build starting...');
+            console.log('[Lavas] SPA build starting...');
             await webpackCompile(await this.createMPAConfig());
-            console.log('[Lavas] MPA build completed.');
+            console.log('[Lavas] SPA build completed.');
         }
     }
 }

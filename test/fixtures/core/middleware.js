@@ -5,6 +5,8 @@
 
 'use strict';
 
+import {stringify} from 'querystring';
+
 export async function getMiddlewares(names) {
     let middlewares = {};
     try {
@@ -29,21 +31,13 @@ export function getClientContext(context, app) {
     const next = context.next;
     ctx.params = ctx.route.params || {};
     ctx.query = ctx.route.query || {};
-    ctx.redirect = function (status, path, query) {
-        if (!status) {
-            return;
-        }
+    ctx.redirect = function ({status = 302, path = '', query = {}, external = false}) {
         ctx._redirected = true; // Used in middleware
-        // if only 1 or 2 arguments: redirect('/') or redirect('/', { foo: 'bar' })
-        if (typeof status === 'string' && (typeof path === 'undefined' || typeof path === 'object')) {
-            query = path || {};
-            path = status;
-            status = 302;
-        }
         next({
             path,
             query,
-            status
+            status,
+            external
         });
     };
 
@@ -60,18 +54,8 @@ export function getServerContext(context, app) {
     const next = context.next;
     ctx.params = ctx.route.params || {};
     ctx.query = ctx.route.query || {};
-    ctx.redirect = function (status, path, query) {
-        if (!status) {
-            return;
-        }
+    ctx.redirect = function ({status = 302, path = '', query = {}}) {
         ctx._redirected = true; // Used in middleware
-        // if only 1 or 2 arguments: redirect('/') or redirect('/', { foo: 'bar' })
-        if (typeof status === 'string'
-            && (typeof path === 'undefined' || typeof path === 'object')) {
-            query = path || {};
-            path = status;
-            status = 302;
-        }
         next({
             path,
             query,

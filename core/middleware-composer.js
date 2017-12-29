@@ -68,7 +68,7 @@ export default class MiddlewareComposer {
         const koaStatic = require('koa-static');
         const send = require('koa-send');
 
-        let {router: {ssr, base}, build: {publicPath}, serviceWorker, errorHandler} = this.config;
+        let {router: {base}, build: {ssr, publicPath}, serviceWorker, errorHandler} = this.config;
         base = removeTrailingSlash(base || '/');
 
         // transform express/connect style middleware to koa style
@@ -106,23 +106,25 @@ export default class MiddlewareComposer {
                 ));
 
                 // serve sw-register.js & sw.js
-                let swFiles = [
-                    basename(serviceWorker.swDest),
-                    'sw-register.js'
-                ].map(f => posix.join(publicPath, f));
-                middlewares.push(async (ctx, next) => {
-                    let done = false;
-                    if (swFiles.includes(ctx.path)) {
-                        // Don't cache service-worker.js & sw-register.js.
-                        ctx.set('Cache-Control', 'private, no-cache, no-store');
-                        done = await send(ctx, ctx.path.substring(publicPath.length), {
-                            root: this.cwd
-                        });
-                    }
-                    if (!done) {
-                        await next();
-                    }
-                });
+                if (serviceWorker && serviceWorker.swDest) {
+                    let swFiles = [
+                        basename(serviceWorker.swDest),
+                        'sw-register.js'
+                    ].map(f => posix.join(publicPath, f));
+                    middlewares.push(async (ctx, next) => {
+                        let done = false;
+                        if (swFiles.includes(ctx.path)) {
+                            // Don't cache service-worker.js & sw-register.js.
+                            ctx.set('Cache-Control', 'private, no-cache, no-store');
+                            done = await send(ctx, ctx.path.substring(publicPath.length), {
+                                root: this.cwd
+                            });
+                        }
+                        if (!done) {
+                            await next();
+                        }
+                    });
+                }
             }
             middlewares.push(c2k(ssrFactory(this.core)));
         }
@@ -137,7 +139,7 @@ export default class MiddlewareComposer {
      */
     express() {
         let expressRouter = Router;
-        let {router: {ssr, base}, build: {publicPath}, serviceWorker, errorHandler} = this.config;
+        let {router: {base}, build: {ssr, publicPath}, serviceWorker, errorHandler} = this.config;
         base = removeTrailingSlash(base || '/');
 
         let middlewares = Array.from(this.internalMiddlewares);
@@ -179,17 +181,19 @@ export default class MiddlewareComposer {
                 }));
 
                 // Serve sw-register.js & sw.js.
-                let swFiles = [
-                    basename(serviceWorker.swDest),
-                    'sw-register.js'
-                ].map(f => posix.join(publicPath, f));
-                let swRouter = expressRouter();
-                swRouter.get(swFiles, staticFactory(publicPath));
-                middlewares.push(swRouter);
-                // Use cache-control but not etag.
-                middlewares.push(serveStatic(this.cwd, {
-                    etag: false
-                }));
+                if (serviceWorker && serviceWorker.swDest) {
+                    let swFiles = [
+                        basename(serviceWorker.swDest),
+                        'sw-register.js'
+                    ].map(f => posix.join(publicPath, f));
+                    let swRouter = expressRouter();
+                    swRouter.get(swFiles, staticFactory(publicPath));
+                    middlewares.push(swRouter);
+                    // Use cache-control but not etag.
+                    middlewares.push(serveStatic(this.cwd, {
+                        etag: false
+                    }));
+                }
             }
 
             middlewares.push(ssrFactory(this.core));

@@ -10,7 +10,7 @@ import {join} from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
 
-import {TEMPLATE_HTML} from '../constants';
+import {TEMPLATE_HTML, DEFAULT_ENTRY_NAME} from '../constants';
 import {assetsPath} from '../utils/path';
 import * as JsonUtil from '../utils/json';
 import templateUtil from '../utils/template';
@@ -44,9 +44,7 @@ export default class BaseBuilder {
         this.config = config;
         this.webpackConfig.config = config;
         this.routeManager.config = config;
-        this.ssr = config.router.ssr;
-        // this.ssrExists = config.entry.some(e => e.ssr);
-        // this.mpaExists = config.entry.some(e => !e.ssr);
+        this.ssr = config.build.ssr;
     }
 
     /**
@@ -136,7 +134,7 @@ export default class BaseBuilder {
         // allow user to provide a custom HTML template
         let rootDir = this.config.globals.rootDir;
         let htmlFilename = `${entryName}.html`;
-        let customTemplatePath = join(rootDir, `entries/${entryName}/${TEMPLATE_HTML}`);
+        let customTemplatePath = join(rootDir, `core/${TEMPLATE_HTML}`);
 
         if (!await pathExists(customTemplatePath)) {
             throw new Error(`${TEMPLATE_HTML} required for entry: ${entryName}`);
@@ -183,7 +181,9 @@ export default class BaseBuilder {
      * @return {Object} mpaConfig webpack config for MPA
      */
     async createMPAConfig(watcherEnabled) {
-        let rootDir = this.config.globals.rootDir;
+        let {globals, build, router} = this.config;
+        let entryName = DEFAULT_ENTRY_NAME;
+        let rootDir = globals.rootDir;
 
         // create mpa config based on client config
         let mpaConfig = this.webpackConfig.client();
@@ -199,25 +199,21 @@ export default class BaseBuilder {
          * 1. add a html-webpack-plugin to output a relative HTML file
          * 2. create an entry if a skeleton component is provided
          */
-        await Promise.all(this.config.entry.map(async entryConfig => {
-            let {name: entryName, ssr: ssrEnabled, base: baseUrl} = entryConfig;
+        if (!build.ssr) {
+            // set client entry first
+            mpaConfig.entry[entryName] = [`./core/entry-client.js`];
 
-            if (!ssrEnabled) {
-                // set client entry first
-                mpaConfig.entry[entryName] = [`./entries/${entryName}/entry-client.js`];
+            // add html-webpack-plugin
+            await this.addHtmlPlugin(mpaConfig, entryName, router.baseUrl, watcherEnabled);
 
-                // add html-webpack-plugin
-                await this.addHtmlPlugin(mpaConfig, entryName, baseUrl, watcherEnabled);
-
-                // if skeleton provided, we need to create an entry
-                let skeletonPath = join(rootDir, `entries/${entryName}/Skeleton.vue`);
-                let skeletonImportPath = `@/entries/${entryName}/Skeleton.vue`;
-                if (await pathExists(skeletonPath)) {
-                    let entryPath = await this.writeSkeletonEntry(skeletonImportPath);
-                    skeletonEntries[entryName] = [entryPath];
-                }
+            // if skeleton provided, we need to create an entry
+            let skeletonPath = join(rootDir, `core/Skeleton.vue`);
+            let skeletonImportPath = `@/core/Skeleton.vue`;
+            if (await pathExists(skeletonPath)) {
+                let entryPath = await this.writeSkeletonEntry(skeletonImportPath);
+                skeletonEntries[entryName] = [entryPath];
             }
-        }));
+        }
 
         if (Object.keys(skeletonEntries).length) {
             // when ssr skeleton, we need to extract css from js

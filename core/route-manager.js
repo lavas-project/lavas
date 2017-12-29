@@ -240,7 +240,7 @@ export default class RouteManager {
         await writeFile(routesFilePath, routesFileContent);
     }
 
-    async writeRouresJsonFile() {
+    async writeRoutesJsonFile() {
         let generateRoutesJson = route => {
             let tmpRoute = {
                 path: route.rewritePath,
@@ -297,7 +297,7 @@ export default class RouteManager {
 
         if (!this.isDev) {
             // write routes.json
-            await this.writeRouresJsonFile();
+            await this.writeRoutesJsonFile();
         }
 
         console.log('[Lavas] all routes are already generated.');
