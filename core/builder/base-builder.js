@@ -4,7 +4,7 @@
  */
 
 import template from 'lodash.template';
-import {readFile, pathExists} from 'fs-extra';
+import {readFile, pathExists, copySync} from 'fs-extra';
 import {join} from 'path';
 
 import HtmlWebpackPlugin from 'html-webpack-plugin';
@@ -45,8 +45,6 @@ export default class BaseBuilder {
         this.webpackConfig.config = config;
         this.routeManager.config = config;
         this.ssr = config.router.ssr;
-        // this.ssrExists = config.entry.some(e => e.ssr);
-        // this.mpaExists = config.entry.some(e => !e.ssr);
     }
 
     /**
@@ -105,6 +103,17 @@ export default class BaseBuilder {
         let filteredConfig = JsonUtil.deepPick(this.config, RUMTIME_ITEMS);
         await this.writeFileToLavasDir('config.json', JsonUtil.stringify(filteredConfig, null, 4));
     }
+
+    // async writeMiddleware() {
+    //     const middlewareTemplate = this.templatesPath('middleware.tmpl');
+    //     let isEmpty = this.config.
+    //     await this.writeFileToLavasDir(
+    //         'middleware.js',
+    //         template(await readFile(middlewareTemplate, 'utf8'))({
+    //             isEmpty
+    //         })
+    //     );
+    // }
 
     /**
      * write an entry file for a skeleton component

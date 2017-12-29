@@ -12,3 +12,5 @@ export const CLIENT_MANIFEST = 'vue-ssr-client-manifest.json';
 export const SERVER_BUNDLE = 'vue-ssr-server-bundle.json';
 export const TEMPLATE_HTML = 'index.html.tmpl';
 export const CONFIG_FILE = 'config.json';
+export const STORE_FILE = 'store.js';
+export const MIDDLEWARE_FILE = 'middleware.js';
