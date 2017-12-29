@@ -7,4 +7,7 @@ node_modules
 .idea
 dist
 tmp
-*-lock.json
+coverage
+.nyc_output
+test/fixtures/dist
+test/fixtures/.lavas

@@ -4,12 +4,18 @@
             "env",
             {
                 "targets": {
-                    "node": 4
+                    "node": 5
                 }
             }
-        ]
+        ],
+        "stage-2"
     ],
     "plugins": [
-        "transform-runtime"
+        "transform-runtime",
+        "add-module-exports",
+        "dynamic-import-node"
+    ],
+    "ignore": [
+        "core/templates"
     ]
 }
