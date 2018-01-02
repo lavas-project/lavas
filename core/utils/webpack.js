@@ -19,7 +19,7 @@ export function webpackCompile(config) {
             if (err) {
                 console.error(err.stack || err);
                 if (err.details) {
-                    console.error(err.details);
+                    err.details.forEach(detail => console.error(detail));
                 }
                 reject(err);
                 return;
@@ -28,13 +28,13 @@ export function webpackCompile(config) {
             const info = stats.toJson();
 
             if (stats.hasErrors()) {
-                console.error(info.errors);
+                info.errors.forEach(error => console.error(error));
                 reject(info.errors);
                 return;
             }
 
             if (stats.hasWarnings()) {
-                console.warn(info.warnings);
+                info.warnings.forEach(warning => console.warn(warning));
             }
 
             resolve();
