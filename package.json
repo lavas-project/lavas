@@ -44,12 +44,11 @@
   "ava": {
     "concurrency": 1,
     "failFast": true,
-    "files": [
-    ],
+    "files": [],
     "backupFiles": [
-        "test/unit/utils/*",
-        "test/unit/config-reader.test.js",
-        "test/unit/route-manager.test.js"
+      "test/unit/utils/*",
+      "test/unit/config-reader.test.js",
+      "test/unit/route-manager.test.js"
     ],
     "require": [
       "babel-register",

@@ -82,9 +82,14 @@ export default class LavasCore extends EventEmitter {
         if (!this.isProd) {
             this.middlewareComposer.setup();
         }
-        await this.builder.build();
+        try {
+            await this.builder.build();
+            spinner.succeed(`[Lavas] ${this.env} build completed.`);
+        }
+        catch (e) {
+            spinner.fail(`[Lavas] ${this.env} build failed.`)
+        }
 
-        spinner.succeed(`[Lavas] ${this.env} build completed.`);
     }
 
     /**

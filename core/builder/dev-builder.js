@@ -135,6 +135,7 @@ export default class DevBuilder extends BaseBuilder {
             readFileSync(join(__dirname, `../templates/${STORE_FILE}`))
         );
 
+        // SSR build process
         if (this.ssr) {
             console.log('[Lavas] SSR build starting...');
             clientConfig = this.webpackConfig.client();
@@ -164,8 +165,8 @@ export default class DevBuilder extends BaseBuilder {
                 await this.renderer.refreshFiles();
             });
         }
-
-        if (!this.ssr) {
+        // SPA build process
+        else {
             console.log('[Lavas] SPA build starting...');
             // create spa config first
             mpaConfig = await this.createMPAConfig(true);
