@@ -21,10 +21,10 @@ test.beforeEach('init', async t => {
  * run the tests serially because they both modify .lavas/main/router.js
  *
  */
-test.serial('it should generate main/router.js in .lavas directory', async t => {
+test.serial('it should generate router.js in .lavas directory', async t => {
     await core.builder.routeManager.buildRoutes();
 
-    let content = await readFile(join(__dirname, '../fixtures/.lavas/main/router.js'), 'utf8');
+    let content = await readFile(join(__dirname, '../fixtures/.lavas/router.js'), 'utf8');
 
     t.true(content.indexOf('"path": ":id"') > -1
         && content.indexOf('"name": "detailId"') > -1
@@ -62,7 +62,7 @@ test.serial('it should modify route objects based on router config', async t => 
 
     await core.builder.routeManager.buildRoutes();
 
-    let content = await readFile(join(__dirname, '../fixtures/.lavas/main/router.js'), 'utf8');
+    let content = await readFile(join(__dirname, '../fixtures/.lavas/router.js'), 'utf8');
 
     // Webpack code-splitting, merge Detail.vue & _id.vue into my-chunk
     t.true(content.indexOf('() => import(/* webpackChunkName: \"my-chunk\" */\'@/pages/Detail.vue\');') > -1);

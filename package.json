@@ -45,11 +45,10 @@
     "concurrency": 1,
     "failFast": true,
     "files": [
+        "test/integration/spa.js"
     ],
     "backupFiles": [
-        "test/unit/utils/*",
-        "test/unit/config-reader.test.js",
-        "test/unit/route-manager.test.js"
+        "test/unit/**/*.test.js"
     ],
     "require": [
       "babel-register",
@@ -93,7 +92,6 @@
     "lodash.template": "^4.4.0",
     "lodash.uniq": "^4.5.0",
     "mz": "^2.7.0",
-    "normalize.css": "^7.0.0",
     "optimize-css-assets-webpack-plugin": "^3.0.0",
     "ora": "^1.3.0",
     "path-to-regexp": "^2.1.0",

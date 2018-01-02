@@ -27,8 +27,8 @@ test.afterEach('clean', t => {
 test.serial('it should run in development mode correctly', async t => {
     await core.init('development', true);
 
-    // switch to MPA mode
-    core.config.entry[0].ssr = false;
+    // switch to SPA mode
+    core.config.build.ssr = false;
     syncConfig(core, core.config);
 
     await core.build();
@@ -38,34 +38,33 @@ test.serial('it should run in development mode correctly', async t => {
     server = app.listen(port);
 
     // serve main.html
-    let skeletonContent = `<div data-server-rendered=true class=skeleton-wrapper data-v-aa10c5fc><header class=skeleton-header data-v-aa10c5fc></header>`
+    let skeletonContent = `<div data-server-rendered=true class=skeleton-wrapper`
     res = await request(app)
-        .get('/main.html');
+        .get('/index.html');
     t.is(200, res.status);
     // include skeleton
     t.true(res.text.indexOf(skeletonContent) > -1);
 
-//     // serve /skeleton-main in dev mode
-//     res = await request(app)
-//         .get('/skeleton-main');
-//     t.is(200, res.status);
-//     t.true(res.text.indexOf(skeletonContent) > -1);
-//
-//     // test nested route /parent/child1
-//     let childPageTitle = '<title data-vue-meta="true">Child1</title>';
-//     res = await request(app)
-//         .get('/parent/child1');
-//     t.is(200, res.status);
-//     t.true(res.text.indexOf(ssrContent) > -1);
-//     t.true(res.text.indexOf(childPageTitle) > -1);
-//
-//     // serve static assets such as manifest.json
-//     res = await request(app)
-//         .get('/static/manifest.json');
-//     t.is(200, res.status);
-//     t.true(res.text.startsWith(`{
-//     "start_url": "/?utm_source=homescreen",
-// `));
+    // serve /skeleton-index in dev mode
+    // res = await request(app)
+    //     .get('/skeleton-index');
+    // t.is(200, res.status);
+    // t.true(res.text.indexOf(skeletonContent) > -1);
+
+    // test nested route /parent/child1
+    let childPageTitle = '<title data-vue-meta="true">Child1</title>';
+    res = await request(app)
+        .get('/parent/child1');
+    t.is(200, res.status);
+    t.true(res.text.indexOf(childPageTitle) > -1);
+
+    // serve static assets such as manifest.json
+    res = await request(app)
+        .get('/static/manifest.json');
+    t.is(200, res.status);
+    t.true(res.text.startsWith(`{
+    "start_url": "/?utm_source=homescreen",
+`));
 //
 //     // render error page for invalid route path
 //     let errorPageTitle = '<title data-vue-meta="true">服务器开小差了</title>';
