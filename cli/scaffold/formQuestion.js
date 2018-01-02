@@ -70,21 +70,21 @@ function questionList(key, schema, params) {
 
     sourceList.forEach(item => {
         let url = '';
-        let desc = log.chalk.gray('\n\n    ' + item.desc);
+        let desc = log.chalk.gray('\n    ' + item.desc);
 
         if (item.url) {
-            url = '\n\n    - ' + log.chalk.yellow.bold.underline(item.url);
+            url = '\n    - ' + log.chalk.yellow.bold.underline(item.url);
         }
         else if (item.imgs && item.imgs[0]) {
             item.imgs.forEach(imgO => {
-                let item = '\n\n    - '
+                let item = '\n    - '
                     + log.chalk.yellow.bold.underline(imgO.src)
                     + (imgO.alt ? ' - ' + imgO.alt : '');
                 url += item;
             });
         }
         else if (item.img) {
-            url = '\n\n    - ' + log.chalk.yellow.bold.underline(item.img);
+            url = '\n    - ' + log.chalk.yellow.bold.underline(item.img);
         }
 
         choiceList.push({
@@ -99,7 +99,7 @@ function questionList(key, schema, params) {
         'name': key,
         'message': `选择一个${con.name} (${log.chalk.green('按上下键选择')}): `,
         'choices': choiceList,
-        'default': choiceList[0],
+        'default': choiceList[0].value || '',
         'checked': !!con.checkbox,
         'pageSize': 1000
     };
