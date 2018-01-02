@@ -10,9 +10,9 @@ import ExtractTextPlugin from 'extract-text-webpack-plugin';
 // cssLoaders
 test('it should generate cssLoaders with minimize and sourceMap', async t => {
     let loaders = cssLoaders({
-        minimize: true,
-        sourceMap: true,
-        extract: false
+        cssSourceMap: true,
+        cssMinimize: true,
+        cssExtract: false
     });
     let expectedCssLoader = {
         loader: 'css-loader',
@@ -59,9 +59,9 @@ test('it should generate cssLoaders with minimize and sourceMap', async t => {
 
 test('it should generate cssLoaders with extract', async t => {
     let loaders = cssLoaders({
-        minimize: false,
-        sourceMap: false,
-        extract: true
+        cssSourceMap: false,
+        cssMinimize: false,
+        cssExtract: true
     });
     let expectedCssLoader = {
         loader: 'css-loader',
@@ -195,9 +195,9 @@ test('it should generate vueLoaders', async t => {
 // styleLoaders
 test('it should generate styleLoaders', async t => {
     let loaders = styleLoaders({
-        minimize: true,
-        sourceMap: true,
-        extract: false
+        cssSourceMap: true,
+        cssMinimize: true,
+        cssExtract: false
     });
     let expectedCssLoader = {
         loader: 'css-loader',

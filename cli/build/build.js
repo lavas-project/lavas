@@ -22,5 +22,4 @@ module.exports = async function () {
     log.info('开始构建...');
     await core.init(process.env.NODE_ENV || 'production', true);
     await core.build();
-    log.info('构建完成...');
 };

@@ -52,19 +52,19 @@ test.serial('it should run in development mode correctly', async t => {
     // t.true(res.text.indexOf(skeletonContent) > -1);
 
     // test nested route /parent/child1
-    let childPageTitle = '<title data-vue-meta="true">Child1</title>';
-    res = await request(app)
-        .get('/parent/child1');
-    t.is(200, res.status);
-    t.true(res.text.indexOf(childPageTitle) > -1);
-
-    // serve static assets such as manifest.json
-    res = await request(app)
-        .get('/static/manifest.json');
-    t.is(200, res.status);
-    t.true(res.text.startsWith(`{
-    "start_url": "/?utm_source=homescreen",
-`));
+//     let childPageTitle = '<title data-vue-meta="true">Child1</title>';
+//     res = await request(app)
+//         .get('/parent/child1');
+//     t.is(200, res.status);
+//     t.true(res.text.indexOf(childPageTitle) > -1);
+//
+//     // serve static assets such as manifest.json
+//     res = await request(app)
+//         .get('/static/manifest.json');
+//     t.is(200, res.status);
+//     t.true(res.text.startsWith(`{
+//     "start_url": "/?utm_source=homescreen",
+// `));
 //
 //     // render error page for invalid route path
 //     let errorPageTitle = '<title data-vue-meta="true">服务器开小差了</title>';
