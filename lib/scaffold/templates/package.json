@@ -4,8 +4,10 @@
     "description": "*__desc__*",
     "author": "*__name__*<*__email__*>",
     "scripts": {
-        "dev": "cross-env NODE_ENV=development lavas dev",
-        "build": "lavas build"
+        "dev": "lavas dev",
+        "build": "lavas build",
+        "start": "lavas start",
+        "lint": "fecs ./ --rule --type 'vue,js,css'"
     },
     "lavas": true,
     "keywords": [
@@ -15,11 +17,17 @@
     ],
     "license": "MIT",
     "dependencies": {
-
+        "array-includes": "^3.0.3",
+        "array.prototype.find": "^2.0.4",
+        "es6-promise": "^4.1.1",
+        "fastclick": "^1.0.6",
+        "express": "^4.0.0",
+        "lavas": "^2.1.6",
+        "normalize.css": "^7.0.0",
+        "stoppable": "^1.0.4"
     },
     "devDependencies": {
-        "cross-env": "^5.0.5",
-        "lavas-cli": "^2.0.0",
-        "*__lavasCoreName__*": "latest"
+        "cross-env": "^5.1.1",
+        "babel-preset-vue-app": "^1.3.1"
     }
 }
