@@ -10,6 +10,7 @@ const childProcess = require('child_process');
 
 const path = require('path');
 const fs = require('fs-extra');
+const os = require('os');
 
 const log = require('../../lib/utils/log');
 
@@ -49,6 +50,8 @@ function questionList(key, schema, params) {
     let con = schema[key];
     let sourceList = [];
     let choiceList = [];
+    let text = '';
+    let valueList = [];
 
     if (!con.dependence) {
         sourceList = con.list;
@@ -68,31 +71,52 @@ function questionList(key, schema, params) {
         });
     }
 
-    sourceList.forEach(item => {
+    sourceList.forEach((item, index) => {
         let url = '';
         let desc = log.chalk.gray('\n    ' + item.desc);
 
-        if (item.url) {
-            url = '\n    - ' + log.chalk.yellow.bold.underline(item.url);
-        }
-        else if (item.imgs && item.imgs[0]) {
-            item.imgs.forEach(imgO => {
-                let item = '\n    - '
-                    + log.chalk.yellow.bold.underline(imgO.src)
-                    + (imgO.alt ? ' - ' + imgO.alt : '');
-                url += item;
-            });
-        }
-        else if (item.img) {
-            url = '\n    - ' + log.chalk.yellow.bold.underline(item.img);
-        }
+        // if (item.url) {
+        //     url = '\n    - ' + log.chalk.yellow.bold.underline(item.url);
+        // }
+        // else if (item.imgs && item.imgs[0]) {
+        //     item.imgs.forEach(imgO => {
+        //         let item = '\n    - '
+        //             + log.chalk.yellow.bold.underline(imgO.src)
+        //             + (imgO.alt ? ' - ' + imgO.alt : '');
+        //         url += item;
+        //     });
+        // }
+        // else if (item.img) {
+        //     url = '\n    - ' + log.chalk.yellow.bold.underline(item.img);
+        // }
 
         choiceList.push({
             'value': item.value,
             'name': `${item.name}${desc}${url}`,
             'short': item.value
         });
+        valueList.push(item.value);
+        text += ''
+            + log.chalk.blue('\n    [' + log.chalk.yellow(index + 1) + '] ' + item.name)
+            + log.chalk.gray('\n        ' + item.desc);
     });
+
+    // 如果是 windows 下的 git bash 环境，由于没有交互 GUI，所以就采用文本输入的方式来解决
+    if (os.platform() === 'win32' && process.env.ORIGINAL_PATH) {
+        return {
+            'type': 'input',
+            'name': key,
+            'message': '请选择一个数字指定 ' + con.name + '：' + text + '\n' + log.chalk.green('?') + ' 请输入数字：',
+            'default': 1,
+            'valueList': valueList,
+            'validate'(value) {
+                if (!/\d+/.test(value) || +value > valueList.length || +value <= 0) {
+                    return '请输入正确的数字';
+                }
+                return true;
+            }
+        };
+    }
 
     return {
         'type': 'list',
@@ -210,6 +234,9 @@ module.exports = async function (schema) {
         }
         else if (!con.disable) {
             data = await inquirer.prompt([opts]);
+            if (opts.valueList) {
+                data[key] = opts.valueList[+data[key] - 1];
+            }
         }
 
         params = Object.assign({}, params, data);
