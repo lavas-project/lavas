@@ -6,7 +6,7 @@
 import {join} from 'path';
 import {pathExists, readFile, readJson, outputFile} from 'fs-extra';
 import {createBundleRenderer} from 'vue-server-renderer';
-import VueSSRClientPlugin from './plugins/ssr-client-plugin';
+import VueSSRClientPlugin from 'vue-server-renderer/client-plugin';
 
 import {DEFAULT_ENTRY_NAME} from './constants';
 import {distLavasPath} from './utils/path';
