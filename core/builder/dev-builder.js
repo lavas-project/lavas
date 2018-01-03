@@ -6,7 +6,7 @@
 import webpack from 'webpack';
 import MFS from 'memory-fs';
 import chokidar from 'chokidar';
-import {readFileSync, pathExists} from 'fs-extra';
+import {readFileSync} from 'fs-extra';
 import {join, posix} from 'path';
 
 import historyMiddleware from 'connect-history-api-fallback';

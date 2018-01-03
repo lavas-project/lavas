@@ -6,7 +6,10 @@
 
 ### Changed
 
-- [Feature] Add `build.skeleton` in config. In SPA, we can toggle skeleton feature by `build.skeleton.enable`.
+- [Feature] Add `build.skeleton` in config. In SPA, you can toggle skeleton feature by `build.skeleton.enable` and change `core/Skeleton.vue` with `build.skeleton.path`.
+- [Feature] Inject some lines in `core/service-worker.js`:
+    - Auto prefix when using `publicPath`. eg. `importScripts('${publicPath}static/js/workbox-sw.prod.v2.1.2.js');`
+    - Auto add `workboxSW.router.registerNavigationRoute();` at the end of the file. You don't need to modify when switching between `SSR` and `SPA` manually.
 
 ## [2.1.8-rc.1] - 2018-1-2
 

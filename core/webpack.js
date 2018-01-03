@@ -15,11 +15,10 @@ import CopyWebpackPlugin from 'copy-webpack-plugin';
 import VueSSRServerPlugin from 'vue-server-renderer/server-plugin';
 import {BundleAnalyzerPlugin} from 'webpack-bundle-analyzer';
 import SWRegisterWebpackPlugin from 'sw-register-webpack-plugin';
-import WorkboxWebpackPlugin from 'workbox-webpack-plugin';
 
 import {vueLoaders, styleLoaders} from './utils/loader';
 import {assetsPath} from './utils/path';
-import {WORKBOX_PATH, getWorkboxFiles} from './utils/workbox';
+import {WORKBOX_PATH, getWorkboxFiles, useWorkbox} from './utils/workbox';
 import {LAVAS_DIRNAME_IN_DIST, SERVER_BUNDLE, ASSETS_DIRNAME_IN_DIST} from './constants';
 
 import fs from 'fs';
@@ -168,7 +167,7 @@ export default class WebpackConfig {
      * @return {Object} client base config
      */
     client(buildConfig = {}) {
-        let {buildVersion, ssr, globals, build, manifest, serviceWorker: workboxConfig} = this.config;
+        let {buildVersion, globals, build, manifest, serviceWorker: workboxConfig} = this.config;
 
         /* eslint-disable fecs-one-var-per-line */
         let {publicPath, filenames, cssSourceMap, cssMinimize, cssExtract,
@@ -249,15 +248,9 @@ export default class WebpackConfig {
             ]
         });
 
-        // Use workbox in prod mode.
         if (this.isProd && workboxConfig) {
-            if (workboxConfig.appshellUrls && workboxConfig.appshellUrls.length) {
-                workboxConfig.templatedUrls = {};
-                workboxConfig.appshellUrls.forEach(appshellUrl => {
-                    workboxConfig.templatedUrls[appshellUrl] = `${buildVersion}`;
-                });
-            }
-            clientConfig.plugins.push(new WorkboxWebpackPlugin(workboxConfig));
+            // Use workbox@2.x in prod mode.
+            useWorkbox(clientConfig, workboxConfig, this.config);
         }
 
         // Copy static files to /dist.
