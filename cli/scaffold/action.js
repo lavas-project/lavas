@@ -11,6 +11,7 @@ const lavasScaffold = require('../../lib/scaffold');
 const ora = require('ora');
 const path = require('path');
 const fs = require('fs-extra');
+const axios = require('axios');
 
 const formQ = require('./formQuestion');
 const log = require('../../lib/utils/log');
@@ -39,6 +40,10 @@ async function exportProject(params, templateConf) {
         + 'npm install\n'
         + 'lavas dev'
     ));
+    try {
+        await axios('https://lavas.baidu.com/api/logger/send?action=cli&commander=init');
+    }
+    catch (e) {}
 }
 
 /**
