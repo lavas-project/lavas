@@ -1,6 +1,14 @@
 # Changelog
 
 =======
+
+## [2.1.8-rc.1] - 2018-1-2
+
+### Changed
+
+- [Fix] `cssExtract` in production mode.
+- [Fix] Update to Webpack@3.x.
+
 ## [2.0.7-rc.4] - 2017-12-20
 
 ### Changed

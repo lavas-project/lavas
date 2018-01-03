@@ -7,9 +7,9 @@ import ExtractTextPlugin from 'extract-text-webpack-plugin';
 export function vueLoaders(options = {}) {
     return {
         loaders: cssLoaders({
-            sourceMap: options.cssSourceMap,
-            minimize: options.cssMinimize,
-            extract: options.cssExtract
+            cssSourceMap: options.cssSourceMap,
+            cssMinimize: options.cssMinimize,
+            cssExtract: options.cssExtract
         })
     };
 }
@@ -19,8 +19,8 @@ export function cssLoaders(options = {}) {
     let cssLoader = {
         loader: 'css-loader',
         options: {
-            minimize: options.minimize,
-            sourceMap: options.sourceMap
+            minimize: options.cssMinimize,
+            sourceMap: options.cssSourceMap
         }
     };
 
@@ -32,14 +32,14 @@ export function cssLoaders(options = {}) {
             loaders.push({
                 loader: loader + '-loader',
                 options: Object.assign({}, loaderOptions, {
-                    sourceMap: options.sourceMap
+                    sourceMap: options.cssSourceMap
                 })
             });
         }
 
         // Extract CSS when that option is specified
         // (which is the case during production build)
-        if (options.extract) {
+        if (options.cssExtract) {
             return ExtractTextPlugin.extract({
                 use: loaders,
                 fallback: 'vue-style-loader'
