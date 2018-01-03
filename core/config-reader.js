@@ -22,6 +22,9 @@ const DEFAULT_CONFIG = {
     build: {
         ssr: true,
         publicPath: '/',
+        skeleton: {
+            enable: true
+        },
         filenames: {
             entry: 'js/[name].[chunkhash:8].js',
             vendor: 'js/vendor.[chunkhash:8].js',

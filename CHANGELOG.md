@@ -2,12 +2,19 @@
 
 =======
 
+## [2.1.8-rc.2] - 2018-1-3
+
+### Changed
+
+- [Feature] Add `build.skeleton` in config. In SPA, we can toggle skeleton feature by `build.skeleton.enable`.
+
 ## [2.1.8-rc.1] - 2018-1-2
 
 ### Changed
 
 - [Fix] `cssExtract` in production mode.
 - [Fix] Update to Webpack@3.x.
+- [Breaking Change] Remove `entry` in config.
 
 ## [2.0.7-rc.4] - 2017-12-20
 
