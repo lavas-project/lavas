@@ -25,7 +25,7 @@ export default class Renderer {
         this.renderer = {};
         this.serverBundle = null;
         this.clientManifest = null;
-        this.templates = null;
+        this.template = null;
         this.resolve = null;
         this.readyPromise = new Promise(r => this.resolve = r);
     }
@@ -86,7 +86,7 @@ export default class Renderer {
         let templatePath = distLavasPath(this.cwd, this.getTemplateName());
         let manifestPath = distLavasPath(this.cwd, CLIENT_MANIFEST);
         if (this.config.build.ssr) {
-            this.templates = await readFile(templatePath, 'utf-8');
+            this.template = await readFile(templatePath, 'utf-8');
             this.clientManifest = await readJson(manifestPath);
         }
 
@@ -155,11 +155,11 @@ export default class Renderer {
         }
 
         let templateContent = await this.getTemplate(this.config.router.base);
-        if (this.templates !== templateContent) {
+        if (this.template !== templateContent) {
             changed = true;
             templateChanged = true;
         }
-        this.templates = templateContent;
+        this.template = templateContent;
 
         if (changed) {
             await this.createRenderer();
@@ -208,7 +208,7 @@ export default class Renderer {
             this.renderer = createBundleRenderer(
                 this.serverBundle,
                 {
-                    template: this.templates,
+                    template: this.template,
                     clientManifest: this.clientManifest,
                     shouldPrefetch: (file, type) => {
                         if (type === 'script') {

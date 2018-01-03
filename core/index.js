@@ -63,7 +63,7 @@ export default class LavasCore extends EventEmitter {
                 this.builder.init(newConfig);
 
                 // clean middlewares
-                this.middlewareComposer.clean();
+                this.middlewareComposer.reset(newConfig);
 
                 // notify the server that it needs to restart
                 this.emit('rebuild');

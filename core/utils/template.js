@@ -1,6 +1,6 @@
 /**
  * @file utils.template.js
- * 处理前后端模板统一 (SSR & MPA)
+ * 处理前后端模板统一 (SSR & SPA)
  * @author lavas
  */
 

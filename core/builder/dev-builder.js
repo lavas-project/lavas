@@ -124,7 +124,7 @@ export default class DevBuilder extends BaseBuilder {
         let clientConfig;
         let serverConfig;
         let hotMiddleware;
-        let clientCompiler; // compiler for client in ssr and mpa
+        let clientCompiler; // compiler for client in ssr and spa
         let serverCompiler; // compiler for server in ssr
         let clientMFS;
         let noop = () => {};
@@ -182,7 +182,7 @@ export default class DevBuilder extends BaseBuilder {
             }
         }
 
-        // create a compiler based on mpa config
+        // create a compiler based on spa config
         clientCompiler = webpack([clientConfig, spaConfig].filter(config => config));
         clientCompiler.cache = this.sharedCache;
 
@@ -200,7 +200,7 @@ export default class DevBuilder extends BaseBuilder {
 
         hotMiddleware = webpackHotMiddleware(clientCompiler, {
             heartbeat: 5000,
-            log: noop
+            // log: noop
         });
         /**
          * TODO: hot reload for html
@@ -222,7 +222,7 @@ export default class DevBuilder extends BaseBuilder {
 
         /**
          * add html history api support:
-         * in mpa, we use connect-history-api-fallback middleware
+         * in spa, we use connect-history-api-fallback middleware
          * in ssr, ssr middleware will handle it instead
          */
         if (!this.ssr) {
