@@ -2,12 +2,22 @@
 
 =======
 
+## [2.1.8-rc.2] - 2018-1-3
+
+### Changed
+
+- [Feature] Add `build.skeleton` in config. In SPA, you can toggle skeleton feature by `build.skeleton.enable` and change `core/Skeleton.vue` with `build.skeleton.path`.
+- [Feature] Inject some lines in `core/service-worker.js`:
+    - Auto prefix when using `publicPath`. eg. `importScripts('${publicPath}static/js/workbox-sw.prod.v2.1.2.js');`
+    - Auto add `workboxSW.router.registerNavigationRoute();` at the end of the file. You don't need to modify when switching between `SSR` and `SPA` manually.
+
 ## [2.1.8-rc.1] - 2018-1-2
 
 ### Changed
 
 - [Fix] `cssExtract` in production mode.
 - [Fix] Update to Webpack@3.x.
+- [Breaking Change] Remove `entry` in config.
 
 ## [2.0.7-rc.4] - 2017-12-20
 

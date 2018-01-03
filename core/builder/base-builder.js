@@ -10,7 +10,7 @@ import {join} from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
 
-import {TEMPLATE_HTML, DEFAULT_ENTRY_NAME} from '../constants';
+import {TEMPLATE_HTML, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH} from '../constants';
 import {assetsPath} from '../utils/path';
 import * as JsonUtil from '../utils/json';
 import templateUtil from '../utils/template';
@@ -190,56 +190,65 @@ export default class BaseBuilder {
      * create a webpack config which will be compiled later
      *
      * @param {boolean} watcherEnabled enable watcher
-     * @return {Object} mpaConfig webpack config for MPA
+     * @return {Object} spaConfig webpack config for SPA
      */
-    async createMPAConfig(watcherEnabled) {
+    async createSPAConfig(watcherEnabled) {
         let {globals, build, router} = this.config;
         let entryName = DEFAULT_ENTRY_NAME;
         let rootDir = globals.rootDir;
 
-        // create mpa config based on client config
-        let mpaConfig = this.webpackConfig.client();
-        let skeletonEntries = {};
+        // create spa config based on client config
+        let spaConfig = this.webpackConfig.client();
 
         // set context and clear entries
-        mpaConfig.entry = {};
-        mpaConfig.name = 'mpaclient';
-        mpaConfig.context = rootDir;
+        spaConfig.entry = {};
+        spaConfig.name = 'mpaclient';
+        spaConfig.context = rootDir;
 
         /**
-         * for each module needs prerendering, we will:
-         * 1. add a html-webpack-plugin to output a relative HTML file
+         * for SPA, we will:
+         * 1. add a html-webpack-plugin to output a HTML file
          * 2. create an entry if a skeleton component is provided
          */
         if (!build.ssr) {
             // set client entry first
-            mpaConfig.entry[entryName] = [`./core/entry-client.js`];
+            spaConfig.entry[entryName] = [`./core/entry-client.js`];
 
             // add html-webpack-plugin
-            await this.addHtmlPlugin(mpaConfig, entryName, router.baseUrl, watcherEnabled);
+            await this.addHtmlPlugin(spaConfig, entryName, router.baseUrl, watcherEnabled);
 
             // if skeleton provided, we need to create an entry
-            let skeletonPath = join(rootDir, `core/Skeleton.vue`);
-            let skeletonImportPath = `@/core/Skeleton.vue`;
-            if (await pathExists(skeletonPath)) {
-                let entryPath = await this.writeSkeletonEntry(skeletonImportPath);
-                skeletonEntries[entryName] = [entryPath];
+            if (build.skeleton && build.skeleton.enable) {
+                let skeletonConfig;
+                let skeletonEntries = {};
+                let skeletonPath;
+                let skeletonImportPath;
+                let skeletonRelativePath = build.skeleton.path || DEFAULT_SKELETON_PATH;
+
+                skeletonPath = join(rootDir, skeletonRelativePath);
+                skeletonImportPath = `@/${skeletonRelativePath}`;
+
+                if (await pathExists(skeletonPath)) {
+
+                    // marked as supported at this time
+                    this.skeletonEnabled = true;
+
+                    skeletonEntries[entryName] = [await this.writeSkeletonEntry(skeletonImportPath)];
+
+                    // when ssr skeleton, we need to extract css from js
+                    skeletonConfig = this.webpackConfig.server({cssExtract: true});
+                    // remove vue-ssr-client plugin
+                    skeletonConfig.plugins.pop();
+                    skeletonConfig.entry = skeletonEntries;
+
+                    // add skeleton plugin
+                    spaConfig.plugins.push(new SkeletonWebpackPlugin({
+                        webpackConfig: skeletonConfig
+                    }));
+                }
             }
         }
 
-        if (Object.keys(skeletonEntries).length) {
-            // when ssr skeleton, we need to extract css from js
-            let skeletonConfig = this.webpackConfig.server({cssExtract: true});
-            // remove vue-ssr-client plugin
-            skeletonConfig.plugins.pop();
-            skeletonConfig.entry = skeletonEntries;
-
-            // add skeleton plugin
-            mpaConfig.plugins.push(new SkeletonWebpackPlugin({
-                webpackConfig: skeletonConfig
-            }));
-        }
-
-        return mpaConfig;
+        return spaConfig;
     }
 }

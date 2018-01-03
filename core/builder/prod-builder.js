@@ -78,7 +78,7 @@ export default class ProdBuilder extends BaseBuilder {
         // SPA build process
         else {
             console.log('[Lavas] SPA build starting...');
-            await webpackCompile(await this.createMPAConfig());
+            await webpackCompile(await this.createSPAConfig());
             console.log('[Lavas] SPA build completed.');
         }
     }

@@ -6,7 +6,7 @@
 import webpack from 'webpack';
 import MFS from 'memory-fs';
 import chokidar from 'chokidar';
-import {readFileSync, pathExists} from 'fs-extra';
+import {readFileSync} from 'fs-extra';
 import {join, posix} from 'path';
 
 import historyMiddleware from 'connect-history-api-fallback';
@@ -14,7 +14,7 @@ import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
 
-import {LAVAS_CONFIG_FILE, STORE_FILE, DEFAULT_ENTRY_NAME} from '../constants';
+import {LAVAS_CONFIG_FILE, STORE_FILE, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH} from '../constants';
 import {enableHotReload, writeFileInDev} from '../utils/webpack';
 import {routes2Reg} from '../utils/router';
 
@@ -80,11 +80,13 @@ export default class DevBuilder extends BaseBuilder {
      * @param {Object} clientConfig webpack client config
      */
     addSkeletonRoutes(clientConfig) {
+        let {globals, build} = this.config;
+        let skeletonRelativePath = build.skeleton && build.skeleton.path || DEFAULT_SKELETON_PATH;
         clientConfig.module.rules.push(SkeletonWebpackPlugin.loader({
-            resource: [join(this.config.globals.rootDir, `.lavas/router`)],
+            resource: [join(globals.rootDir, `.lavas/router`)],
             options: {
                 entry: [DEFAULT_ENTRY_NAME],
-                importTemplate: 'import [nameHash] from \'@/core/Skeleton.vue\';',
+                importTemplate: `import [nameHash] from '@/${skeletonRelativePath}';`,
                 routePathTemplate: '/skeleton-[name]',
                 insertAfter: 'let routes = ['
             }
@@ -118,7 +120,7 @@ export default class DevBuilder extends BaseBuilder {
      */
     async build() {
         this.isDev = true;
-        let mpaConfig;
+        let spaConfig;
         let clientConfig;
         let serverConfig;
         let hotMiddleware;
@@ -169,17 +171,19 @@ export default class DevBuilder extends BaseBuilder {
         else {
             console.log('[Lavas] SPA build starting...');
             // create spa config first
-            mpaConfig = await this.createMPAConfig(true);
+            spaConfig = await this.createSPAConfig(true);
 
             // enable hotreload in every entry in dev mode
-            await enableHotReload(this.lavasPath(), mpaConfig, true);
+            await enableHotReload(this.lavasPath(), spaConfig, true);
 
             // add skeleton routes
-            this.addSkeletonRoutes(mpaConfig);
+            if (this.skeletonEnabled) {
+                this.addSkeletonRoutes(spaConfig);
+            }
         }
 
         // create a compiler based on mpa config
-        clientCompiler = webpack([clientConfig, mpaConfig].filter(config => config));
+        clientCompiler = webpack([clientConfig, spaConfig].filter(config => config));
         clientCompiler.cache = this.sharedCache;
 
         this.devMiddleware = webpackDevMiddleware(clientCompiler, {
