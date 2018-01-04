@@ -10,6 +10,7 @@
 - [Feature] Inject some lines in `core/service-worker.js`:
     - Auto prefix when using `publicPath`. eg. `importScripts('${publicPath}static/js/workbox-sw.prod.v2.1.2.js');`
     - Auto add `workboxSW.router.registerNavigationRoute();` at the end of the file. You don't need to modify when switching between `SSR` and `SPA` manually.
+- [Fix] Bug in switching from `SPA` to `SSR`.
 
 ## [2.1.8-rc.1] - 2018-1-2
 

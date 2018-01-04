@@ -6,4 +6,4 @@ node_modules
 *.swp
 .idea
 *-log.json
-test/fixtures/.lavas
+lavas-core-vue/test/fixtures/.lavas

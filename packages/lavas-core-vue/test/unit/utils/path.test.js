@@ -3,7 +3,7 @@
  * @author panyuqi (pyqiverson@gmail.com)
  */
 
-import {distLavasPath, assetsPath, resolveAliasPath} from '../../../dist/core/utils/path';
+import {distLavasPath, assetsPath, resolveAliasPath} from '../../../dist/utils/path';
 import {join, sep} from 'path';
 import test from 'ava';
 

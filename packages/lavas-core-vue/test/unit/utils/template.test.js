@@ -3,7 +3,7 @@
  * @author wangyisheng@baidu.com (wangyisheng)
  */
 
-import {client, server} from '../../../dist/core/utils/template';
+import {client, server} from '../../../dist/utils/template';
 import test from 'ava';
 
 // client
