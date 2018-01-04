@@ -1,6 +1,6 @@
 {
   "name": "lavas",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Lavas solution cli tool",
   "main": "dist/index.js",
   "files": [
@@ -50,6 +50,7 @@
     "mz": "^2.7.0",
     "ora": "^1.3.0",
     "path-to-regexp": "^2.1.0",
+    "request": "^2.83.0",
     "request-promise": "^4.2.1",
     "semver": "^5.4.1",
     "shelljs": "^0.7.8"
