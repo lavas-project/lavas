@@ -1,5 +1,5 @@
 /**
- * @file 脚手架
+ * @file lavas init scaffold action
  * @author mj(zoumiaojiang@gmail.com)
  */
 
@@ -16,26 +16,27 @@ const axios = require('axios');
 const formQ = require('./formQuestion');
 const log = require('../../lib/utils/log');
 const utils = require('../../lib/utils');
+const locals = require('../../locals')();
 
 let cwd = process.cwd();
 
 /**
- * 导出工程
+ * export lavas project
  *
- * @param  {Object} params 导出工程所需的参数
- * @param  {Object} templateConf 导出的工程的配置信息
+ * @param  {Object} params params for export action
+ * @param  {Object} templateConf  the config content of project
  */
 async function exportProject(params, templateConf) {
-    let spinner = ora('正在导出工程..');
+    let spinner = ora(locals.LOADING_EXPORT_PROJECT + '...');
 
     spinner.start();
     await lavasScaffold.render(params, templateConf);
     spinner.stop();
 
-    // 为了打印出的内容美观不紧凑
+    // for log beautify
     console.log('');
-    log.info('项目已创建成功!');
-    log.info('您可以操作如下命令快速开始开发 Lavas 工程：\n\n'
+    log.info(locals.INIT_SUCCESS);
+    log.info(locals.INIT_NEXT_GUIDE + '：\n\n'
         + log.chalk.green('cd ' + params.name + '\n'
         + 'npm install\n'
         + 'lavas dev'
@@ -47,32 +48,32 @@ async function exportProject(params, templateConf) {
 }
 
 /**
- * 初始化 pwa 项目入口
+ * the entry of init pwa project
  *
- * @param {Object} conf 初始化配置
+ * @param {Object} conf  init config object
  */
 module.exports = async function (conf) {
     let isNetworkOk = await utils.isNetworkConnect();
 
     if (!isNetworkOk) {
-        log.info('创建工程需要下载云端模版');
-        log.info('请确认您的设备处于网络可访问的环境中');
+        log.info(locals.NETWORK_DISCONNECT);
+        log.info(locals.NETWORK_DISCONNECT_SUG);
         return;
     }
 
     if (!shelljs.which('git')) {
-        log.info('Lavas 命令行依赖 git 工具');
-        log.info('当前环境下没有检测到 git 命令，请确认是否安装 git');
+        log.info(locals.NO_GIT_COMMAND);
+        log.info(locals.NO_GIT_COMMAND_SUG);
         return;
     }
 
-    log.info(`欢迎使用 ${log.chalk.green('Lavas')} 解决方案`);
-    log.info('开始新建一个 Lavas PWA 项目\n');
+    log.info(locals.WELECOME);
+    log.info(locals.GREETING_GUIDE + '\n');
 
-    // 整个初始化过程分为 6 步
+    // 6 steps for init process
 
     // 第一步：从云端配置获取 Meta 配置，确定将要下载的框架和模板 List
-    let spinner = ora('正在拉取云端数据，请稍候...');
+    let spinner = ora(locals.LOADING_FROM_CLOUD + '...');
     spinner.start();
     let metaSchema = await lavasScaffold.getMetaSchema();
     spinner.stop();
@@ -99,14 +100,14 @@ module.exports = async function (conf) {
     if (isPathExist) {
         if (conf.force) {
 
-            // 直接覆盖当前项目
+            // cover the old project in force
             await fs.remove(projectTargetPath);
             await exportProject(params, templateConf);
         }
         else {
             let ret = await inquirer.prompt([{
                 'type': 'confirm',
-                'message': '存在同名项目，是否覆盖?',
+                'message': locals.SAMA_NAME_ENSURE + '?',
                 'default': false,
                 'name': 'isForce'
             }]);

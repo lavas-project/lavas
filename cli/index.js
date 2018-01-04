@@ -13,6 +13,7 @@ const checkUpdate = require('../lib/utils/checkUpdate');
 const initCommand = require('./scaffold');
 const buildCommand = require('./build');
 const serverCommand = require('./server');
+const locals = require('../locals')();
 
 let version = process.env.VERSION || require('../../package.json').version;
 
@@ -33,26 +34,26 @@ else {
 }
 
 
-// 定义 lavas 命令
+// define lavas command
 program
     .usage('[commands] [options]')
     .arguments('<cmd> [env]')
-    .option('-v, --version', '查看当前版本')
+    .option('-v, --version', locals.SHOW_VERSION)
     .action((cmd, env) => {
         if (env) {
-            log.error(`\`lavas ${cmd} ${env}\` 命令不存在`);
+            log.error(`\`lavas ${cmd} ${env}\` ${locals.NO_COMMAND}`);
         }
         else {
-            log.error('`lavas ' + cmd + '` 命令不存在');
+            log.error('`lavas ' + cmd + '` ' + locals.NO_COMMAND);
         }
 
-        log.info('请查看 `lavas --help`');
+        log.info(locals.PLEASE_SEE + ' `lavas --help`');
     });
 
 initCommand(program);
 buildCommand(program);
 serverCommand(program);
 
-// 检查版本更新
+// check the latest version
 checkUpdate();
 program.parse(process.argv);

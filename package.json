@@ -10,7 +10,8 @@
   "scripts": {
     "build": "npm run build:cli && npm run build:core",
     "build:lib": "babel lib --out-dir dist/lib --copy-files",
-    "build:cli": "npm run build:lib && babel cli --out-dir dist/cli --copy-files",
+    "build:locals": "babel locals --out-dir dist/locals --copy-files",
+    "build:cli": "npm run build:locals && npm run build:lib && babel cli --out-dir dist/cli --copy-files",
     "build:core": "babel core --out-dir dist/core --copy-files",
     "lint": "fecs ./ --rule --type 'vue,js,css'",
     "prepublish": "npm run build",

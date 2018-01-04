@@ -14,6 +14,7 @@ const historyMiddleware = require('connect-history-api-fallback');
 const app = express();
 const log = require('../../lib/utils/log');
 const utils = require('../../lib/utils');
+const locals = require('../../locals')();
 const DEFAULT_DEV_SERVER_SCRIPT = 'server.dev.js';
 const DEFAULT_PROD_SERVER_SCRIPT = 'server.prod.js';
 
@@ -22,20 +23,20 @@ module.exports = function (program) {
     // lavas dev
     program
         .command('dev')
-        .description('启动 Lavas 开发环境服务器')
-        .option('-p, --port <port>', '指定 port')
-        .option('-s, --server-script <server-script>', '指定开发环境服务端脚本')
+        .description(locals.START_DEV)
+        .option('-p, --port <port>', locals.START_PORT)
+        .option('-s, --server-script <server-script>', locals.START_SCRIPT)
         .action(async ({port, serverScript}) => {
             let serverScriptPath = path.resolve(
                 utils.getLavasProjectRoot(),
                 serverScript || DEFAULT_DEV_SERVER_SCRIPT
             );
 
-            log.info('正在启动 Lavas 调试服务器...');
+            log.info(locals.START_DEV_SERVER + '...');
 
             let isServerScriptExist = await fs.pathExists(serverScriptPath);
             if (!isServerScriptExist) {
-                log.warn(`Lavas 没有检测到项目根目录下含有 ${serverScriptPath} 文件!`);
+                log.warn(`${locals.START_NO_FILE} ${serverScriptPath}`);
             }
             else {
                 process.env.NODE_ENV = 'development';
@@ -49,20 +50,20 @@ module.exports = function (program) {
     // lavas start
     program
         .command('start')
-        .description('启动 Lavas 生产环境服务器')
-        .option('-p, --port <port>', '指定 port')
-        .option('-s, --src', '指定生产环境服务端脚本')
+        .description(locals.START_PROD)
+        .option('-p, --port <port>', locals.START_PORT)
+        .option('-s, --src', locals.START_SCRIPT)
         .action(async ({port, serverScript}) => {
             let serverScriptPath = path.resolve(
                 utils.getLavasProjectRoot(),
                 serverScript || DEFAULT_PROD_SERVER_SCRIPT
             );
 
-            log.info('正在启动 Lavas 正式服务器...');
+            log.info(locals.START_PROD_SERVER + '...');
 
             let isServerScriptExist = await fs.pathExists(serverScriptPath);
             if (!isServerScriptExist) {
-                log.warn(`Lavas 没有检测到项目根目录下含有 ${serverScriptPath} 文件!`);
+                log.warn(`${locals.START_NO_FILE} ${serverScriptPath}`);
             }
             else {
                 process.env.NODE_ENV = 'production';

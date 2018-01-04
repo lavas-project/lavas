@@ -6,6 +6,7 @@
 'use strict';
 
 const buildAction = require('./build');
+const locals = require('../../locals')();
 
 module.exports = function (program) {
 
@@ -13,7 +14,7 @@ module.exports = function (program) {
     program
         .command('build')
         .alias('b')
-        .description('为生产环境构建 Lavas 项目')
+        .description(locals.BUILD_DESC)
         .action(options => buildAction({
             // some options
         }))
