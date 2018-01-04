@@ -1,6 +1,6 @@
 /**
  * @file english
- * @author mj(zoumiaojiang)
+ * @author mj(zoumiaojiang@gmail.com)
  */
 
 const chalk = require('chalk');

@@ -1,6 +1,6 @@
 /**
  * @file chinese text
- * @author mj(zoumiaojiang)
+ * @author mj(zoumiaojiang@gmail.com)
  */
 
 const chalk = require('chalk');

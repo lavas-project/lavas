@@ -1,0 +1,57 @@
+{
+    "name": "lavas",
+    "version": "2.2.0",
+    "description": "Lavas solution cli tool",
+    "main": "dist/index.js",
+    "files": [
+      "bin",
+      "dist"
+    ],
+    "scripts": {
+        "prepublish": "babel src --out-dir dist --copy-files"
+    },
+    "bin": {
+      "lavas": "./bin/lavas-cli.js",
+      "lavas-cli": "./bin/lavas-cli.js"
+    },
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/lavas-project/lavas.git"
+    },
+    "keywords": [
+      "lavas",
+      "pwa",
+      "cli",
+      "vue"
+    ],
+    "author": "zoumiaojiang<zoumiaojiang@gmail.com>",
+    "license": "ISC",
+    "engines": {
+      "node": ">= 4.0.0",
+      "npm": ">= 3.0.0"
+    },
+    "dependencies": {
+      "ajv": "^5.1.3",
+      "archiver": "^1.3.0",
+      "axios": "^0.17.1",
+      "babel-loader": "^7.1.1",
+      "babel-runtime": "^6.26.0",
+      "chalk": "^1.1.3",
+      "child_process": "^1.0.2",
+      "commander": "^2.11.0",
+      "connect-history-api-fallback": "^1.3.0",
+      "etpl": "^3.2.0",
+      "express": "^4.16.2",
+      "fs-extra": "^4.0.1",
+      "glob": "^7.1.2",
+      "inquirer": "^3.0.6",
+      "lavas-core-vue": "^1.0.1",
+      "lodash": "^4.17.4",
+      "mz": "^2.7.0",
+      "ora": "^1.3.0",
+      "path-to-regexp": "^2.1.0",
+      "request-promise": "^4.2.1",
+      "semver": "^5.4.1",
+      "shelljs": "^0.7.8"
+    }
+  }

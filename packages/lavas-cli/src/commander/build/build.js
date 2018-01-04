@@ -5,7 +5,7 @@
 
 'use strict';
 
-const LavasCore = require('../../core');
+const LavasCore = require('lavas-core-vue');
 
 const utils = require('../../lib/utils');
 const log = require('../../lib/utils/log');

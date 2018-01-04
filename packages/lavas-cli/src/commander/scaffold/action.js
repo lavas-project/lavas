@@ -7,7 +7,6 @@
 
 const inquirer = require('inquirer');
 const shelljs = require('shelljs');
-const lavasScaffold = require('../../lib/scaffold');
 const ora = require('ora');
 const path = require('path');
 const fs = require('fs-extra');
@@ -15,6 +14,7 @@ const axios = require('axios');
 
 const formQ = require('./formQuestion');
 const log = require('../../lib/utils/log');
+const lavasScaffold = require('../../lib/scaffold');
 const utils = require('../../lib/utils');
 const locals = require('../../locals')();
 
