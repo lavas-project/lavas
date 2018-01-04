@@ -31,7 +31,7 @@ export function getWorkboxFiles(isProd) {
  * @param {Object} lavasConfig lavas config
  */
 export function useWorkbox(webpackConfig, workboxConfig, lavasConfig) {
-    let {swSrc, appshellUrl} = workboxConfig;
+    let {swSrc, appshellUrl, appshellUrls} = workboxConfig;
     let {buildVersion, build: {publicPath, ssr}, globals} = lavasConfig;
 
     // service-worker provided by user
@@ -44,7 +44,11 @@ export function useWorkbox(webpackConfig, workboxConfig, lavasConfig) {
     // register navigation in the end
     let registerNavigationClause;
     if (ssr) {
-        registerNavigationClause = `workboxSW.router.registerNavigationRoute('${appshellUrl}');`;
+
+        // be compatible with previous version
+        if (appshellUrls && appshellUrls.length) {
+            appshellUrl = appshellUrls[0];
+        }
 
         // add build version to templatedUrls
         if (appshellUrl) {
@@ -52,6 +56,8 @@ export function useWorkbox(webpackConfig, workboxConfig, lavasConfig) {
                 [appshellUrl]: `${buildVersion}`
             };
         }
+
+        registerNavigationClause = `workboxSW.router.registerNavigationRoute('${appshellUrl}');`;
     }
     else {
         registerNavigationClause = `workboxSW.router.registerNavigationRoute('/index.html');`;

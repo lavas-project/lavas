@@ -137,29 +137,28 @@ export default class BaseBuilder {
     /**
      * use html webpack plugin
      *
-     * @param {Object} mpaConfig mpaConfig
-     * @param {string} entryName entryName
+     * @param {Object} spaConfig spaConfig
      * @param {string} baseUrl entry base url
      * @param {boolean} watcherEnabled enable watcher
      */
-    async addHtmlPlugin(mpaConfig, entryName, baseUrl, watcherEnabled) {
+    async addHtmlPlugin(spaConfig, baseUrl, watcherEnabled) {
         // allow user to provide a custom HTML template
         let rootDir = this.config.globals.rootDir;
-        let htmlFilename = `${entryName}.html`;
+        let htmlFilename = `${DEFAULT_ENTRY_NAME}.html`;
         let customTemplatePath = join(rootDir, `core/${TEMPLATE_HTML}`);
 
         if (!await pathExists(customTemplatePath)) {
-            throw new Error(`${TEMPLATE_HTML} required for entry: ${entryName}`);
+            throw new Error(`${TEMPLATE_HTML} required for entry: ${DEFAULT_ENTRY_NAME}`);
         }
 
-        let entryTemplatePath = join(entryName, TEMPLATE_HTML);
+        // write HTML template used by html-webpack-plugin which doesn't support template STRING
         let resolvedTemplatePath = await this.writeFileToLavasDir(
-            entryTemplatePath,
+            TEMPLATE_HTML,
             templateUtil.client(await readFile(customTemplatePath, 'utf8'), baseUrl)
         );
 
         // add html webpack plugin
-        mpaConfig.plugins.unshift(new HtmlWebpackPlugin({
+        spaConfig.plugins.unshift(new HtmlWebpackPlugin({
             filename: htmlFilename,
             template: resolvedTemplatePath,
             inject: true,
@@ -171,7 +170,7 @@ export default class BaseBuilder {
             favicon: assetsPath('img/icons/favicon.ico'),
             chunksSortMode: 'dependency',
             cache: false,
-            chunks: ['manifest', 'vue', 'vendor', entryName],
+            chunks: ['manifest', 'vue', 'vendor', DEFAULT_ENTRY_NAME],
             config: this.config // use config in template
         }));
 
@@ -179,7 +178,7 @@ export default class BaseBuilder {
         if (watcherEnabled) {
             this.addWatcher(customTemplatePath, 'change', async () => {
                 await this.writeFileToLavasDir(
-                    entryTemplatePath,
+                    TEMPLATE_HTML,
                     templateUtil.client(await readFile(customTemplatePath, 'utf8'), baseUrl)
                 );
             });
@@ -194,7 +193,6 @@ export default class BaseBuilder {
      */
     async createSPAConfig(watcherEnabled) {
         let {globals, build, router} = this.config;
-        let entryName = DEFAULT_ENTRY_NAME;
         let rootDir = globals.rootDir;
 
         // create spa config based on client config
@@ -202,7 +200,7 @@ export default class BaseBuilder {
 
         // set context and clear entries
         spaConfig.entry = {};
-        spaConfig.name = 'mpaclient';
+        spaConfig.name = 'spaclient';
         spaConfig.context = rootDir;
 
         /**
@@ -212,10 +210,10 @@ export default class BaseBuilder {
          */
         if (!build.ssr) {
             // set client entry first
-            spaConfig.entry[entryName] = [`./core/entry-client.js`];
+            spaConfig.entry[DEFAULT_ENTRY_NAME] = [`./core/entry-client.js`];
 
             // add html-webpack-plugin
-            await this.addHtmlPlugin(spaConfig, entryName, router.baseUrl, watcherEnabled);
+            await this.addHtmlPlugin(spaConfig, router.baseUrl, watcherEnabled);
 
             // if skeleton provided, we need to create an entry
             if (build.skeleton && build.skeleton.enable) {
@@ -233,7 +231,7 @@ export default class BaseBuilder {
                     // marked as supported at this time
                     this.skeletonEnabled = true;
 
-                    skeletonEntries[entryName] = [await this.writeSkeletonEntry(skeletonImportPath)];
+                    skeletonEntries[DEFAULT_ENTRY_NAME] = [await this.writeSkeletonEntry(skeletonImportPath)];
 
                     // when ssr skeleton, we need to extract css from js
                     skeletonConfig = this.webpackConfig.server({cssExtract: true});

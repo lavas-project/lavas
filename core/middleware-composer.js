@@ -36,7 +36,8 @@ export default class MiddlewareComposer {
         this.internalMiddlewares.push(middleware);
     }
 
-    clean() {
+    reset(config) {
+        this.config = config;
         this.internalMiddlewares = [];
     }
 
