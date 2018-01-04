@@ -4,7 +4,11 @@
  */
 
 module.exports = function () {
-    let lang = (process.env.LANG || '').split('.')[0] || 'zh_CN';
+    let lang = process.env.LANG || 'zh_CN';
 
-    return require('./' + lang);
+    if (/zh/g.test(lang)) {
+        return require('./zh_CN');
+    }
+
+    return require('./en');
 };

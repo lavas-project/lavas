@@ -13,7 +13,7 @@ module.exports = {
     INIT_NEXT_GUIDE: 'You can type the following commands to quickly start ',
     LOADING_FROM_CLOUD: 'Downloading, please wait a moment ',
     LOADING_EXPORT_PROJECT: 'Exporting project ',
-    SAMA_NAME_ENSURE: 'There is a project of the same name, cover it ',
+    SAMA_NAME_ENSURE: 'A project of the same name already exists, cover it ',
     UPDATE_TIPS: 'Lavas have a new version，you can use `npm update -g lavas` command to update! ',
     NO_GIT_COMMAND: 'Lavas commander require `git` ',
     NO_GIT_COMMOND_SUG: 'Please confirm whether to install `git` ',
