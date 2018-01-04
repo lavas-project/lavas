@@ -9,6 +9,7 @@ const LavasCore = require('../../core');
 
 const utils = require('../../lib/utils');
 const log = require('../../lib/utils/log');
+const locals = require('../../locals')();
 
 /**
  * 处理 build 构建逻辑
@@ -19,7 +20,7 @@ module.exports = async function () {
     let rootDir = utils.getLavasProjectRoot();
     let core = new LavasCore(rootDir);
 
-    log.info('开始构建...');
+    log.info(locals.START_BUILD + '...');
     await core.init(process.env.NODE_ENV || 'production', true);
     await core.build();
 };

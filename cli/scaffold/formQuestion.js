@@ -13,6 +13,7 @@ const fs = require('fs-extra');
 const os = require('os');
 
 const log = require('../../lib/utils/log');
+const locals = require('../../locals')();
 
 /**
  * 获取当前用户的 git 账号信息
@@ -52,6 +53,11 @@ function questionList(key, schema, params) {
     let choiceList = [];
     let text = '';
     let valueList = [];
+    let listName = con.name;
+    let listLocals = con.locals && con.locals[locals.LANG];
+    if (listLocals) {
+        listName = listLocals.name;
+    }
 
     if (!con.dependence) {
         sourceList = con.list;
@@ -73,7 +79,15 @@ function questionList(key, schema, params) {
 
     sourceList.forEach((item, index) => {
         let url = '';
-        let desc = log.chalk.gray('\n    ' + item.desc);
+        let {desc, name} = item;
+        let itemLocals = item.locals && item.locals[locals.LANG];
+
+        if (itemLocals) {
+            desc = itemLocals.desc || desc;
+            name = itemLocals.name || name;
+        }
+
+        desc = log.chalk.gray('\n    ' + desc);
 
         // if (item.url) {
         //     url = '\n    - ' + log.chalk.yellow.bold.underline(item.url);
@@ -92,13 +106,13 @@ function questionList(key, schema, params) {
 
         choiceList.push({
             'value': item.value,
-            'name': `${item.name}${desc}${url}`,
+            'name': `${name}${desc}${url}`,
             'short': item.value
         });
         valueList.push(item.value);
         text += ''
-            + log.chalk.blue('\n    [' + log.chalk.yellow(index + 1) + '] ' + item.name)
-            + log.chalk.gray('\n        ' + item.desc);
+            + log.chalk.blue('\n    [' + log.chalk.yellow(index + 1) + '] ' + name)
+            + desc;
     });
 
     // 如果是 windows 下的 git bash 环境，由于没有交互 GUI，所以就采用文本输入的方式来解决
@@ -106,12 +120,13 @@ function questionList(key, schema, params) {
         return {
             'type': 'input',
             'name': key,
-            'message': '请选择一个数字指定 ' + con.name + '：' + text + '\n' + log.chalk.green('?') + ' 请输入数字：',
+            'message': locals.PLEASE_INPUT_NUM_DESC + ' ' + listName + '：' + text
+                + '\n' + log.chalk.green('?') + ' ' + locals.PLEASE_INPUT_NUM + '：',
             'default': 1,
             'valueList': valueList,
             'validate'(value) {
                 if (!/\d+/.test(value) || +value > valueList.length || +value <= 0) {
-                    return '请输入正确的数字';
+                    return locals.PLEASE_INPUT_RIGHR_NUM;
                 }
                 return true;
             }
@@ -121,7 +136,7 @@ function questionList(key, schema, params) {
     return {
         'type': 'list',
         'name': key,
-        'message': `选择一个${con.name} (${log.chalk.green('按上下键选择')}): `,
+        'message': `${locals.PLEASE_SELECT}${listName} (${log.chalk.green(locals.PLEASE_SELECT_DESC)}): `,
         'choices': choiceList,
         'default': choiceList[0].value || '',
         'checked': !!con.checkbox,
@@ -139,12 +154,18 @@ function questionList(key, schema, params) {
  */
 function questionYesOrNo(key, schema, params) {
     let con = schema[key];
+    let name = con.name;
+    let itemLocals = con.locals && con.locals[locals.LANG];
+
+    if (itemLocals) {
+        name = itemLocals.name || name;
+    }
 
     return {
         'type': 'confirm',
         'name': key,
         'default': false,
-        'message': `${con.name}? :`
+        'message': `${name}? :`
     };
 }
 
@@ -158,7 +179,15 @@ function questionYesOrNo(key, schema, params) {
  */
 async function questionInput(key, schema, params) {
     let con = schema[key];
-    let name = con.name;
+    let {name, invalidate} = con;
+    let defaultVal = con.default;
+    let itemLocals = con.locals && con.locals[locals.LANG];
+
+    if (itemLocals) {
+        name = itemLocals.name || name;
+        defaultVal = itemLocals.default || defaultVal;
+        invalidate = itemLocals.invalidate || invalidate;
+    }
 
     con.validate = () => !!1;
 
@@ -174,7 +203,7 @@ async function questionInput(key, schema, params) {
             let nowPath = path.resolve(process.cwd(), value || '');
 
             if (!fs.existsSync(nowPath)) {
-                return con.invalidate || '输入不符合规范';
+                return invalidate || locals.INPUT_INVALID;
             }
             return true;
         };
@@ -185,7 +214,7 @@ async function questionInput(key, schema, params) {
 
         con.validate = value => {
             if (!reg.test(value)) {
-                return con.invalidate || '输入不符合规范';
+                return invalidate || locals.INPUT_INVALID;
             }
             return true;
         };
@@ -194,8 +223,8 @@ async function questionInput(key, schema, params) {
     return {
         'type': con.type === 'password' ? 'password' : 'input',
         'name': key,
-        'message': `请输入${name}: `,
-        'default': con.default,
+        'message': `${locals.PLEASE_INPUT}${name}: `,
+        'default': defaultVal,
         'validate': con.validate
     };
 }

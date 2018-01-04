@@ -6,14 +6,15 @@
 'use strict';
 
 const init = require('./action');
+const locals = require('../../locals')();
 
 module.exports = function (program) {
 
-    // 定义 lavas init 命令
+    // define lavas init command
     program
         .command('init')
-        .description('初始化 Lavas PWA 项目')
-        .option('-f, --force', '是否覆盖已有项目')
+        .description(locals.INIT_DESC)
+        .option('-f, --force', locals.INIT_OPTION_FORCE)
         .action(options => init({
             force: options.force
         }));
