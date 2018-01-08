@@ -15,8 +15,6 @@ module.exports = function (program) {
         .command('build')
         .alias('b')
         .description(locals.BUILD_DESC)
-        .action(options => buildAction({
-            // some options
-        }))
+        .action(options => buildAction())
     ;
 };

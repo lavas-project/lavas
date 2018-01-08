@@ -9,5 +9,6 @@ dist
 tmp
 coverage
 .nyc_output
+package-lock.json
 packages/lavas-core-vue/test/fixtures/dist
 packages/lavas-core-vue/test/fixtures/.lavas

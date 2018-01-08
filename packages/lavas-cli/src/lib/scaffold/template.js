@@ -7,7 +7,6 @@
 const fs = require('fs-extra');
 const path = require('path');
 const os = require('os');
-
 const glob = require('glob');
 const archiver = require('archiver');
 const etpl = require('etpl');
@@ -88,8 +87,15 @@ function deleteFilter(dir, ignores = []) {
  */
 function addPackageJson(dir, params) {
     let templateConfig = store.get('templateConfig');
+    let version = store.get('version') || '2';
     let etplCompile = new etpl.Engine(templateConfig.etpl || conf.ETPL);
     let packageJson = templateConfig.exportsPackageJson;
+
+    packageJson.lavas = {
+        core: templateConfig.core || 'lavas-core-vue',
+        version
+    };
+
     let fileName = 'package.json';
     let filePath = path.resolve(dir, fileName);
     let fileContent = (packageJson && typeof packageJson === 'object')
@@ -180,13 +186,16 @@ async function getTemplateInfo(metaParam) {
         let templateValue = metaParam.template || meta.defaults.template || 'lavasTemplate';
         let framework = meta.frameworks.filter(item => item.value === frameworkValue)[0];
         let template = framework.subList.template.filter(item => item.value === templateValue)[0];
+        let version = meta.version;
 
         store.set('framework', framework);
         store.set('template', template);
+        store.set('version', version);
 
         return {
             framework,
-            template
+            template,
+            version
         };
     }
     catch (e) {
@@ -202,9 +211,12 @@ async function getTemplateInfo(metaParam) {
  * @return {Objecy}             导出的结果
  */
 exports.download = async function (metaParams = {}) {
-    let {framework, template} = await getTemplateInfo(metaParams);
+    let {framework, template, version} = await getTemplateInfo(metaParams);
     let gitRepo = template.git;
-    let storeDir = path.resolve(conf.LOCAL_TEMPLATES_DIR, framework.value, 'lavas2_' + template.value);
+    let storeDir = path.resolve(
+        conf.LOCAL_TEMPLATES_DIR,
+        framework.value, template.value + '_' + version
+    );
     let branchName = template.branch || 'master';
     let ajv = new Ajv({allErrors: true});
     let metaJsonSchema = store.get('metaJsonSchema') || await schema.getMetaJsonSchema();

@@ -42,5 +42,6 @@ module.exports = {
     PLEASE_INPUT_RIGHR_NUM: '请输入正确的数字',
     PLEASE_INPUT_NUM: '请输入数字',
     PLEASE_INPUT_NUM_DESC: '请选择一个数字指定',
-    INPUT_INVALID: '输入不符合规范'
+    INPUT_INVALID: '输入不符合规范',
+    START_CONFIG: '指定自定义 lavas.config.js'
 };
