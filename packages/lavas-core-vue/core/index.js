@@ -53,6 +53,9 @@ export default class LavasCore extends EventEmitter {
         this.expressMiddleware = this.middlewareComposer.express
             .bind(this.middlewareComposer);
 
+        // expose render function
+        this.render = this.renderer.render.bind(this.renderer);
+
         if (!this.isProd) {
             // register rebuild listener
             this.on('start-rebuild', async () => {

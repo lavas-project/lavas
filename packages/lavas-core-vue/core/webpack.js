@@ -78,13 +78,7 @@ export default class WebpackConfig {
                                 cssMinimize,
                                 cssExtract
                             })
-                        }],
-                        include: [
-                            join(globals.rootDir, 'components'),
-                            join(globals.rootDir, 'core'),
-                            join(globals.rootDir, 'pages'),
-                            join(globals.rootDir, 'entries')
-                        ]
+                        }]
                     },
                     {
                         test: /\.js$/,
