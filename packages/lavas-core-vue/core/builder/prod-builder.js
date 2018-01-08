@@ -35,7 +35,7 @@ export default class ProdBuilder extends BaseBuilder {
         );
 
         // SSR build process
-        if (this.ssr) {
+        if (build.ssr) {
             console.log('[Lavas] SSR build starting...');
             // webpack client & server config
             let clientConfig = this.webpackConfig.client();

@@ -41,11 +41,18 @@ export default class BaseBuilder {
      * @param {Object} config config
      */
     init(config) {
+        this.processConfig(config);
         this.config = config;
         this.webpackConfig.config = config;
         this.routeManager.config = config;
-        this.ssr = config.build.ssr;
     }
+
+    /**
+     * process config
+     *
+     * @override
+     */
+    processConfig() {}
 
     /**
      * build

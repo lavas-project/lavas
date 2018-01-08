@@ -17,6 +17,7 @@ import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
 import {LAVAS_CONFIG_FILE, STORE_FILE, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH} from '../constants';
 import {enableHotReload, writeFileInDev} from '../utils/webpack';
 import {routes2Reg} from '../utils/router';
+import {isFromCDN} from '../utils/path';
 
 import BaseBuilder from './base-builder';
 
@@ -36,6 +37,17 @@ export default class DevBuilder extends BaseBuilder {
         this.writeFile = writeFileInDev;
 
         this.sharedCache = {};
+    }
+
+    /**
+     * process lavas config
+     *
+     * @param {Object} config lavas config
+     */
+    processConfig(config) {
+        // in dev mode, ignore CDN publicPath and use default '/' instead.
+        config.build.publicPath = isFromCDN(config.build.publicPath)
+            ? '/' : config.build.publicPath;
     }
 
     /**
@@ -128,6 +140,7 @@ export default class DevBuilder extends BaseBuilder {
         let serverCompiler; // compiler for server in ssr
         let clientMFS;
         let noop = () => {};
+        let ssrEnabled = this.config.build.ssr;
 
         await this.routeManager.buildRoutes();
         await this.writeRuntimeConfig();
@@ -138,7 +151,7 @@ export default class DevBuilder extends BaseBuilder {
         );
 
         // SSR build process
-        if (this.ssr) {
+        if (ssrEnabled) {
             console.log('[Lavas] SSR build starting...');
             clientConfig = this.webpackConfig.client();
             serverConfig = this.webpackConfig.server();
@@ -186,6 +199,7 @@ export default class DevBuilder extends BaseBuilder {
         clientCompiler = webpack([clientConfig, spaConfig].filter(config => config));
         clientCompiler.cache = this.sharedCache;
 
+        // prefix all the assets paths with publicPath in MFS
         this.devMiddleware = webpackDevMiddleware(clientCompiler, {
             publicPath: this.config.build.publicPath,
             noInfo: true
@@ -194,7 +208,7 @@ export default class DevBuilder extends BaseBuilder {
         // set memory-fs used by devMiddleware
         clientMFS = this.devMiddleware.fileSystem;
         clientCompiler.outputFileSystem = clientMFS;
-        if (this.ssr) {
+        if (ssrEnabled) {
             this.renderer.clientMFS = clientMFS;
         }
 
@@ -225,7 +239,7 @@ export default class DevBuilder extends BaseBuilder {
          * in spa, we use connect-history-api-fallback middleware
          * in ssr, ssr middleware will handle it instead
          */
-        if (!this.ssr) {
+        if (!ssrEnabled) {
             /**
              * we should put this middleware in front of dev middleware since
              * it will rewrite req.url to xxx.html based on options.rewrites
@@ -234,7 +248,7 @@ export default class DevBuilder extends BaseBuilder {
                 htmlAcceptHeaders: ['text/html'],
                 disableDotRule: false, // ignore paths with dot inside
                 // verbose: true,
-                index: `/${DEFAULT_ENTRY_NAME}.html`
+                index: `${this.config.build.publicPath}${DEFAULT_ENTRY_NAME}.html`
             }));
         }
 
@@ -245,10 +259,10 @@ export default class DevBuilder extends BaseBuilder {
         // wait until webpack building finished
         await new Promise(resolve => {
             this.devMiddleware.waitUntilValid(async () => {
-                if (!this.ssr) {
+                if (!ssrEnabled) {
                     console.log('[Lavas] SPA build completed.');
                 }
-                if (this.ssr) {
+                else {
                     await this.renderer.refreshFiles();
                     console.log('[Lavas] SSR build completed.');
                 }

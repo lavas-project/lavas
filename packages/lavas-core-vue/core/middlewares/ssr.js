@@ -28,7 +28,7 @@ export default function (core) {
         let ctx = {
             title: 'Lavas', // default title
             url,
-            config, // mount config to ctx which will be used when rendering template
+            config: builder && builder.config || config, // mount config to ctx which will be used when rendering template
             req,
             res,
             error: errorHandler
