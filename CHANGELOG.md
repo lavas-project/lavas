@@ -2,6 +2,12 @@
 
 =======
 
+## Lavas-core-vue [1.0.1-rc.1] - 2018-1-8
+
+### Changed
+
+- [Fix] In development mode, if we detect the `publicPath` is from CDN (eg. starts with `http(s)://` or `//`), a default path `/` will be used instead. But in production mode, the CDN `publicPath` will be used as assets' prefix correctly.
+
 ## [2.1.8-rc.2] - 2018-1-3
 
 ### Changed
