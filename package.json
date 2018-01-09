@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "build:lavas-core-vue": "babel packages/lavas-core-vue/core --out-dir packages/lavas-core-vue/dist --copy-files",
-    "build:lavas-cli": "babel pacakages/lavas-cli/src --out-dir package/lavas-cli/dist --copy-files",
+    "build:lavas-cli": "babel packages/lavas-cli/src --out-dir packages/lavas-cli/dist --copy-files",
     "lint": "fecs ./ --rule --type 'vue,js,css'",
     "test": "npm run build:lavas-core-vue && nyc ava"
   },

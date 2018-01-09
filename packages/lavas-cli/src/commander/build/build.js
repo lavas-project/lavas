@@ -5,6 +5,7 @@
 
 'use strict';
 const path = require('path');
+const fs = require('fs-extra');
 
 const utils = require('../../lib/utils');
 const log = require('../../lib/utils/log');
@@ -26,6 +27,23 @@ module.exports = async function (options) {
     let core = new LavasCore(rootDir);
 
     log.info(locals.START_BUILD + '...');
-    await core.init(process.env.NODE_ENV || 'production', true);
+
+    options = options || {};
+    let initOptions = {};
+    if (options.config) {
+        let config = options.config;
+        if (!path.isAbsolute(config)) {
+            config = path.resolve(utils.getLavasProjectRoot(), config);
+        }
+
+        if (!(await fs.pathExists(config))) {
+            log.warn(`${locals.START_NO_FILE} ${config}`);
+            return;
+        }
+
+        initOptions.config = config;
+    }
+
+    await core.init(process.env.NODE_ENV || 'production', true, initOptions);
     await core.build();
 };

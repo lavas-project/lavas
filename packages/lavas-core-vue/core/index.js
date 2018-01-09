@@ -23,11 +23,14 @@ export default class LavasCore extends EventEmitter {
      *
      * @param {string} env NODE_ENV
      * @param {boolean} isInBuild is in build process
+     * @param {Object} options options
+     * @param {Object} options.config custom config object
      */
-    async init(env, isInBuild) {
+    async init(env, isInBuild, options) {
+        options = options || {};
         this.env = env;
         this.isProd = this.env === 'production';
-        this.configReader = new ConfigReader(this.cwd, this.env);
+        this.configReader = new ConfigReader(this.cwd, this.env, options.config);
 
         /**
          * in a build process, we need to read config by scan a directory,
@@ -54,7 +57,7 @@ export default class LavasCore extends EventEmitter {
             .bind(this.middlewareComposer);
 
         // expose render function
-        this.render = this.renderer.render.bind(this.renderer);
+        // this.render = this.renderer.render.bind(this.renderer);
 
         if (!this.isProd) {
             // register rebuild listener

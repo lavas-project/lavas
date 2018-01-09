@@ -35,13 +35,32 @@ module.exports = function (program) {
             let isServerScriptExist = await fs.pathExists(serverScriptPath);
             if (!isServerScriptExist) {
                 log.warn(`${locals.START_NO_FILE} ${serverScriptPath}`);
+                return;
             }
-            else {
-                process.env.NODE_ENV = 'development';
-                if (port) {
-                    process.env.PORT = Number(port);
+
+            process.env.NODE_ENV = 'development';
+
+            if (port) {
+                process.env.PORT = Number(port);
+            }
+
+            let serverScriptFun = require(serverScriptPath);
+            let options = {};
+            if (config) {
+                if (!path.isAbsolute(config)) {
+                    config = path.resolve(utils.getLavasProjectRoot(), config);
                 }
-                require(serverScriptPath);
+
+                if (!(await fs.pathExists(config))) {
+                    log.warn(`${locals.START_NO_FILE} ${config}`);
+                    return;
+                }
+
+                options.config = config;
+            }
+
+            if (typeof serverScriptFun === 'function') {
+                serverScriptFun(options);
             }
         });
 
@@ -63,13 +82,32 @@ module.exports = function (program) {
             let isServerScriptExist = await fs.pathExists(serverScriptPath);
             if (!isServerScriptExist) {
                 log.warn(`${locals.START_NO_FILE} ${serverScriptPath}`);
+                return;
             }
-            else {
-                process.env.NODE_ENV = 'production';
-                if (port) {
-                    process.env.PORT = Number(port);
+
+            process.env.NODE_ENV = 'production';
+
+            if (port) {
+                process.env.PORT = Number(port);
+            }
+
+            let serverScriptFun = require(serverScriptPath);
+            let options = {};
+            if (config) {
+                if (!path.isAbsolute(config)) {
+                    config = path.resolve(utils.getLavasProjectRoot(), config);
                 }
-                require(serverScriptPath);
+
+                if (!(await fs.pathExists(config))) {
+                    log.warn(`${locals.START_NO_FILE} ${config}`);
+                    return;
+                }
+
+                options.config = config;
+            }
+
+            if (typeof serverScriptFun === 'function') {
+                serverScriptFun(options);
             }
         });
 };
