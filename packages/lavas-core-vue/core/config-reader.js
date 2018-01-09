@@ -205,7 +205,7 @@ export default class ConfigReader {
      * @return {Object} config
      */
     async readConfigFile() {
-        if (this.inputConfig) {
+        if (this.customConfigPath) {
             return this.read();
         }
 
