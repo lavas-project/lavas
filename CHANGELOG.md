@@ -2,6 +2,12 @@
 
 =======
 
+## Lavas-core-vue [1.0.1-rc.2] - 2018-1-9
+
+### Changed
+
+- [Feature] Add `config` option to `lavas dev`, `lavas start` and `lavas build`.
+
 ## Lavas-core-vue [1.0.1-rc.1] - 2018-1-8
 
 ### Changed
