@@ -111,9 +111,10 @@ export const RUMTIME_ITEMS = {
 };
 
 export default class ConfigReader {
-    constructor(cwd, env) {
+    constructor(cwd, env, customConfigPath) {
         this.cwd = cwd;
         this.env = env;
+        this.customConfigPath = customConfigPath;
     }
 
     /**
@@ -136,54 +137,63 @@ export default class ConfigReader {
             merge(config, config[this.env], mergeArray);
         }
 
+        // read from custom config
+        if (this.customConfigPath) {
+            console.log(`[Lavas] use custom config: ${this.customConfigPath}`);
+            delete require.cache[require.resolve(this.customConfigPath)];
+            merge(config, await import(this.customConfigPath), mergeArray);
+            return config;
+        }
+
         // read from lavas.config.js
         let singleConfigPath = join(this.cwd, LAVAS_CONFIG_FILE);
         if (await pathExists(singleConfigPath)) {
             console.log('[Lavas] read lavas.config.js.');
             delete require.cache[require.resolve(singleConfigPath)];
             merge(config, await import(singleConfigPath), mergeArray);
+            return config;
         }
-        else {
-            let configDir = join(this.cwd, 'config');
-            let files = glob.sync(
-                '**/*.js', {
-                    cwd: configDir
-                }
-            );
 
-            // require all files and assign them to config recursively
-            await Promise.all(files.map(async filepath => {
-                filepath = filepath.substring(0, filepath.length - 3);
-
-                let paths = filepath.split('/');
-
-                let name;
-                let cur = config;
-                for (let i = 0; i < paths.length - 1; i++) {
-                    name = paths[i];
-                    if (!cur[name]) {
-                        cur[name] = {};
-                    }
-
-                    cur = cur[name];
-                }
-
-                name = paths.pop();
-
-                // load config, delete cache first
-                let configPath = join(configDir, filepath);
-                delete require.cache[require.resolve(configPath)];
-                let exportContent = await import(configPath);
-                cur[name] = typeof exportContent === 'object' && exportContent !== null
-                    ? merge(cur[name], exportContent, mergeArray) : exportContent;
-            }));
-
-            let temp = config.env || {};
-
-            // merge config according env
-            if (temp[this.env]) {
-                merge(config, temp[this.env], mergeArray);
+        // read from config/
+        let configDir = join(this.cwd, 'config');
+        let files = glob.sync(
+            '**/*.js', {
+                cwd: configDir
             }
+        );
+
+        // require all files and assign them to config recursively
+        await Promise.all(files.map(async filepath => {
+            filepath = filepath.substring(0, filepath.length - 3);
+
+            let paths = filepath.split('/');
+
+            let name;
+            let cur = config;
+            for (let i = 0; i < paths.length - 1; i++) {
+                name = paths[i];
+                if (!cur[name]) {
+                    cur[name] = {};
+                }
+
+                cur = cur[name];
+            }
+
+            name = paths.pop();
+
+            // load config, delete cache first
+            let configPath = join(configDir, filepath);
+            delete require.cache[require.resolve(configPath)];
+            let exportContent = await import(configPath);
+            cur[name] = typeof exportContent === 'object' && exportContent !== null
+                ? merge(cur[name], exportContent, mergeArray) : exportContent;
+        }));
+
+        let temp = config.env || {};
+
+        // merge config according env
+        if (temp[this.env]) {
+            merge(config, temp[this.env], mergeArray);
         }
 
         return config;
@@ -195,6 +205,10 @@ export default class ConfigReader {
      * @return {Object} config
      */
     async readConfigFile() {
+        if (this.customConfigPath) {
+            return this.read();
+        }
+
         return JsonUtil.parse(await readFile(distLavasPath(this.cwd, CONFIG_FILE), 'utf8'));
     }
 }

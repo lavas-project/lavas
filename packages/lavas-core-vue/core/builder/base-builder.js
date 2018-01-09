@@ -10,7 +10,7 @@ import {join} from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
 
-import {TEMPLATE_HTML, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH} from '../constants';
+import {TEMPLATE_HTML, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH, CONFIG_FILE} from '../constants';
 import {assetsPath} from '../utils/path';
 import * as JsonUtil from '../utils/json';
 import templateUtil from '../utils/template';
@@ -108,7 +108,7 @@ export default class BaseBuilder {
      */
     async writeRuntimeConfig() {
         let filteredConfig = JsonUtil.deepPick(this.config, RUMTIME_ITEMS);
-        await this.writeFileToLavasDir('config.json', JsonUtil.stringify(filteredConfig, null, 4));
+        await this.writeFileToLavasDir(CONFIG_FILE, JsonUtil.stringify(filteredConfig, null, 4));
     }
 
     async writeMiddleware() {

@@ -15,6 +15,7 @@ module.exports = function (program) {
         .command('build')
         .alias('b')
         .description(locals.BUILD_DESC)
-        .action(options => buildAction())
+        .option('-c, --config [value]', locals.START_CONFIG)
+        .action(async options => buildAction(options))
     ;
 };
