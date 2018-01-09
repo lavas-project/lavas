@@ -3,4 +3,8 @@
  * @author mj(zoumiaojiang@gmail.com)
  */
 
-module.exports = {};
+let lavasScaffold = require('./lib/scaffold');
+
+module.exports = {
+    scaffold: lavasScaffold
+};

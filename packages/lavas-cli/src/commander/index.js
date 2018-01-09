@@ -6,7 +6,7 @@
 'use strict';
 
 const program = require('commander');
-const cp = require('child_process');
+const exec = require('mz/child_process').exec;
 
 const log = require('../lib/utils/log');
 const checkUpdate = require('../lib/utils/checkUpdate');
@@ -18,14 +18,10 @@ const locals = require('../locals')();
 let version = process.env.VERSION || require('../../package.json').version;
 
 // check the latest version
-checkUpdate().then(() => {
+checkUpdate().then(async () => {
     if (!process.argv[2]) {
-        cp.exec('lavas -h', (err, stdout, stderr) => {
-            if (err) {
-                throw err;
-            }
-            console.log(stdout);
-        });
+        let output = await exec('lavas -h');
+        console.log(output[0]);
     }
     else {
         let argv = process.argv[2];
@@ -34,7 +30,6 @@ checkUpdate().then(() => {
             log.info('version: ', version);
         }
     }
-
 
     // define lavas command
     program

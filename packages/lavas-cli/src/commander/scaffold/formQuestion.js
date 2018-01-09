@@ -6,8 +6,7 @@
 'use strict';
 
 const inquirer = require('inquirer');
-const childProcess = require('child_process');
-
+const exec = require('mz/child_process').exec;
 const path = require('path');
 const fs = require('fs-extra');
 const os = require('os');
@@ -20,23 +19,20 @@ const locals = require('../../locals')();
  *
  * @return {Promise} promise 对象
  */
-function getGitInfo() {
-    let exec = childProcess.execSync;
+async function getGitInfo() {
+    let author;
+    let email;
 
-    return new Promise((resolve, reject) => {
-        let author;
-        let email;
+    try {
+        // 尝试从 git 配置中获取
+        author = await exec('git config --get user.name');
+        email = await exec('git config --get user.email');
+    }
+    catch (e) {}
+    author = author && author[0] && author[0].toString().trim();
+    email = email && email[0] && email[0].toString().trim();
 
-        try {
-            // 尝试从 git 配置中获取
-            author = exec('git config --get user.name');
-            email = exec('git config --get user.email');
-        }
-        catch (e) {}
-        author = author && author.toString().trim();
-        email = email && email.toString().trim();
-        resolve({author, email});
-    });
+    return {author, email};
 }
 
 /**
@@ -105,9 +101,9 @@ function questionList(key, schema, params) {
         // }
 
         choiceList.push({
-            'value': item.value,
-            'name': `${name}${desc}${url}`,
-            'short': item.value
+            value: item.value,
+            name: `${name}${desc}${url}`,
+            short: item.value
         });
         valueList.push(item.value);
         text += ''
@@ -194,11 +190,10 @@ async function questionInput(key, schema, params) {
     // 如果输入项是 author 或者 email 的，尝试的去 git config 中拿默认的内容
     if (key === 'author' || key === 'email') {
         let userInfo = await getGitInfo();
-
-        con.default = userInfo[key] || con.default;
+        defaultVal = userInfo[key] || con.default;
     }
     if (key === 'dirPath') {
-        con.default = path.resolve(process.cwd(), con.default || '');
+        defaultVal = path.resolve(process.cwd(), con.default || '');
         con.validate = value => {
             let nowPath = path.resolve(process.cwd(), value || '');
 
