@@ -2,11 +2,13 @@
 
 =======
 
-## Lavas-core-vue [1.0.1-rc.2] - 2018-1-9
+## Lavas-core-vue [1.0.1-rc.2] - 2018-1-10
 
 ### Changed
 
 - [Feature] Add `config` option to `lavas dev`, `lavas start` and `lavas build`.
+- [Feature] Lavas internal middlewares such as `static`, `service-worker`, `ssr`, `error` and `favicon` can be toggled by calling `express/koaMiddleware()`.
+- [Feature] Provide `render()` function so that a custom SSR middleware can be used in SSR mode.
 
 ## Lavas-core-vue [1.0.1-rc.1] - 2018-1-8
 

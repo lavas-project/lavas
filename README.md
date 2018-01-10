@@ -1,9 +1,9 @@
 lavas
 =========
 
-[![npm (scoped with tag)](https://img.shields.io/npm/v/lavas/lavas2.svg)](https://npmjs.com/package/lavas)
-[![Build Status](https://travis-ci.org/lavas-project/lavas.svg?branch=dev-2.0)](https://travis-ci.org/lavas-project/lavas)
-[![Coverage Status](https://coveralls.io/repos/github/lavas-project/lavas/badge.svg?branch=dev-2.0)](https://coveralls.io/github/lavas-project/lavas?branch=dev-2.0)
+[![npm (scoped with tag)](https://img.shields.io/npm/v/lavas.svg)](https://npmjs.com/package/lavas)
+[![Build Status](https://travis-ci.org/lavas-project/lavas.svg)](https://travis-ci.org/lavas-project/lavas)
+[![Coverage Status](https://coveralls.io/repos/github/lavas-project/lavas/badge.svg)](https://coveralls.io/github/lavas-project/lavas)
 [![NPM downloads](https://img.shields.io/npm/dm/lavas.svg)](https://npmjs.com/package/lavas)
 
 基于 Vue 的 PWA 解决方案，帮助开发者快速搭建 PWA 应用，解决开发 PWA 过程中遇到的各种问题。
@@ -13,7 +13,7 @@ lavas
 lavas 提供了命令行工具，可以通过以下命令进行安装
 
 ```bash
-$ npm install -g lavas@lavas2
+$ npm install -g lavas
 ```
 
 再通过 `lavas init` 并填入项目基本信息新建一个项目
