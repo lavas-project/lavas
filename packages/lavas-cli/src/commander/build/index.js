@@ -12,10 +12,9 @@ module.exports = function (program) {
 
     // 定义 lavas build 命令
     program
-        .command('build')
+        .command('build [config]')
         .alias('b')
         .description(locals.BUILD_DESC)
-        .option('-c, --config [value]', locals.START_CONFIG)
-        .action(async options => buildAction(options))
+        .action(async config => buildAction(config))
     ;
 };
