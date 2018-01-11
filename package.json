@@ -10,7 +10,8 @@
     "build:lavas-core-vue": "babel packages/lavas-core-vue/core --out-dir packages/lavas-core-vue/dist --copy-files",
     "build:lavas-cli": "babel packages/lavas-cli/src --out-dir packages/lavas-cli/dist --copy-files",
     "lint": "fecs ./ --rule --type 'vue,js,css'",
-    "test": "npm run build:lavas-core-vue && nyc ava"
+    "test": "npm run build:lavas-core-vue && nyc ava",
+    "publish:core": "lerna publish --scope=lavas-core-vue"
   },
   "bin": {
     "lavas": "./packages/lavas-cli/bin/dev-lavas-cli.js",

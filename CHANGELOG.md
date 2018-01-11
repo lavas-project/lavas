@@ -2,7 +2,7 @@
 
 =======
 
-## Lavas-core-vue [1.0.1-rc.2] - 2018-1-10
+## Lavas-core-vue [1.0.2-rc.0] - 2018-1-10
 
 ### Changed
 
