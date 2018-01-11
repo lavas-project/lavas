@@ -17,8 +17,6 @@ export default {
 
 <style lang="stylus" scoped>
 
-@import '~normalize.css';
-
 .skeleton-wrapper
     position fixed
     top 0
