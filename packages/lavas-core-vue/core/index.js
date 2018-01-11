@@ -57,7 +57,7 @@ export default class LavasCore extends EventEmitter {
             .bind(this.middlewareComposer);
 
         // expose render function
-        // this.render = this.renderer.render.bind(this.renderer);
+        this.render = this.renderer.render.bind(this.renderer);
 
         if (!this.isProd) {
             // register rebuild listener
@@ -85,15 +85,12 @@ export default class LavasCore extends EventEmitter {
         let spinner = ora();
         spinner.start();
 
-        if (!this.isProd) {
-            this.middlewareComposer.setup();
-        }
         try {
             await this.builder.build();
             spinner.succeed(`[Lavas] ${this.env} build completed.`);
         }
         catch (e) {
-            console.log(e);
+            console.error(e);
             spinner.fail(`[Lavas] ${this.env} build failed.`)
         }
 
@@ -104,8 +101,6 @@ export default class LavasCore extends EventEmitter {
      *
      */
     async runAfterBuild() {
-        this.middlewareComposer.setup();
-        this.renderer = new Renderer(this);
         // create with bundle & manifest
         await this.renderer.createWithBundle();
     }

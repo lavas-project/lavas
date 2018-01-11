@@ -5,6 +5,7 @@
 
 import {join} from 'path';
 import {pathExists, readFile, readJson, outputFile} from 'fs-extra';
+import {merge} from 'lodash';
 import {createBundleRenderer} from 'vue-server-renderer';
 import VueSSRClientPlugin from 'vue-server-renderer/client-plugin';
 
@@ -22,7 +23,7 @@ export default class Renderer {
         this.rootDir = this.config.globals
             && this.config.globals.rootDir;
         this.cwd = core.cwd;
-        this.renderer = {};
+        this.renderer = null;
         this.serverBundle = null;
         this.clientManifest = null;
         this.template = null;
@@ -229,17 +230,23 @@ export default class Renderer {
         }
     }
 
-    /**
-     * get vue server renderer
-     *
-     * @return {Promise.<*>}
-     */
-    getRenderer() {
-        if (this.renderer) {
-            return Promise.resolve(this.renderer);
-        }
+    async render(context = {}) {
+        let ctx = {};
 
-        // If this is the first time, wait for resolve
-        return this.readyPromise;
+        // merge with default context
+        merge(ctx, {
+            title: 'Lavas', // default title
+            config: this.config, // mount config to ctx which will be used when rendering template
+        }, context);
+
+        let renderer = await (this.renderer
+            ? Promise.resolve(this.renderer) : this.readyPromise);
+
+        // render to string
+        return new Promise(resolve => {
+            renderer.renderToString(ctx, (err, html) => {
+                return resolve({err, html});
+            });
+        });
     }
 }

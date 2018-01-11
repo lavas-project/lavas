@@ -9,13 +9,13 @@ const path = require('path');
 const BUILD_PATH = path.resolve(__dirname, 'dist');
 
 module.exports = {
-    ssr: true,
     middleware: {
         server: ['server-only'],
         client: ['client-only'],
         all: ['both']
     },
     build: {
+        ssr: true,
         path: BUILD_PATH,
         defines: {
             base: {
@@ -34,7 +34,7 @@ module.exports = {
     serviceWorker: {
         swSrc: path.join(__dirname, 'core/service-worker.js'),
         swDest: path.join(BUILD_PATH, 'service-worker.js'),
-        globDirectory: path.basename(BUILD_PATH),
+        globDirectory: BUILD_PATH,
         globPatterns: [
             '**/*.{html,js,css,eot,svg,ttf,woff}'
         ],
