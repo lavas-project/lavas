@@ -28,6 +28,7 @@ module.exports = {
     START_BUILD: 'Start building ',
     START_DEV: 'Start Lavas development environment server ',
     START_PROD: 'Start Lavas production environment server ',
+    START_STATIC: 'Start Lavas static server ',
     START_DEV_SERVER: 'Launching Lavas debug server ',
     START_PROD_SERVER: 'Launching Lavas production server ',
     START_PORT: 'Specify a port ',

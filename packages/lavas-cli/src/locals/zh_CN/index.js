@@ -28,6 +28,7 @@ module.exports = {
     START_BUILD: '开始构建',
     START_DEV: '启动 Lavas 开发环境服务器',
     START_PROD: '启动 Lavas 生产环境服务器',
+    START_STATIC: '启动 Lavas 静态服务器',
     START_DEV_SERVER: '正在启动 Lavas 调试服务器',
     START_PROD_SERVER: '正在启动 Lavas 正式服务器',
     START_PORT: '指定 port',
