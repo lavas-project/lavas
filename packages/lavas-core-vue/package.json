@@ -67,7 +67,7 @@
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.1",
     "super-json": "^2.2.0",
-    "sw-register-webpack-plugin": "^1.0.11",
+    "sw-register-webpack-plugin": "^1.0.15",
     "url-loader": "^0.5.9",
     "vue": "^2.5.2",
     "vue-loader": "13.0.2",

@@ -32,15 +32,6 @@ export default class Renderer {
     }
 
     /**
-     * get template path
-     *
-     * @return {string} template path
-     */
-    getTemplatePath() {
-        return join(this.rootDir, `core/${this.getTemplateName()}`);
-    }
-
-    /**
      * get template name
      *
      * @return {string} template path
@@ -50,21 +41,27 @@ export default class Renderer {
     }
 
     /**
+     * get template path
+     *
+     * @return {string} template path
+     */
+    getTemplatePath() {
+        return join(this.rootDir, `core/${this.getTemplateName()}`);
+    }
+
+    /**
      * return ssr template
      *
      * @param {string} base base url
      * @return {string} templateContent
      */
-    async getTemplate(base = '/') {
+    async getTemplate() {
         let templatePath = this.getTemplatePath();
         if (!await pathExists(templatePath)) {
             throw new Error(`${templatePath} required`);
         }
 
-        return templateUtil.server(
-            await readFile(templatePath, 'utf8'),
-            base
-        );
+        return templateUtil.server(await readFile(templatePath, 'utf8'));
     }
 
     /**
@@ -102,7 +99,7 @@ export default class Renderer {
 
         // copy index.template.html to dist/lavas/
         if (this.config.build.ssr) {
-            let templateContent = await this.getTemplate(this.config.router.base);
+            let templateContent = await this.getTemplate();
             let distTemplatePath = distLavasPath(
                 this.config.build.path,
                 this.getTemplateName()
@@ -155,7 +152,7 @@ export default class Renderer {
             this.serverBundle = JSON.parse(serverBundleContent);
         }
 
-        let templateContent = await this.getTemplate(this.config.router.base);
+        let templateContent = await this.getTemplate();
         if (this.template !== templateContent) {
             changed = true;
             templateChanged = true;
@@ -219,7 +216,7 @@ export default class Renderer {
                         return true;
                     },
                     runInNewContext: false,
-                    inject: false
+                    inject: true
                 }
             );
 
