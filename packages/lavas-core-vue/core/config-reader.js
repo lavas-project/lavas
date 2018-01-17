@@ -114,7 +114,7 @@ export default class ConfigReader {
     constructor(cwd, env, customConfigPath) {
         this.cwd = cwd;
         this.env = env;
-        // fix lavas dev
+        // fix https://github.com/lavas-project/lavas/issues/50
         if (customConfigPath !== 'dev') {
             this.customConfigPath = customConfigPath;
         }
