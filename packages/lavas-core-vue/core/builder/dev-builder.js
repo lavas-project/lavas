@@ -139,7 +139,7 @@ export default class DevBuilder extends BaseBuilder {
         let clientCompiler; // compiler for client in ssr and spa
         let serverCompiler; // compiler for server in ssr
         let clientMFS;
-        let noop = () => {};
+        // let noop = () => {};
         let ssrEnabled = this.config.build.ssr;
 
         await this.routeManager.buildRoutes();
