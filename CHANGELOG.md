@@ -2,6 +2,12 @@
 
 =======
 
+## Lavas-core-vue [1.0.3-rc.1] - 2018-1-17
+
+### Changed
+
+- [Feature] Allow developers use custom variables in `core/index.html.tmpl`
+
 ## Lavas-core-vue [1.0.2-rc.0] - 2018-1-10
 
 ### Changed
