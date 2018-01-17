@@ -40,7 +40,6 @@
       "packages/lavas-core-vue/test/unit/**/*.test.js",
       "packages/lavas-core-vue/test/integration/*.js"
     ],
-    "backupFiles": [],
     "require": [
       "babel-register",
       "babel-polyfill"
