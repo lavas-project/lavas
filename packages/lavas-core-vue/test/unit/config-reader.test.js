@@ -14,7 +14,7 @@ import {syncConfig} from '../utils';
 let core;
 
 test.beforeEach('init', async t => {
-    core = new LavasCore(join(__dirname, '../fixtures'));
+    core = new LavasCore(join(__dirname, '../fixtures/simple'));
     await core.init('development', true);
 });
 

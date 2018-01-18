@@ -8,7 +8,7 @@ import test from 'ava';
 import {resolve} from 'path';
 import {readFileSync} from 'fs-extra';
 
-let initTemplate = readFileSync(resolve(__dirname, '../../fixtures/core/index.html.tmpl'));
+let initTemplate = readFileSync(resolve(__dirname, '../../fixtures/simple/core/index.html.tmpl'));
 let ignoreSpacesAndNewLines = string => string.replace(/(>|}|;|{)(?:\s|\r|\n)+(<|{|\w|})/g, '$1$2').trim();
 
 test('it should generate server side template', async t => {

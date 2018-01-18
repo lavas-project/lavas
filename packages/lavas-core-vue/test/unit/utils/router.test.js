@@ -9,7 +9,7 @@ import test from 'ava';
 
 // generateRoutes()
 test('it should generate routes according to the structure of directory', async t => {
-    let routes = await generateRoutes(join(__dirname, '../../fixtures/pages'));
+    let routes = await generateRoutes(join(__dirname, '../../fixtures/simple/pages'));
 
     t.true(routes.length === 6);
 
