@@ -2,6 +2,16 @@
 
 =======
 
+## Lavas-core-vue [1.0.4] - 2018-1-18
+
+- [Fix] Use CommonsChunkPlugin correctly. ([#38][i38])
+- [Fix] Hotreload will not reload infinitely now. ([#43][i43] [#36][i36])
+- [Feature] Split test fixture into multiple projects, eg. a `simple` folder is used by some simple test cases.
+
+[i36]: https://github.com/lavas-project/lavas/issues/36
+[i38]: https://github.com/lavas-project/lavas/issues/38
+[i43]: https://github.com/lavas-project/lavas/issues/43
+
 ## Lavas-core-vue [1.0.4-rc.1] - 2018-1-17
 
 ### Changed
