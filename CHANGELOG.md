@@ -2,6 +2,12 @@
 
 =======
 
+## Lavas-core-vue [1.1.0] - 2018-1-18
+
+### Changed
+
+- [Fix] New version of `core/index.html.tmpl` can work with older version of lavas correctly
+
 ## Lavas-core-vue [1.0.4-rc.1] - 2018-1-17
 
 ### Changed
