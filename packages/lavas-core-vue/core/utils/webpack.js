@@ -93,3 +93,13 @@ export async function enableHotReload(dir, config, subscribeReload = false) {
         new webpack.NoEmitOnErrorsPlugin()
     );
 }
+
+/**
+ * remove templatedPath which contains [hash] [chunkhash] and [contenthash] in filenames
+ *
+ * @param {string} path original path
+ * @return {string} path path without templated path
+ */
+export function removeTemplatedPath(path) {
+    return path.replace(/\[(chunkhash|contenthash|hash)(:\d?)?\]\./g, '')
+}

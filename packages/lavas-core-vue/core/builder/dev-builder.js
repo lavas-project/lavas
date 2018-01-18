@@ -8,6 +8,7 @@ import MFS from 'memory-fs';
 import chokidar from 'chokidar';
 import {readFileSync} from 'fs-extra';
 import {join, posix} from 'path';
+import {debounce} from 'lodash';
 
 import historyMiddleware from 'connect-history-api-fallback';
 import webpackDevMiddleware from 'webpack-dev-middleware';
@@ -15,7 +16,7 @@ import webpackHotMiddleware from 'webpack-hot-middleware';
 import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
 
 import {LAVAS_CONFIG_FILE, STORE_FILE, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH} from '../constants';
-import {enableHotReload, writeFileInDev} from '../utils/webpack';
+import {enableHotReload, writeFileInDev, removeTemplatedPath} from '../utils/webpack';
 import {routes2Reg} from '../utils/router';
 import {isFromCDN} from '../utils/path';
 
@@ -48,6 +49,14 @@ export default class DevBuilder extends BaseBuilder {
         // in dev mode, ignore CDN publicPath and use default '/' instead.
         config.build.publicPath = isFromCDN(config.build.publicPath)
             ? '/' : config.build.publicPath;
+
+        /**
+         * in dev mode, remove templatedPath which contains [hash] [chunkhash] and [contenthash] in filenames
+         * https://github.com/webpack/webpack/issues/1914#issuecomment-174171709
+         */
+        Object.keys(config.build.filenames).forEach(key => {
+            config.build.filenames[key] = removeTemplatedPath(config.build.filenames[key]);
+        });
     }
 
     /**
@@ -113,9 +122,10 @@ export default class DevBuilder extends BaseBuilder {
 
         // use chokidar to rebuild routes
         let pagesDir = join(globals.rootDir, 'pages');
-        this.addWatcher(pagesDir, ['add', 'unlink'], async () => {
+        let rebuildRoutes = debounce(async () => {
             await this.routeManager.buildRoutes();
-        });
+        }, 200);
+        this.addWatcher(pagesDir, ['add', 'unlink'], rebuildRoutes);
 
         // watch files provides by user
         if (build.watch) {
@@ -139,7 +149,6 @@ export default class DevBuilder extends BaseBuilder {
         let clientCompiler; // compiler for client in ssr and spa
         let serverCompiler; // compiler for server in ssr
         let clientMFS;
-        // let noop = () => {};
         let ssrEnabled = this.config.build.ssr;
 
         await this.routeManager.buildRoutes();
@@ -202,7 +211,9 @@ export default class DevBuilder extends BaseBuilder {
         // prefix all the assets paths with publicPath in MFS
         this.devMiddleware = webpackDevMiddleware(clientCompiler, {
             publicPath: this.config.build.publicPath,
-            noInfo: true
+            noInfo: true,
+            stats: false,
+            logLevel: 'silent'
         });
 
         // set memory-fs used by devMiddleware
@@ -213,8 +224,8 @@ export default class DevBuilder extends BaseBuilder {
         }
 
         hotMiddleware = webpackHotMiddleware(clientCompiler, {
-            heartbeat: 5000,
-            // log: noop
+            heartbeat: 2500,
+            log: false
         });
         /**
          * TODO: hot reload for html
