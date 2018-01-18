@@ -8,6 +8,7 @@
 import merge from 'webpack-merge';
 import {join} from 'path';
 import test from 'ava';
+import {rename} from 'fs-extra';
 import LavasCore from '../../dist';
 import {syncConfig} from '../utils';
 
@@ -106,7 +107,37 @@ test.serial('it should use another config when user has explictly set', async t 
     await core.init('development', true, {config: join(__dirname, '../fixtures/simple/lavas.another.config.js')});
 
     t.deepEqual(core.config.middleware.all, []);
-    t.true(core.config.build.ssr);
+    t.true(!core.config.build.ssr);
     t.is(core.config.build.publicPath, '/lavas2/');
     t.is(core.config.router.base, '/lavas2/');
+});
+
+test.serial('it should read from config directory when lavas.config.js does not exist', async t => {
+    // rename to simulate when it does not exist
+    await rename(
+        join(__dirname, '../fixtures/simple/lavas.config.js'),
+        join(__dirname, '../fixtures/simple/lavas.config.js.bak')
+    );
+    await core.init('development', true);
+
+    t.deepEqual(core.config.middleware.all, []);
+    t.true(!core.config.build.ssr);
+    t.is(core.config.build.publicPath, '/from-dir/');
+    t.is(core.config.router.base, '/from-dir/');
+    t.true(!core.config.build.cssExtract);
+
+    // resume
+    await rename(
+        join(__dirname, '../fixtures/simple/lavas.config.js.bak'),
+        join(__dirname, '../fixtures/simple/lavas.config.js')
+    );
+});
+
+test.serial('it should read from config.json after building', async t => {
+    await core.init('production');
+
+    t.deepEqual(core.config.middleware.all, ['both']);
+    t.true(core.config.build.ssr);
+    t.is(core.config.router.base, '/');
+    t.is(core.config.errorHandler.errorPath, '/error');
 });

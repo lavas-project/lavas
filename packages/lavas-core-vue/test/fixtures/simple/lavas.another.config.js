@@ -15,7 +15,7 @@ module.exports = {
         all: []
     },
     build: {
-        ssr: true,
+        ssr: false,
         publicPath: '/lavas2/',
         path: BUILD_PATH
     },

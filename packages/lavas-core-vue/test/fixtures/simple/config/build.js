@@ -116,6 +116,7 @@ module.exports = {
                     importStatements: [
                         '@import "~@/assets/style/variable.styl";'
                     ]
+                }
             });
         }
     },
