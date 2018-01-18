@@ -1,5 +1,5 @@
 /**
- * @file TestCase for MPA
+ * @file TestCase for #43
  * @author panyuqi@baidu.com (panyuqi)
  */
 
@@ -37,11 +37,24 @@ test.serial('it should run in development mode correctly', async t => {
     app.use(isKoaSupport ? core.koaMiddleware() : core.expressMiddleware());
     server = app.listen(port);
 
-    // serve main.html
+    // serve index.html
     let skeletonContent = `<div data-server-rendered=true class=skeleton-wrapper`
     res = await request(app)
         .get('/index.html');
     t.is(200, res.status);
     // include skeleton
     t.true(res.text.indexOf(skeletonContent) > -1);
+
+    // generate filenames without [hash]
+    let clientMFS = core.builder.devMiddleware.fileSystem;
+    let jsDir = join(__dirname, '../fixtures/simple/dist/static/js');
+    let assets = [
+        'index.js',
+        'vue.js',
+        'vendor.js',
+        'manifest.js'
+    ];
+    assets.forEach(asset => {
+        t.truthy(clientMFS.readFileSync(join(jsDir, asset), 'utf8'));
+    });
 });
