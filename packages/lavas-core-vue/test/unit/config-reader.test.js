@@ -13,12 +13,13 @@ import {syncConfig} from '../utils';
 
 let core;
 
-test.beforeEach('init', async t => {
+test.beforeEach('init', t => {
     core = new LavasCore(join(__dirname, '../fixtures/simple'));
-    await core.init('development', true);
 });
 
-test('it should merge middlewares defined in lavas.config.js and defaults correctly', t => {
+test.serial('it should merge middlewares defined in lavas.config.js and defaults correctly', async t => {
+    await core.init('development', true);
+
     /**
      * default            all: []
      * lavas.config.js    all: ['both']
@@ -27,7 +28,9 @@ test('it should merge middlewares defined in lavas.config.js and defaults correc
     t.deepEqual(core.config.middleware.all, ['both']);
 });
 
-test('it should add a new alias', async t => {
+test.serial('it should add a new alias', async t => {
+    await core.init('development', true);
+
     let config = merge(core.config, {
         build: {
             alias: {
@@ -42,7 +45,9 @@ test('it should add a new alias', async t => {
     t.is(baseConfig.resolve.alias['~~'], 'some-path');
 });
 
-test('it should use a extend function to modify webpack base config directly', async t => {
+test.serial('it should use a extend function to modify webpack base config directly', async t => {
+    await core.init('development', true);
+
     let config = merge(core.config, {
         build: {
             extend(webpackConfig, {type}) {
@@ -59,7 +64,9 @@ test('it should use a extend function to modify webpack base config directly', a
     t.is(baseConfig.plugins[baseConfig.plugins.length - 1], 'NewCustomPlugin');
 });
 
-test('it should use a extend function to modify webpack client config directly', async t => {
+test.serial('it should use a extend function to modify webpack client config directly', async t => {
+    await core.init('development', true);
+
     let config = merge(core.config, {
         build: {
             extend(webpackConfig, {type}) {
@@ -76,7 +83,9 @@ test('it should use a extend function to modify webpack client config directly',
     t.is(clientConfig.plugins[clientConfig.plugins.length - 1], 'NewClientCustomPlugin');
 });
 
-test('it should use a extend function to modify webpack server config directly', async t => {
+test.serial('it should use a extend function to modify webpack server config directly', async t => {
+    await core.init('development', true);
+
     let config = merge(core.config, {
         build: {
             extend(webpackConfig, {type}) {
@@ -91,4 +100,13 @@ test('it should use a extend function to modify webpack server config directly',
 
     let serverConfig = core.builder.webpackConfig.server(config);
     t.is(serverConfig.plugins[serverConfig.plugins.length - 1], 'NewServerCustomPlugin');
+});
+
+test.serial('it should use another config when user has explictly set', async t => {
+    await core.init('development', true, {config: join(__dirname, '../fixtures/simple/lavas.another.config.js')});
+
+    t.deepEqual(core.config.middleware.all, []);
+    t.true(core.config.build.ssr);
+    t.is(core.config.build.publicPath, '/lavas2/');
+    t.is(core.config.router.base, '/lavas2/');
 });
