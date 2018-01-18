@@ -16,7 +16,7 @@ let core;
 let res;
 
 test.beforeEach('init lavas-core & server', async t => {
-    core = new LavasCore(join(__dirname, '../fixtures'));
+    core = new LavasCore(join(__dirname, '../fixtures/simple'));
     app = createApp();
 });
 

@@ -15,7 +15,7 @@ let port = process.env.PORT || 3000;
 let core;
 
 test.beforeEach('init lavas-core & server', async t => {
-    core = new LavasCore(join(__dirname, '../fixtures'));
+    core = new LavasCore(join(__dirname, '../fixtures/simple'));
     app = createApp();
 });
 
@@ -81,7 +81,7 @@ test.serial('it should run in production mode correctly', async t => {
     await core.build();
 
     // start server in production mode
-    core = new LavasCore(join(__dirname, '../fixtures/dist'));
+    core = new LavasCore(join(__dirname, '../fixtures/simple/dist'));
     await core.init('production');
     await core.runAfterBuild();
 

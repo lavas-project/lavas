@@ -124,6 +124,7 @@
     "babel-plugin-dynamic-import-node": "^1.0.2",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-decorators": "^6.24.1",
+    "babel-plugin-transform-imports": "^1.4.1",
     "babel-plugin-transform-runtime": "^6.22.0",
     "babel-polyfill": "^6.23.0",
     "babel-preset-env": "^1.3.2",
@@ -138,6 +139,7 @@
     "nyc": "^10.3.2",
     "semver": "^5.4.1",
     "superkoa": "^1.0.3",
-    "supertest": "^3.0.0"
+    "supertest": "^3.0.0",
+    "vuetify": "^0.17.6"
   }
 }
