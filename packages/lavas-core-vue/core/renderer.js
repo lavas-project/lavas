@@ -55,13 +55,13 @@ export default class Renderer {
      * @param {string} base base url
      * @return {string} templateContent
      */
-    async getTemplate() {
+    async getTemplate(base = '/') {
         let templatePath = this.getTemplatePath();
         if (!await pathExists(templatePath)) {
             throw new Error(`${templatePath} required`);
         }
 
-        return templateUtil.server(await readFile(templatePath, 'utf8'));
+        return templateUtil.server(await readFile(templatePath, 'utf8'), base);
     }
 
     /**
@@ -99,7 +99,7 @@ export default class Renderer {
 
         // copy index.template.html to dist/lavas/
         if (this.config.build.ssr) {
-            let templateContent = await this.getTemplate();
+            let templateContent = await this.getTemplate(this.config.router.base);
             let distTemplatePath = distLavasPath(
                 this.config.build.path,
                 this.getTemplateName()
@@ -152,7 +152,7 @@ export default class Renderer {
             this.serverBundle = JSON.parse(serverBundleContent);
         }
 
-        let templateContent = await this.getTemplate();
+        let templateContent = await this.getTemplate(this.config.router.base);
         if (this.template !== templateContent) {
             changed = true;
             templateChanged = true;
@@ -203,6 +203,7 @@ export default class Renderer {
     async createRenderer() {
         if (this.serverBundle && this.clientManifest) {
             let isFirstTime = !this.renderer;
+            let inject = !/\{\{\{\s*render/.test(this.template);
             this.renderer = createBundleRenderer(
                 this.serverBundle,
                 {
@@ -216,7 +217,7 @@ export default class Renderer {
                         return true;
                     },
                     runInNewContext: false,
-                    inject: true
+                    inject
                 }
             );
 
