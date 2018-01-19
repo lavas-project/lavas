@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<% if (renderMetaFlag) { %>
+<%= "\<% meta = meta.inject() %\>" %>
+<html lang="zh_CN" data-vue-meta-server-rendered {{{ meta.htmlAttrs.text() }}}>
+<% } else { %>
+<html lang="zh_CN" data-vue-meta-server-rendered>
+<% } %>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <% if (renderMetaFlag) { %>
+        {{{ meta.title.text() }}}
+        {{{ meta.meta.text() }}}
+        {{{ meta.link.text() }}}
+        {{{ meta.style.text() }}}
+        {{{ meta.script.text() }}}
+        {{{ meta.noscript.text() }}}
+        <% } %>
+        <% if (renderManifestFlag) { %>
+        <!-- Add to home screen for Android and modern mobile browsers -->
+        <link rel="manifest" href="{{ config.build.publicPath }}static/manifest.json?v={{ config.buildVersion }}">
+        <!-- Add to home screen for Safari on iOS -->
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <% } %>
+
+        {{{ renderResourceHints() }}}
+        {{{ renderStyles() }}}
+
+        <!-- @CUSTOM_HEAD@ -->
+    </head>
+    <% if (renderMetaFlag) { %>
+    <body {{{ meta.bodyAttrs.text() }}}>
+    <% } else { %>
+    <body>
+    <% } %>
+        <!-- @CUSTOM_BODY_BEFORE@ -->
+
+        <!--vue-ssr-outlet-->
+
+        <!-- @CUSTOM_BODY_AFTER@ -->
+
+        {{{ renderScripts() }}}
+        {{{ renderState() }}}
+
+        <%= "\<% if (isProd) { %\>" %>
+        <script>
+            window.onload = function () {
+                var script = document.createElement('script');
+                var firstScript = document.getElementsByTagName('script')[0];
+                script.type = 'text/javascript';
+                script.async = true;
+                script.src = '{{ config.build.publicPath }}sw-register.js?v=' + Date.now();
+                firstScript.parentNode.insertBefore(script, firstScript);
+            };
+        </script>
+        <%= "\<% } %\>" %>
+    </body>
+</html>

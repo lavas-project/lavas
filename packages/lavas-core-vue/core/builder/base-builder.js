@@ -145,9 +145,10 @@ export default class BaseBuilder {
      * use html webpack plugin
      *
      * @param {Object} spaConfig spaConfig
+     * @param {string} baseUrl baseUrl from config/router
      * @param {boolean} watcherEnabled enable watcher
      */
-    async addHtmlPlugin(spaConfig, watcherEnabled) {
+    async addHtmlPlugin(spaConfig, baseUrl = '/', watcherEnabled) {
         // allow user to provide a custom HTML template
         let rootDir = this.config.globals.rootDir;
         let htmlFilename = `${DEFAULT_ENTRY_NAME}.html`;
@@ -160,7 +161,7 @@ export default class BaseBuilder {
         // write HTML template used by html-webpack-plugin which doesn't support template STRING
         let resolvedTemplatePath = await this.writeFileToLavasDir(
             TEMPLATE_HTML,
-            templateUtil.client(await readFile(customTemplatePath, 'utf8'))
+            templateUtil.client(await readFile(customTemplatePath, 'utf8'), baseUrl)
         );
 
         // add html webpack plugin
@@ -185,7 +186,7 @@ export default class BaseBuilder {
             this.addWatcher(customTemplatePath, 'change', async () => {
                 await this.writeFileToLavasDir(
                     TEMPLATE_HTML,
-                    templateUtil.client(await readFile(customTemplatePath, 'utf8'))
+                    templateUtil.client(await readFile(customTemplatePath, 'utf8'), baseUrl)
                 );
             });
         }
@@ -219,7 +220,7 @@ export default class BaseBuilder {
             spaConfig.entry[DEFAULT_ENTRY_NAME] = [`./core/entry-client.js`];
 
             // add html-webpack-plugin
-            await this.addHtmlPlugin(spaConfig, watcherEnabled);
+            await this.addHtmlPlugin(spaConfig, router.base, watcherEnabled);
 
             // if skeleton provided, we need to create an entry
             if (build.skeleton && build.skeleton.enable) {
