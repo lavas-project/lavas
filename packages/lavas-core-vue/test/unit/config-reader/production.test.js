@@ -12,7 +12,7 @@ import LavasCore from '../../../dist';
 
 test('it should read from config.json after building', async t => {
     let core = new LavasCore(join(__dirname, '../../fixtures/simple'));
-    await core.init('development', true);
+    await core.init('production', true);
     await core.build();
 
     core = new LavasCore(join(__dirname, '../../fixtures/simple/dist'));
