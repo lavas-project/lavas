@@ -156,6 +156,7 @@ export default class ConfigReader {
             merge(config, await import(singleConfigPath), mergeArray);
             return config;
         }
+        console.log('[Lavas] config directory is deprecated! Try to use lavas.config.js instead.');
 
         // read from config/
         let configDir = join(this.cwd, 'config');

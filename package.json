@@ -38,7 +38,7 @@
     "concurrency": 1,
     "failFast": true,
     "files": [
-      "packages/lavas-core-vue/test/unit/config-reader.test.js"
+      "packages/lavas-core-vue/test/unit/config-reader/development.directory.test.js"
     ],
     "backupFiles": [
       "packages/lavas-core-vue/test/unit/**/*.test.js",
