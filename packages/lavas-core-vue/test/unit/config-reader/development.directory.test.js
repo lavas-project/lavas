@@ -16,14 +16,14 @@ test('it should read from config directory when lavas.config.js does not exist',
         join(__dirname, '../../fixtures/simple/lavas.config.js'),
         join(__dirname, '../../fixtures/simple/lavas.config.js.bak')
     );
-    let core = new LavasCore(join(__dirname, '../fixtures/simple'));
+    let core = new LavasCore(join(__dirname, '../../fixtures/simple'));
     await core.init('development', true);
 
-    // t.deepEqual(core.config.middleware.all, []);
-    t.true(core.config.build.ssr);
-    // t.is(core.config.build.publicPath, '/from-dir/');
-    // t.is(core.config.router.base, '/from-dir/');
-    // t.true(!core.config.build.cssExtract);
+    t.deepEqual(core.config.middleware.all, []);
+    t.true(!core.config.build.ssr);
+    t.is(core.config.build.publicPath, '/from-dir/');
+    t.is(core.config.router.base, '/from-dir/');
+    t.true(!core.config.build.cssExtract);
 
     // resume
     await rename(

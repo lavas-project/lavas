@@ -32,7 +32,10 @@ export function getWorkboxFiles(isProd) {
  */
 export function useWorkbox(webpackConfig, workboxConfig, lavasConfig) {
     let {swSrc, appshellUrl, appshellUrls} = workboxConfig;
-    let {buildVersion, build: {publicPath, ssr}, globals} = lavasConfig;
+    let {buildVersion, build: {publicPath, ssr}, globals, router: {base = '/'}} = lavasConfig;
+    if (base !== '/' && !base.endsWith('/')) {
+        base += '/';
+    }
 
     // service-worker provided by user
     let serviceWorkerContent = readFileSync(swSrc);
@@ -50,19 +53,35 @@ export function useWorkbox(webpackConfig, workboxConfig, lavasConfig) {
             appshellUrl = appshellUrls[0];
         }
 
-        // add build version to templatedUrls
+        // add build version to templatedUrls and set register clause
         if (appshellUrl) {
+            // add router base
+            if (base !== '/') {
+                if (appshellUrl.startsWith('/')) {
+                    appshellUrl = appshellUrl.substring(1, appshellUrl.length);
+                }
+                appshellUrl = base + appshellUrl;
+            }
+
             workboxConfig.templatedUrls = {
                 [appshellUrl]: `${buildVersion}`
             };
-        }
 
-        registerNavigationClause = `workboxSW.router.registerNavigationRoute('${appshellUrl}');`;
+            registerNavigationClause = `workboxSW.router.registerNavigationRoute('${appshellUrl}');`;
+        }
     }
     else {
-        registerNavigationClause = `workboxSW.router.registerNavigationRoute('/index.html');`;
+        registerNavigationClause = `workboxSW.router.registerNavigationRoute('${base}index.html');`;
     }
-    serviceWorkerContent += registerNavigationClause;
+
+    if (/workboxSW\.precache\(\[\]\);/.test(serviceWorkerContent)) {
+        serviceWorkerContent = serviceWorkerContent.replace(/workboxSW\.precache\(\[\]\);/,
+            `workboxSW.precache([]);\n${registerNavigationClause}\n`);
+    }
+    else {
+        serviceWorkerContent += registerNavigationClause;
+    }
+
 
     // write new service worker in .lavas/sw.js
     let tempSwSrc = join(globals.rootDir, './.lavas', 'sw-temp.js');
