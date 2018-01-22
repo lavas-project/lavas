@@ -3,7 +3,7 @@
  * @author panyuqi (pyqiverson@gmail.com)
  */
 
-import {distLavasPath, assetsPath, resolveAliasPath} from '../../../dist/utils/path';
+import {distLavasPath, assetsPath, resolveAliasPath, isFromCDN, removeTrailingSlash} from '../../../dist/utils/path';
 import {join, sep} from 'path';
 import test from 'ava';
 
@@ -23,4 +23,21 @@ test('it should resolve path with webpack alias', t => {
         '@': '/root'
     };
     t.is(['', 'root', 'components', 'a.vue'].join(sep), resolveAliasPath(alias, '@/components/a.vue'));
+});
+
+// isFromCDN()
+test('it should test whether a path is from CDN', t => {
+    let urlA = 'https://testA.cdn.com/';
+    let urlB = 'http://testB.cdn.com/';
+    let urlC = '//testC.cdn.com/';
+
+    t.true(isFromCDN(urlA));
+    t.true(isFromCDN(urlB));
+    t.true(isFromCDN(urlC));
+});
+
+// removeTrailingSlash
+test('it should remove trailing slash correctly', t => {
+    t.is('foo/bar', removeTrailingSlash('foo/bar/'));
+    t.is('foo/bar', removeTrailingSlash('foo/bar'));
 });
