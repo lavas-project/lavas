@@ -10,22 +10,18 @@ const BUILD_PATH = path.resolve(__dirname, 'dist');
 
 module.exports = {
     middleware: {
-        server: ['server-only'],
-        client: ['client-only'],
-        all: ['both']
+        server: [],
+        client: [],
+        all: []
     },
     build: {
-        ssr: true,
-        path: BUILD_PATH,
-        defines: {
-            base: {
-                'DEFINE_TEST_VAR': '"test-var"'
-            }
-        }
+        ssr: false,
+        publicPath: '/lavas2/',
+        path: BUILD_PATH
     },
     router: {
         mode: 'history',
-        base: '/',
+        base: '/lavas2/',
         pageTransition: {
             type: 'fade',
             transitionClass: 'fade'
@@ -42,7 +38,6 @@ module.exports = {
             'sw-register.js',
             '**/*.map'
         ],
-        appshellUrl: '/appshell',
         dontCacheBustUrlsMatching: /\.\w{8}\./
     }
 };

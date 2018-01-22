@@ -158,6 +158,7 @@ export default class ConfigReader {
         }
 
         // read from config/
+        console.log('[Lavas] config directory is deprecated! Try to use lavas.config.js instead.');
         let configDir = join(this.cwd, 'config');
         let files = glob.sync(
             '**/*.js', {
