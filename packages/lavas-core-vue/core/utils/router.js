@@ -157,6 +157,10 @@ function treeToRouter(tree, parent, {pathRule = 'kebabCase'} = {}) {
             component: info.dir + '.vue'
         };
 
+        if (info.levels.length > 2) {
+            route.entryName = info.levels[1];
+        }
+
         if (!children || children.every(child => !/(\/index)+$/i.test(child.info.dir))) {
             route.name = generateName(info.dir);
         }

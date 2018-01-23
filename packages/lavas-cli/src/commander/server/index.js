@@ -53,6 +53,8 @@ module.exports = function (program) {
             }
             catch (e) {
                 log.warn(`${locals.INPUT_INVALID} ${configPath}`);
+                console.log(e)
+                return;
             }
 
             let appDir = configJson.appDir || utils.getLavasProjectRoot();

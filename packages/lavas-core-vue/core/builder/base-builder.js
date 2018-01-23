@@ -10,7 +10,7 @@ import {join} from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
 
-import {TEMPLATE_HTML, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH, CONFIG_FILE} from '../constants';
+import {TEMPLATE_HTML, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH, CONFIG_FILE, STORE_FILE} from '../constants';
 import {assetsPath} from '../utils/path';
 import * as JsonUtil from '../utils/json';
 import templateUtil from '../utils/template';
@@ -123,6 +123,18 @@ export default class BaseBuilder {
         );
     }
 
+    async writeStore() {
+        const storeTemplate = this.templatesPath('store.tmpl');
+        let isEmpty = !(await pathExists(join(this.config.globals.rootDir, 'store')));
+
+        await this.writeFileToLavasDir(
+            STORE_FILE,
+            template(await readFile(storeTemplate, 'utf8'))({
+                isEmpty
+            })
+        );
+    }
+
     /**
      * write an entry file for a skeleton component
      *
@@ -147,21 +159,32 @@ export default class BaseBuilder {
      * @param {Object} spaConfig spaConfig
      * @param {string} baseUrl baseUrl from config/router
      * @param {boolean} watcherEnabled enable watcher
+     * @param {?string} entryName entry name in MPA, undefined in SPA
      */
-    async addHtmlPlugin(spaConfig, baseUrl = '/', watcherEnabled) {
-        // allow user to provide a custom HTML template
+    async addHtmlPlugin(spaConfig, baseUrl = '/', watcherEnabled, entryName) {
         let rootDir = this.config.globals.rootDir;
-        let htmlFilename = `${DEFAULT_ENTRY_NAME}.html`;
-        let customTemplatePath = join(rootDir, `core/${TEMPLATE_HTML}`);
+        let htmlFilename;
+        let templatePath;
+        let tempTemplatePath;
+        if (entryName) {
+            htmlFilename = `${entryName}.html`;
+            templatePath = join(rootDir, `entries/${entryName}/${TEMPLATE_HTML}`);
+            tempTemplatePath = `${entryName}/${TEMPLATE_HTML}`;
+        }
+        else {
+            htmlFilename = `${DEFAULT_ENTRY_NAME}.html`;
+            templatePath = join(rootDir, `core/${TEMPLATE_HTML}`);
+            tempTemplatePath = TEMPLATE_HTML;
+        }
 
-        if (!await pathExists(customTemplatePath)) {
-            throw new Error(`${TEMPLATE_HTML} required for entry: ${DEFAULT_ENTRY_NAME}`);
+        if (!await pathExists(templatePath)) {
+            throw new Error(`${TEMPLATE_HTML} required for entry: ${entryName || DEFAULT_ENTRY_NAME}`);
         }
 
         // write HTML template used by html-webpack-plugin which doesn't support template STRING
         let resolvedTemplatePath = await this.writeFileToLavasDir(
-            TEMPLATE_HTML,
-            templateUtil.client(await readFile(customTemplatePath, 'utf8'), baseUrl)
+            tempTemplatePath,
+            templateUtil.client(await readFile(templatePath, 'utf8'), baseUrl)
         );
 
         // add html webpack plugin
@@ -177,16 +200,16 @@ export default class BaseBuilder {
             favicon: assetsPath('img/icons/favicon.ico'),
             chunksSortMode: 'dependency',
             cache: false,
-            chunks: ['manifest', 'vue', 'vendor', DEFAULT_ENTRY_NAME],
+            chunks: ['manifest', 'vue', 'vendor', entryName || DEFAULT_ENTRY_NAME],
             config: this.config // use config in template
         }));
 
         // watch template in development mode
         if (watcherEnabled) {
-            this.addWatcher(customTemplatePath, 'change', async () => {
+            this.addWatcher(templatePath, 'change', async () => {
                 await this.writeFileToLavasDir(
-                    TEMPLATE_HTML,
-                    templateUtil.client(await readFile(customTemplatePath, 'utf8'), baseUrl)
+                    tempTemplatePath,
+                    templateUtil.client(await readFile(templatePath, 'utf8'), baseUrl)
                 );
             });
         }
@@ -199,7 +222,7 @@ export default class BaseBuilder {
      * @return {Object} spaConfig webpack config for SPA
      */
     async createSPAConfig(watcherEnabled) {
-        let {globals, build, router} = this.config;
+        let {globals, build, router, entries} = this.config;
         let rootDir = globals.rootDir;
 
         // create spa config based on client config
@@ -215,7 +238,7 @@ export default class BaseBuilder {
          * 1. add a html-webpack-plugin to output a HTML file
          * 2. create an entry if a skeleton component is provided
          */
-        if (!build.ssr) {
+        if (entries.length === 0) {
             // set client entry first
             spaConfig.entry[DEFAULT_ENTRY_NAME] = [`./core/entry-client.js`];
 
@@ -252,6 +275,47 @@ export default class BaseBuilder {
                     }));
                 }
             }
+        }
+        else {
+            await Promise.all(entries.map(async entry => {
+                let entryName = entry.name;
+                // set client entry first
+                spaConfig.entry[entryName] = [`./entries/${entryName}/entry-client.js`];
+
+                // add html-webpack-plugin
+                await this.addHtmlPlugin(spaConfig, router.base, watcherEnabled, entryName);
+
+                // if skeleton provided, we need to create an entry
+                if (build.skeleton && build.skeleton.enable) {
+                    let skeletonConfig;
+                    let skeletonEntries = {};
+                    let skeletonPath;
+                    let skeletonImportPath;
+                    let skeletonRelativePath = build.skeleton.path || DEFAULT_SKELETON_PATH;
+
+                    skeletonPath = join(rootDir, skeletonRelativePath);
+                    skeletonImportPath = `@/${skeletonRelativePath}`;
+
+                    if (await pathExists(skeletonPath)) {
+
+                        // marked as supported at this time
+                        this.skeletonEnabled = true;
+
+                        skeletonEntries[DEFAULT_ENTRY_NAME] = [await this.writeSkeletonEntry(skeletonImportPath)];
+
+                        // when ssr skeleton, we need to extract css from js
+                        skeletonConfig = this.webpackConfig.server({cssExtract: true});
+                        // remove vue-ssr-client plugin
+                        skeletonConfig.plugins.pop();
+                        skeletonConfig.entry = skeletonEntries;
+
+                        // add skeleton plugin
+                        spaConfig.plugins.push(new SkeletonWebpackPlugin({
+                            webpackConfig: skeletonConfig
+                        }));
+                    }
+                }
+            }));
         }
 
         return spaConfig;
