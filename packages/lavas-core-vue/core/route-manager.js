@@ -316,13 +316,19 @@ export default class RouteManager {
      *
      */
     async buildRoutes() {
-        const {routes: routesConfig = [], rewrite: rewriteRules = [], pathRule} = this.config.router;
+        const {routes: routesConfig = [], rewrite: rewriteRules = [], pathRule, entries: entriesConfig} = this.config.router;
         this.flatRoutes = new Set();
 
         console.log('[Lavas] auto compile routes...');
 
         // generate routes according to pages dir
-        this.routes = await generateRoutes(join(this.lavasDir, '../pages'), {routerOption: {pathRule}});
+        this.routes = await generateRoutes(
+            join(this.lavasDir, '../pages'),
+            {
+                routerOption: {pathRule},
+                enableEntry: entriesConfig.length !== 0
+            }
+        );
 
         // merge with routes' config
         this.mergeWithConfig(this.routes, routesConfig, rewriteRules);
