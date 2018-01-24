@@ -22,9 +22,9 @@ export default class ProdBuilder extends BaseBuilder {
      * build in production mode
      */
     async build() {
-        let {build, globals, entries} = this.config;
+        let {build, globals, entries: entriesConfig} = this.config;
 
-        if (build.ssr && entries.length !== 0) {
+        if (build.ssr && entriesConfig.length !== 0) {
             throw new Error('[Lavas] Multi Entries cannot use SSR mode. Try to set ssr to `false`');
             return;
         }
@@ -89,7 +89,7 @@ export default class ProdBuilder extends BaseBuilder {
         }
         // SPA build process
         else {
-            let mode = entries.length === 0 ? 'SPA' : 'MPA';
+            let mode = entriesConfig.length === 0 ? 'SPA' : 'MPA';
             console.log(`[Lavas] ${mode} build starting...`);
             await webpackCompile(await this.createSPAConfig());
             console.log(`[Lavas] ${mode} build completed.`);
