@@ -316,7 +316,7 @@ export default class RouteManager {
      *
      */
     async buildRoutes() {
-        const {routes: routesConfig = [], rewrite: rewriteRules = [], pathRule, entries: entriesConfig} = this.config.router;
+        const {routes: routesConfig = [], rewrite: rewriteRules = [], pathRule} = this.config.router;
         this.flatRoutes = new Set();
 
         console.log('[Lavas] auto compile routes...');
@@ -326,7 +326,7 @@ export default class RouteManager {
             join(this.lavasDir, '../pages'),
             {
                 routerOption: {pathRule},
-                enableEntry: entriesConfig.length !== 0
+                enableEntry: this.config.entries.length !== 0
             }
         );
 
