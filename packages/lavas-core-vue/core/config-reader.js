@@ -209,13 +209,18 @@ export default class ConfigReader {
         if (config.entries.length !== 0) {
             config.entries = config.entries.map(entry => {
                 if (typeof entry === 'string') {
-                    return {
-                        name: entry,
-                        serviceWorker: config.serviceWorker
-                    }
+                    entry = {name: entry};
                 }
 
-                return entry;
+                let finalConfig = {};
+                let urlReg = entry.name === 'index' ? /^\// : new RegExp(`^/${entry.name}`);
+                merge(finalConfig, {
+                    router: config.router,
+                    service: config.serviceWorker,
+                    urlReg
+                }, entry);
+
+                return finalConfig;
             });
         }
 

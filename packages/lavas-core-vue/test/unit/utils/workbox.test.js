@@ -7,7 +7,7 @@ import test from 'ava';
 import {join} from 'path';
 import {readFile, writeFile} from 'fs-extra';
 import merge from 'webpack-merge';
-import {getWorkboxFiles, useWorkbox} from '../../../dist/utils/workbox';
+import {getWorkboxFiles} from '../../../dist/utils/workbox';
 import {syncConfig} from '../../utils';
 import LavasCore from '../../../dist';
 
@@ -149,9 +149,12 @@ test.serial('it should generate service-worker.js in SPA mode with invalid confi
 
     let swTemplatePath = join(__dirname, '../../fixtures/simple/core/service-worker.js');
     let swTemplateContent = await readFile(swTemplatePath, 'utf8');
-    let swTemplateChangedContent = swTemplateContent.replace(/workboxSW\.precache\(\[\]\);/, 'workboxSW.precache([ ]);');
-    await writeFile(swTemplatePath, swTemplateChangedContent, 'utf8');
+    let swTemplateChangedContent = swTemplateContent.replace(
+        /workboxSW\.precache\(\[\]\);/,
+        'workboxSW.precache([ ]);'
+    );
 
+    await writeFile(swTemplatePath, swTemplateChangedContent, 'utf8');
     await core.build();
 
     let swContent = await readFile(join(__dirname, '../../fixtures/simple/dist/service-worker.js'), 'utf8');

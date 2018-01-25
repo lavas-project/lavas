@@ -7,7 +7,6 @@
 
 import {join} from 'path';
 import test from 'ava';
-import {rename} from 'fs-extra';
 import LavasCore from '../../../dist';
 
 test('it should use another config when user has explictly set', async t => {

@@ -135,6 +135,20 @@ export default class BaseBuilder {
         );
     }
 
+    async writeLavasLink() {
+        let lavasLinkTemplate = await readFile(this.templatesPath('LavasLink.js.tmpl'), 'utf8');
+        await this.writeFileToLavasDir('LavasLink.js', template(lavasLinkTemplate)({
+            entryConfig: JsonUtil.stringify(this.config.entries.map(entry => {
+                // only select necessary keys
+                return {
+                    name: entry.name,
+                    urlReg: entry.urlReg,
+                    router: entry.router
+                };
+            }))
+        }));
+    }
+
     /**
      * write an entry file for a skeleton component
      *
@@ -240,7 +254,7 @@ export default class BaseBuilder {
          */
         if (entries.length === 0) {
             // set client entry first
-            spaConfig.entry[DEFAULT_ENTRY_NAME] = [`./core/entry-client.js`];
+            spaConfig.entry[DEFAULT_ENTRY_NAME] = ['./core/entry-client.js'];
 
             // add html-webpack-plugin
             await this.addHtmlPlugin(spaConfig, router.base, watcherEnabled);

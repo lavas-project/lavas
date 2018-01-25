@@ -254,5 +254,5 @@ test('it should generate styleLoaders', async t => {
                 sourceMap: true
             }
         }]
-    }])
+    }]);
 });

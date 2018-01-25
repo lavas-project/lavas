@@ -40,6 +40,7 @@ export default class ProdBuilder extends BaseBuilder {
             await this.writeStore();
         }
         else {
+            await this.writeLavasLink();
             await Promise.all(entriesConfig.map(entry => {
                 let entryName = entry.name;
                 return this.writeStore(entryName);

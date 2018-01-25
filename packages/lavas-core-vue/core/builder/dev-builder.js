@@ -166,6 +166,7 @@ export default class DevBuilder extends BaseBuilder {
             await this.writeStore();
         }
         else {
+            await this.writeLavasLink();
             await Promise.all(entriesConfig.map(entry => {
                 let entryName = entry.name;
                 return this.writeStore(entryName);
@@ -280,26 +281,13 @@ export default class DevBuilder extends BaseBuilder {
             if (entriesConfig.length !== 0) {
                 let rewrites = [];
                 let indexObject;
-                // make index route the last one
-                entriesConfig.forEach(entry => {
-                    let entryName = entry.name;
-                    if (entryName === 'index') {
-                        indexObject = {
-                            from: /\//,
-                            to: `${this.config.build.publicPath}index.html`
-                        };
-                    }
-                    else {
-                        rewrites.push({
-                            from: new RegExp(`\/${entryName}`),
-                            to: `${this.config.build.publicPath}${entryName}.html`
-                        });
-                    }
-                });
 
-                if (indexObject) {
-                    rewrites.push(indexObject);
-                }
+                entriesConfig.forEach(entry => {
+                    rewrites.push({
+                        from: entry.urlReg,
+                        to: `${this.config.build.publicPath}${entry.name}.html`
+                    });
+                });
 
                 historyConfig.rewrites = rewrites;
             }

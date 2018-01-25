@@ -9,12 +9,10 @@ import {merge} from 'lodash';
 import {createBundleRenderer} from 'vue-server-renderer';
 import VueSSRClientPlugin from 'vue-server-renderer/client-plugin';
 
-import {DEFAULT_ENTRY_NAME} from './constants';
 import {distLavasPath} from './utils/path';
 import {webpackCompile, enableHotReload} from './utils/webpack';
 import templateUtil from './utils/template';
-
-import {LAVAS_DIRNAME_IN_DIST, TEMPLATE_HTML, SERVER_BUNDLE, CLIENT_MANIFEST} from './constants';
+import {DEFAULT_ENTRY_NAME, LAVAS_DIRNAME_IN_DIST, TEMPLATE_HTML, SERVER_BUNDLE, CLIENT_MANIFEST} from './constants';
 
 export default class Renderer {
     constructor(core) {

@@ -7,7 +7,7 @@
 
 const path = require('path');
 const fs = require('fs-extra');
-const {fork} = require('child_process');
+const fork = require('child_process').fork;
 const express = require('express');
 const app = express();
 const historyMiddleware = require('connect-history-api-fallback');
@@ -76,7 +76,8 @@ module.exports = function (program) {
             if (config) {
                 options.push(configPath);
             }
-            fork(serverScriptPath, options)
+
+            fork(serverScriptPath, options);
         });
 
     // lavas start
@@ -99,7 +100,7 @@ module.exports = function (program) {
                 process.env.PORT = Number(port);
             }
 
-            fork(serverScriptPath)
+            fork(serverScriptPath);
         });
 
     // lavas static
@@ -107,11 +108,10 @@ module.exports = function (program) {
         command('static')
         .description(locals.START_STATIC)
         .option('-p, --port <port>', locals.START_PORT)
-        .action(async ({port}) => {
+        .action(async ({port = 8000}) => {
             log.info(locals.START_STATIC + '...');
 
             let routesJsonPath = path.resolve(process.cwd(), 'lavas/routes.json');
-            port = port || 8080;
 
             // start static server with lavas routes configured
             if (await fs.pathExists(routesJsonPath)) {

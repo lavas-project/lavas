@@ -181,19 +181,13 @@ export default class RouteManager {
             .replace(/"component": "(_.+)"/mg, '"component": $1');
     }
 
-    /**
-     * write routes.js
-     *
-     */
-    async writeRoutesSourceFile() {
-        let writeFile = this.isDev ? writeFileInDev : outputFile;
+    processRouterConfig(routerConfig) {
         let {
             mode = 'history',
             base = '/',
             pageTransition = {enable: false},
             scrollBehavior
-        } = this.config.router;
-
+        } = routerConfig;
         // set page transition, support 2 types: slide|fade
         let transitionType = pageTransition.type;
         if (transitionType === 'slide') {
@@ -221,10 +215,21 @@ export default class RouteManager {
             scrollBehavior = serialize(scrollBehavior).replace('scrollBehavior(', 'function(');
         }
 
+        return {mode, base, pageTransition, scrollBehavior};
+    }
+
+    /**
+     * write routes.js
+     *
+     */
+    async writeRoutesSourceFile() {
+        let writeFile = this.isDev ? writeFileInDev : outputFile;
+
         if (this.config.entries.length === 0) {
+            let {mode, base, pageTransition, scrollBehavior} = this.processRouterConfig(this.config.router);
             // add errorRoute to the end
             this.routes.push(this.errorRoute);
-            let routesFilePath = join(this.lavasDir, `router.js`);
+            let routesFilePath = join(this.lavasDir, 'router.js');
             let routesContent = this.generateRoutesContent(this.routes);
 
             let routesFileContent = template(await readFile(routerTemplate, 'utf8'))({
@@ -243,6 +248,7 @@ export default class RouteManager {
 
         this.config.entries.forEach(async entry => {
             let entryName = entry.name;
+            let {mode, base, pageTransition, scrollBehavior} = this.processRouterConfig(entry.router);
             let routesFilePath = join(this.lavasDir, `${entryName}/router.js`);
 
             // filter entry routes and flatRoutes

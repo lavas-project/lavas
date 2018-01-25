@@ -149,7 +149,7 @@ function appendToTree(tree, levels, info) {
 function treeToRouter(tree, parent, {pathRule = 'kebabCase'} = {}, enableEntry) {
     let rr = tree.reduce((router, {info, children}) => {
         if (info.type === 'flat') {
-            return router.concat(treeToRouter(children, parent, {pathRule}));
+            return router.concat(treeToRouter(children, parent, {pathRule}, enableEntry));
         }
 
         let route = {
