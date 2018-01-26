@@ -15,12 +15,12 @@ let port = process.env.PORT || 3000;
 let core;
 let res;
 
-test.before('init lavas-core & server', async t => {
+test.beforeEach('init lavas-core & server', async t => {
     core = new LavasCore(join(__dirname, '../fixtures/simple'));
     app = createApp();
 });
 
-test.after('clean', t => {
+test.afterEach('clean', t => {
     server && server.close();
 });
 
@@ -38,12 +38,9 @@ test.serial('it should run in development mode correctly', async t => {
     server = app.listen(port);
 
     // serve index.html
-    let skeletonContent = `<div data-server-rendered=true class=skeleton-wrapper`
     res = await request(app)
         .get('/index.html');
     t.is(200, res.status);
-    // include skeleton
-    t.true(res.text.indexOf(skeletonContent) > -1);
 
     // generate filenames without [hash]
     let clientMFS = core.builder.devMiddleware.fileSystem;

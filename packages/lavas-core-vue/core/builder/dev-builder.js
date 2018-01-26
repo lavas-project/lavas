@@ -17,7 +17,6 @@ import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
 
 import {LAVAS_CONFIG_FILE, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH} from '../constants';
 import {enableHotReload, writeFileInDev, removeTemplatedPath} from '../utils/webpack';
-import {routes2Reg} from '../utils/router';
 import {isFromCDN} from '../utils/path';
 
 import BaseBuilder from './base-builder';
@@ -216,7 +215,8 @@ export default class DevBuilder extends BaseBuilder {
 
             // add skeleton routes
             if (this.skeletonEnabled) {
-                this.addSkeletonRoutes(spaConfig);
+                // TODO: handle skeleton routes in dev mode
+                // this.addSkeletonRoutes(spaConfig);
             }
         }
 

@@ -62,3 +62,15 @@ export function removeTrailingSlash(base) {
     return base.endsWith('/')
         ? base.substring(0, base.length - 1) : base;
 }
+
+/**
+ * convert camelcase to dash
+ *
+ * borrow from https://gist.github.com/youssman/745578062609e8acac9f
+ * @param {string} str string in camel case
+ * @return {string} dash string
+ */
+export function camelCaseToDash(str) {
+    return str.replace(/([a-zA-Z])(?=[A-Z])/g, '$1-')
+        .toLowerCase();
+}
