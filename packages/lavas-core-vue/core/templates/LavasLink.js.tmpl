@@ -1,5 +1,11 @@
 'use strict';
 
+let entryConfig = <%= entryConfig %>;
+// 将entryConfig中的正则复原
+entryConfig.forEach(config => config.urlReg = getRegExp(config.urlReg));
+let base = getBase('<%= base %>');
+let mode = '<%= mode %>';
+
 // 将super-json转化的正则对象复原
 function getRegExp(regExpStr) {
     if (typeof regExpStr === 'string' && regExpStr.indexOf('#!RegExp') === 0) {
@@ -20,15 +26,12 @@ function getEntry({name, url}) {
 // '/some-entry/' -> '/some-entry'
 // '/'' => ''
 function getBase(rawBase = '/') {
-    if (rawBase !== '/' && rawBase.endsWith('/')) {
+    if (rawBase.endsWith('/')) {
         return rawBase.substring(0, rawBase.length - 1);
     }
-}
 
-let entryConfig = <%= entryConfig %>;
-// 将entryConfig中的正则复原
-entryConfig.forEach(config => config.urlReg = getRegExp(config.urlReg));
-let base = getBase('<%= base %>');
+    return rawBase;
+}
 
 export default {
     name: 'lavas-link',
@@ -73,9 +76,9 @@ export default {
         }
 
         // cross entry, use <a>
-        let to = getBase(toEntry.router.base) + this.to
+        let to = base + this.to
 
-        if (toEntry.router.mode === 'hash' && to.indexOf('#') === -1) {
+        if (mode === 'hash' && to.indexOf('#') === -1) {
             to += '#' + to;
         }
 

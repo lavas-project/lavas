@@ -43,7 +43,7 @@ export default class WebpackConfig {
      * @return {Object} webpack base config
      */
     base(buildConfig = {}) {
-        let {globals, build, serviceWorker} = this.config;
+        let {globals, build, serviceWorker, entries} = this.config;
         /* eslint-disable fecs-one-var-per-line */
         let {path, publicPath, filenames, babel, cssSourceMap, cssMinimize,
             cssExtract, jsSourceMap,
@@ -122,7 +122,8 @@ export default class WebpackConfig {
             }),
             new SWRegisterWebpackPlugin({
                 filePath: resolve(__dirname, 'templates/sw-register.js'),
-                prefix: (serviceWorker && serviceWorker.swPath) || publicPath
+                prefix: (serviceWorker && serviceWorker.swPath) || publicPath,
+                entries
             })
         ];
 
