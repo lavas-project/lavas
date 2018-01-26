@@ -19,13 +19,16 @@ function getEntry({name, url}) {
 // remove trailing slash
 // '/some-entry/' -> '/some-entry'
 // '/'' => ''
-function getBase(rawBase) {
-    return rawBase ? rawBase.substring(0, rawBase.length - 1) : '';
+function getBase(rawBase = '/') {
+    if (rawBase !== '/' && rawBase.endsWith('/')) {
+        return rawBase.substring(0, rawBase.length - 1);
+    }
 }
 
 let entryConfig = <%= entryConfig %>;
 // 将entryConfig中的正则复原
 entryConfig.forEach(config => config.urlReg = getRegExp(config.urlReg));
+let base = getBase('<%= base %>');
 
 export default {
     name: 'lavas-link',

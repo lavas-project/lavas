@@ -144,7 +144,8 @@ export default class BaseBuilder {
                     name: entry.name,
                     urlReg: entry.urlReg
                 };
-            }))
+            })),
+            base: this.config.router.base
         }));
     }
 

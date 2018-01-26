@@ -36,7 +36,6 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig) {
     let {swSrc, appshellUrl, appshellUrls} = workboxConfig;
 
     if (entryConfig) {
-        base = entryConfig.router.base || '/';
         swSrc = getEntryConfigValue(swSrc, entryConfig.name);
         workboxConfig.swDest = getEntryConfigValue(workboxConfig.swDest, entryConfig.name);
         workboxConfig.swPath = getEntryConfigValue(workboxConfig.swPath, entryConfig.name);
