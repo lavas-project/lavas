@@ -27,12 +27,21 @@ export function getWorkboxFiles(isProd) {
  * use workbox-webpack-plugin
  *
  * @param {Object} webpackConfig webpack config
- * @param {Object} workboxConfig workbox config
  * @param {Object} lavasConfig lavas config
+ * @param {?Object} entryConfig entry config (undefined when SPA and SSR)
  */
-export function useWorkbox(webpackConfig, workboxConfig, lavasConfig) {
-    let {swSrc, appshellUrl, appshellUrls} = workboxConfig;
+export function useWorkbox(webpackConfig, lavasConfig, entryConfig) {
     let {buildVersion, build: {publicPath, ssr}, globals, router: {base = '/'}} = lavasConfig;
+    let workboxConfig = entryConfig ? entryConfig.serviceWorker : lavasConfig.serviceWorker;
+    let {swSrc, appshellUrl, appshellUrls} = workboxConfig;
+
+    if (entryConfig) {
+        base = entryConfig.router.base || '/';
+        swSrc = getEntryConfigValue(swSrc, entryConfig.name);
+        workboxConfig.swDest = getEntryConfigValue(workboxConfig.swDest, entryConfig.name);
+        workboxConfig.swPath = getEntryConfigValue(workboxConfig.swPath, entryConfig.name);
+    }
+
     if (base !== '/' && !base.endsWith('/')) {
         base += '/';
     }
@@ -71,7 +80,8 @@ export function useWorkbox(webpackConfig, workboxConfig, lavasConfig) {
         }
     }
     else {
-        registerNavigationClause = `workboxSW.router.registerNavigationRoute('${base}index.html');`;
+        let entryHtml = entryConfig ? `${entryConfig.name}.html` : 'index.html';
+        registerNavigationClause = `workboxSW.router.registerNavigationRoute('${base}${entryHtml}');`;
     }
 
     if (/workboxSW\.precache\(\[\]\);/.test(serviceWorkerContent)) {
@@ -84,10 +94,24 @@ export function useWorkbox(webpackConfig, workboxConfig, lavasConfig) {
 
 
     // write new service worker in .lavas/sw.js
-    let tempSwSrc = join(globals.rootDir, './.lavas', 'sw-temp.js');
+    let tempSwSrc = entryConfig
+        ? join(globals.rootDir, './.lavas', entryConfig.name, 'sw-temp.js')
+        : join(globals.rootDir, './.lavas', 'sw-temp.js');
     writeFileSync(tempSwSrc, serviceWorkerContent, 'utf8');
     workboxConfig.swSrc = tempSwSrc;
 
     // use workbox-webpack-plugin@2.x
     webpackConfig.plugins.push(new WorkboxWebpackPlugin(workboxConfig));
+}
+
+/**
+ * replace [entryName] with real value
+ * entries/[entryName]/service-worker.js => entries/index/service-worker.js
+ *
+ * @param {string} value sericeWorker config value
+ * @param {string} entryName entry name
+ * @return {string} real value
+ */
+function getEntryConfigValue(value, entryName) {
+    return value ? value.replace(/\[entryName\]/g, entryName) : undefined;
 }

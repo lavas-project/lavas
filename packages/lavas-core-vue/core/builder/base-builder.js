@@ -142,8 +142,7 @@ export default class BaseBuilder {
                 // only select necessary keys
                 return {
                     name: entry.name,
-                    urlReg: entry.urlReg,
-                    router: entry.router
+                    urlReg: entry.urlReg
                 };
             }))
         }));

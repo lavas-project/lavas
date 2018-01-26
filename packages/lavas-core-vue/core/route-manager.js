@@ -248,7 +248,7 @@ export default class RouteManager {
 
         this.config.entries.forEach(async entry => {
             let entryName = entry.name;
-            let {mode, base, pageTransition, scrollBehavior} = this.processRouterConfig(entry.router);
+            let {mode, base, pageTransition, scrollBehavior} = this.processRouterConfig(this.config.router);
             let routesFilePath = join(this.lavasDir, `${entryName}/router.js`);
 
             // filter entry routes and flatRoutes

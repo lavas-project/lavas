@@ -243,9 +243,19 @@ export default class WebpackConfig {
             ]
         });
 
-        if (this.isProd && workboxConfig) {
-            // Use workbox@2.x in prod mode.
-            useWorkbox(clientConfig, workboxConfig, this.config);
+        // Use workbox@2.x in prod mode.
+        if (this.isProd) {
+            if (this.config.entries.length === 0 && workboxConfig && workboxConfig.enable !== false) {
+                useWorkbox(clientConfig, this.config);
+            }
+
+            if (this.config.entries.length !== 0) {
+                this.config.entries.forEach(entryConfig => {
+                    if (entryConfig.serviceWorker && entryConfig.serviceWorker.enable !== false) {
+                        useWorkbox(clientConfig, this.config, entryConfig);
+                    }
+                })
+            }
         }
 
         // Copy static files to /dist.

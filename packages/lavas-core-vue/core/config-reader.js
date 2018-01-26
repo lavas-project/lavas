@@ -109,7 +109,14 @@ export const RUMTIME_ITEMS = {
     serviceWorker: {
         swDest: true
     },
-    entries: true
+    entries: {
+        name: true,
+        router: true,
+        urlReg: true,
+        serviceWorker: {
+            swDest: true
+        }
+    }
 };
 
 export default class ConfigReader {
@@ -215,8 +222,7 @@ export default class ConfigReader {
                 let finalConfig = {};
                 let urlReg = entry.name === 'index' ? /^\// : new RegExp(`^/${entry.name}`);
                 merge(finalConfig, {
-                    router: config.router,
-                    service: config.serviceWorker,
+                    serviceWorker: config.serviceWorker,
                     urlReg
                 }, entry);
 
