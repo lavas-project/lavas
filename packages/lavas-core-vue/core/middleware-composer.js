@@ -4,6 +4,7 @@
  */
 
 import {join, posix, basename} from 'path';
+import {existsSync} from 'fs-extra';
 import {parse} from 'url';
 import {isFromCDN, removeTrailingSlash} from './utils/path';
 
@@ -102,7 +103,9 @@ export default class MiddlewareComposer {
         if (selectedMiddlewares.includes(INTERNAL_MIDDLEWARE.FAVICON)) {
             // serve favicon
             let faviconPath = posix.join(this.cwd, ASSETS_DIRNAME_IN_DIST, 'img/icons/favicon.ico');
-            this.add(favicon(faviconPath));
+            if (existsSync(faviconPath)) {
+                this.add(favicon(faviconPath));
+            }
         }
 
         // transform express/connect style middleware to koa style

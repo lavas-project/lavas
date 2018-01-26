@@ -1,9 +1,19 @@
 import Vue from 'vue';
-import Skeleton from '<%- skeleton.path %>';
+<% skeletons.forEach(function(skeleton) { %>
+import <%- skeleton.componentName %> from '<%- skeleton.componentPath %>';
+<% }); %>
 
 export default new Vue({
     components: {
-        Skeleton
+        <% skeletons.forEach(function(skeleton) { %>
+        <%- skeleton.componentName %>,
+        <% }); %>
     },
-    template: '<skeleton />'
+    template: `
+        <div>
+            <% skeletons.forEach(function(skeleton) { %>
+            <<%- skeleton.componentNameInDash %> id="<%= skeleton.skeletonId %>" style="display:none"/>
+            <% }); %>
+        </div>
+    `
 });

@@ -5,13 +5,13 @@
 
 import template from 'lodash.template';
 import {readFile, pathExists, copySync} from 'fs-extra';
-import {join} from 'path';
+import {join, basename} from 'path';
 
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
 
 import {TEMPLATE_HTML, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH, CONFIG_FILE} from '../constants';
-import {assetsPath} from '../utils/path';
+import {assetsPath, resolveAliasPath, camelCaseToDash} from '../utils/path';
 import * as JsonUtil from '../utils/json';
 import templateUtil from '../utils/template';
 
@@ -124,20 +124,17 @@ export default class BaseBuilder {
     }
 
     /**
-     * write an entry file for a skeleton component
+     * write an entry file for skeleton components
      *
-     * @param {string} skeletonPath used as import
+     * @param {Array} skeleton routes
      * @return {string} entryPath
      */
-    async writeSkeletonEntry(skeletonPath) {
+    async writeSkeletonEntry(skeletons) {
         const skeletonEntryTemplate = this.templatesPath('entry-skeleton.tmpl');
+
         return await this.writeFileToLavasDir(
             'skeleton.js',
-            template(await readFile(skeletonEntryTemplate, 'utf8'))({
-                skeleton: {
-                    path: skeletonPath
-                }
-            })
+            template(await readFile(skeletonEntryTemplate, 'utf8'))({skeletons})
         );
     }
 
@@ -193,13 +190,112 @@ export default class BaseBuilder {
     }
 
     /**
+     * use vue-skeleton-webpack-plugin
+     *
+     * @param {Object} spaConfig spaConfig
+     */
+    async addSkeletonPlugin(spaConfig) {
+        let {router, skeleton} = this.config;
+        // if skeleton provided, we need to create an entry
+        let skeletonConfig;
+        let skeletonEntries = {};
+
+        // add default skeleton path `@/core/Skeleton.vue`
+        if (!skeleton.routes || !skeleton.routes.length) {
+            skeleton.routes = [{
+                path: '*',
+                componentPath: DEFAULT_SKELETON_PATH
+            }];
+        }
+
+        // check if all the componentPaths are existed first
+        let error = await this.validateSkeletonRoutes(skeleton.routes, spaConfig.resolve.alias);
+        if (error && error.msg) {
+            console.error(error.msg);
+        }
+        else {
+            // generate skeletonId based on componentPath
+            skeleton.routes.forEach(route => {
+                route.componentName = basename(route.componentPath, '.vue');
+                route.componentNameInDash = camelCaseToDash(route.componentName);
+                route.skeletonId = route.skeletonId || route.componentNameInDash;
+            });
+
+            // marked as supported at this time
+            this.skeletonEnabled = true;
+
+            skeletonEntries[DEFAULT_ENTRY_NAME] = [await this.writeSkeletonEntry(skeleton.routes)];
+
+            // when ssr skeleton, we need to extract css from js
+            skeletonConfig = this.webpackConfig.server({cssExtract: true});
+            // TODO: remove vue-ssr-client plugin
+            skeletonConfig.plugins.pop();
+            skeletonConfig.entry = skeletonEntries;
+
+            // add skeleton plugin
+            spaConfig.plugins.push(new SkeletonWebpackPlugin({
+                webpackConfig: skeletonConfig,
+                quiet: true,
+                router: {
+                    mode: router.mode,
+                    routes: skeleton.routes
+                },
+                minimize: !this.isDev
+            }));
+        }
+    }
+
+    /**
+     * validate skeleton.router.routes
+     *
+     * @param {Array} routes routes for skeleton
+     * @param {Object} alias alias in webpack
+     * @return {boolean|Object} error error
+     */
+    async validateSkeletonRoutes(routes, alias) {
+        let currentRoute;
+        let resolvedPaths = [];
+        let isComponentPathResolved;
+        for (let i = 0; i < routes.length; i++) {
+            currentRoute = routes[i];
+
+            if (!currentRoute.componentPath) {
+                return {
+                    msg: `[Lavas] componentPath for ${currentRoute.path} is required.`
+                };
+            }
+
+            // try to resolve componentPath with rootDir and webpack alias
+            isComponentPathResolved = false;
+            resolvedPaths = [
+                join(this.config.globals.rootDir, currentRoute.componentPath),
+                resolveAliasPath(alias, currentRoute.componentPath)
+            ]
+            for (let j = 0; j < resolvedPaths.length; j++) {
+                if (await pathExists(resolvedPaths[j])) {
+                    currentRoute.componentPath = resolvedPaths[j];
+                    isComponentPathResolved = true;
+                    break;
+                }
+            }
+
+            if (!isComponentPathResolved) {
+                return {
+                    msg: `[Lavas] ${currentRoute.componentPath} is not existed during the process of generating skeleton.`
+                };
+            }
+        }
+        return false;
+    }
+
+    /**
      * create a webpack config which will be compiled later
      *
      * @param {boolean} watcherEnabled enable watcher
      * @return {Object} spaConfig webpack config for SPA
      */
     async createSPAConfig(watcherEnabled) {
-        let {globals, build, router} = this.config;
+        let {globals, build, router, skeleton} = this.config;
         let rootDir = globals.rootDir;
 
         // create spa config based on client config
@@ -222,35 +318,9 @@ export default class BaseBuilder {
             // add html-webpack-plugin
             await this.addHtmlPlugin(spaConfig, router.base, watcherEnabled);
 
-            // if skeleton provided, we need to create an entry
-            if (build.skeleton && build.skeleton.enable) {
-                let skeletonConfig;
-                let skeletonEntries = {};
-                let skeletonPath;
-                let skeletonImportPath;
-                let skeletonRelativePath = build.skeleton.path || DEFAULT_SKELETON_PATH;
-
-                skeletonPath = join(rootDir, skeletonRelativePath);
-                skeletonImportPath = `@/${skeletonRelativePath}`;
-
-                if (await pathExists(skeletonPath)) {
-
-                    // marked as supported at this time
-                    this.skeletonEnabled = true;
-
-                    skeletonEntries[DEFAULT_ENTRY_NAME] = [await this.writeSkeletonEntry(skeletonImportPath)];
-
-                    // when ssr skeleton, we need to extract css from js
-                    skeletonConfig = this.webpackConfig.server({cssExtract: true});
-                    // remove vue-ssr-client plugin
-                    skeletonConfig.plugins.pop();
-                    skeletonConfig.entry = skeletonEntries;
-
-                    // add skeleton plugin
-                    spaConfig.plugins.push(new SkeletonWebpackPlugin({
-                        webpackConfig: skeletonConfig
-                    }));
-                }
+            // add vue-skeleton-webpack-plugin
+            if (skeleton && skeleton.enable) {
+                await this.addSkeletonPlugin(spaConfig);
             }
         }
 
