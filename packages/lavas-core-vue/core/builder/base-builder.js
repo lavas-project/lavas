@@ -5,7 +5,7 @@
 
 import template from 'lodash.template';
 import {readFile, pathExists, copySync} from 'fs-extra';
-import {join, basename} from 'path';
+import {join, basename, normalize} from 'path';
 
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
@@ -273,7 +273,9 @@ export default class BaseBuilder {
             ]
             for (let j = 0; j < resolvedPaths.length; j++) {
                 if (await pathExists(resolvedPaths[j])) {
-                    currentRoute.componentPath = resolvedPaths[j];
+                    // in Windows, normalize will replace posix.sep`/` with win32.sep`\\`
+                    currentRoute.componentPath = normalize(resolvedPaths[j])
+                        .replace(/\\/g, '\\\\'); // escape backslash before writing to skeleton template
                     isComponentPathResolved = true;
                     break;
                 }
