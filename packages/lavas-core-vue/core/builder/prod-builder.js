@@ -41,10 +41,7 @@ export default class ProdBuilder extends BaseBuilder {
         }
         else {
             await this.writeLavasLink();
-            await Promise.all(entriesConfig.map(entry => {
-                let entryName = entry.name;
-                return this.writeStore(entryName);
-            }));
+            await Promise.all(entriesConfig.map(entry => this.writeStore()));
         }
 
         // SSR build process
