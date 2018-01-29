@@ -73,6 +73,7 @@ const DEFAULT_CONFIG = {
         server: [],
         client: []
     },
+    entries: [],
     serviceWorker: null,
     production: {
         build: {
@@ -107,6 +108,14 @@ export const RUMTIME_ITEMS = {
     errorHandler: true,
     serviceWorker: {
         swDest: true
+    },
+    entries: {
+        name: true,
+        router: true,
+        urlReg: true,
+        serviceWorker: {
+            swDest: true
+        }
     }
 };
 
@@ -145,7 +154,7 @@ export default class ConfigReader {
             console.log(`[Lavas] use custom config: ${this.customConfigPath}`);
             delete require.cache[require.resolve(this.customConfigPath)];
             merge(config, await import(this.customConfigPath), mergeArray);
-            return config;
+            return this.processEntryConfig(config);
         }
 
         // read from lavas.config.js
@@ -154,7 +163,7 @@ export default class ConfigReader {
             console.log('[Lavas] read lavas.config.js.');
             delete require.cache[require.resolve(singleConfigPath)];
             merge(config, await import(singleConfigPath), mergeArray);
-            return config;
+            return this.processEntryConfig(config);
         }
 
         // read from config/
@@ -198,6 +207,27 @@ export default class ConfigReader {
         // merge config according env
         if (temp[this.env]) {
             merge(config, temp[this.env], mergeArray);
+        }
+
+        return this.processEntryConfig(config);
+    }
+
+    processEntryConfig(config) {
+        if (config.entries.length !== 0) {
+            config.entries = config.entries.map(entry => {
+                if (typeof entry === 'string') {
+                    entry = {name: entry};
+                }
+
+                let finalConfig = {};
+                let urlReg = entry.name === 'index' ? /^\// : new RegExp(`^/${entry.name}`);
+                merge(finalConfig, {
+                    serviceWorker: config.serviceWorker,
+                    urlReg
+                }, entry);
+
+                return finalConfig;
+            });
         }
 
         return config;

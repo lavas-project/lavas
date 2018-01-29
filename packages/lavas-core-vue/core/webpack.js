@@ -43,7 +43,7 @@ export default class WebpackConfig {
      * @return {Object} webpack base config
      */
     base(buildConfig = {}) {
-        let {globals, build, serviceWorker} = this.config;
+        let {globals, build, serviceWorker, entries} = this.config;
         /* eslint-disable fecs-one-var-per-line */
         let {path, publicPath, filenames, babel, cssSourceMap, cssMinimize,
             cssExtract, jsSourceMap,
@@ -122,7 +122,8 @@ export default class WebpackConfig {
             }),
             new SWRegisterWebpackPlugin({
                 filePath: resolve(__dirname, 'templates/sw-register.js'),
-                prefix: (serviceWorker && serviceWorker.swPath) || publicPath
+                prefix: (serviceWorker && serviceWorker.swPath) || publicPath,
+                entries
             })
         ];
 
@@ -243,9 +244,19 @@ export default class WebpackConfig {
             ]
         });
 
-        if (this.isProd && workboxConfig) {
-            // Use workbox@2.x in prod mode.
-            useWorkbox(clientConfig, workboxConfig, this.config);
+        // Use workbox@2.x in prod mode.
+        if (this.isProd) {
+            if (this.config.entries.length === 0 && workboxConfig && workboxConfig.enable !== false) {
+                useWorkbox(clientConfig, this.config);
+            }
+
+            if (this.config.entries.length !== 0) {
+                this.config.entries.forEach(entryConfig => {
+                    if (entryConfig.serviceWorker && entryConfig.serviceWorker.enable !== false) {
+                        useWorkbox(clientConfig, this.config, entryConfig);
+                    }
+                })
+            }
         }
 
         // Copy static files to /dist.

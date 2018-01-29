@@ -13,7 +13,10 @@ import Vuex from 'vuex';
 
 Vue.use(Vuex);
 
-// find all files in {srcDir}/store
+<% if (isEmpty) { %>
+export const createStore = () => new Vuex.Store();
+<% } else { %>
+// find all files in /store
 const files = require.context('@/store', true, /^\.\/.*\.js$/);
 const filenames = files.keys();
 
@@ -105,3 +108,5 @@ function getModuleNamespace(storeData, paths) {
 
     return getModuleNamespace(nsModule, paths);
 }
+
+<% } %>

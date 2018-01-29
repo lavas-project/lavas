@@ -36,8 +36,7 @@ export function createApp() {
         const Koa = require('koa');
         return new Koa();
     }
-    else {
-        const express = require('express');
-        return express();
-    }
+
+    const express = require('express');
+    return express();
 }

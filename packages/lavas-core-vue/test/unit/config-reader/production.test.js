@@ -7,7 +7,6 @@
 
 import {join} from 'path';
 import test from 'ava';
-import {rename} from 'fs-extra';
 import LavasCore from '../../../dist';
 
 test('it should read from config.json after building', async t => {

@@ -2,6 +2,12 @@
 
 =======
 
+## Lavas-core-vue [1.0.6-rc.6] - 2018-1-29
+
+### Changed
+
+- [Feature] Support MPA (multi entries with ssr: `false`)
+
 ## Lavas-core-vue [1.0.4] - 2018-1-18
 
 ### Changed

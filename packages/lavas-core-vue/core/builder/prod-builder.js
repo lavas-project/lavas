@@ -6,7 +6,7 @@
 import {emptyDir, outputFile, copy, readFileSync} from 'fs-extra';
 import {join} from 'path';
 
-import {CONFIG_FILE, STORE_FILE} from '../constants';
+import {CONFIG_FILE} from '../constants';
 import {webpackCompile} from '../utils/webpack';
 import {distLavasPath} from '../utils/path';
 
@@ -22,17 +22,27 @@ export default class ProdBuilder extends BaseBuilder {
      * build in production mode
      */
     async build() {
-        let {build, globals} = this.config;
+        let {build, globals, entries: entriesConfig} = this.config;
+
+        if (build.ssr && entriesConfig.length !== 0) {
+            throw new Error('[Lavas] Multi Entries cannot use SSR mode. Try to set ssr to `false`');
+            return;
+        }
+
         // clear dist/ first
         await emptyDir(build.path);
 
         await this.routeManager.buildRoutes();
         await this.writeRuntimeConfig();
-        await this.writeMiddleware();
-        await this.writeFileToLavasDir(
-            STORE_FILE,
-            readFileSync(join(__dirname, `../templates/${STORE_FILE}`))
-        );
+        // write middleware.js & store.js
+        if (entriesConfig.length === 0) {
+            await this.writeMiddleware();
+            await this.writeStore();
+        }
+        else {
+            await this.writeLavasLink();
+            await Promise.all(entriesConfig.map(entry => this.writeStore()));
+        }
 
         // SSR build process
         if (build.ssr) {
@@ -77,9 +87,10 @@ export default class ProdBuilder extends BaseBuilder {
         }
         // SPA build process
         else {
-            console.log('[Lavas] SPA build starting...');
+            let mode = entriesConfig.length === 0 ? 'SPA' : 'MPA';
+            console.log(`[Lavas] ${mode} build starting...`);
             await webpackCompile(await this.createSPAConfig());
-            console.log('[Lavas] SPA build completed.');
+            console.log(`[Lavas] ${mode} build completed.`);
         }
     }
 }

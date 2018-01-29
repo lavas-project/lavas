@@ -38,7 +38,7 @@ test.serial('it should run in development mode correctly', async t => {
     server = app.listen(port);
 
     // serve main.html
-    let skeletonContent = `<div data-server-rendered=true>`;
+    let skeletonContent = '<div data-server-rendered=true>';
     res = await request(app)
         .get('/index.html');
     t.is(200, res.status);

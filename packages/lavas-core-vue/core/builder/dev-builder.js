@@ -15,7 +15,7 @@ import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
 
-import {LAVAS_CONFIG_FILE, STORE_FILE, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH} from '../constants';
+import {LAVAS_CONFIG_FILE, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH} from '../constants';
 import {enableHotReload, writeFileInDev, removeTemplatedPath} from '../utils/webpack';
 import {isFromCDN} from '../utils/path';
 
@@ -149,14 +149,25 @@ export default class DevBuilder extends BaseBuilder {
         let serverCompiler; // compiler for server in ssr
         let clientMFS;
         let ssrEnabled = this.config.build.ssr;
+        let entriesConfig = this.config.entries;
+
+        if (ssrEnabled && entriesConfig.length !== 0) {
+            throw new Error('[Lavas] Multi Entries cannot use SSR mode. Try to set ssr to `false`');
+            return;
+        }
 
         await this.routeManager.buildRoutes();
         await this.writeRuntimeConfig();
-        await this.writeMiddleware();
-        await this.writeFileToLavasDir(
-            STORE_FILE,
-            readFileSync(join(__dirname, `../templates/${STORE_FILE}`))
-        );
+
+        // write middleware.js & store.js
+        if (entriesConfig.length === 0) {
+            await this.writeMiddleware();
+            await this.writeStore();
+        }
+        else {
+            await this.writeLavasLink();
+            await Promise.all(entriesConfig.map(entry => this.writeStore()));
+        }
 
         // SSR build process
         if (ssrEnabled) {
@@ -190,7 +201,9 @@ export default class DevBuilder extends BaseBuilder {
         }
         // SPA build process
         else {
-            console.log('[Lavas] SPA build starting...');
+            let mode = entriesConfig.length === 0 ? 'SPA' : 'MPA';
+
+            console.log(`[Lavas] ${mode} build starting...`);
             // create spa config first
             spaConfig = await this.createSPAConfig(true);
 
@@ -255,12 +268,28 @@ export default class DevBuilder extends BaseBuilder {
              * we should put this middleware in front of dev middleware since
              * it will rewrite req.url to xxx.html based on options.rewrites
              */
-            this.core.middlewareComposer.add(historyMiddleware({
+            let historyConfig = {
                 htmlAcceptHeaders: ['text/html'],
                 disableDotRule: false, // ignore paths with dot inside
                 // verbose: true,
                 index: `${this.config.build.publicPath}${DEFAULT_ENTRY_NAME}.html`
-            }));
+            };
+
+            if (entriesConfig.length !== 0) {
+                let rewrites = [];
+                let indexObject;
+
+                entriesConfig.forEach(entry => {
+                    rewrites.push({
+                        from: entry.urlReg,
+                        to: `${this.config.build.publicPath}${entry.name}.html`
+                    });
+                });
+
+                historyConfig.rewrites = rewrites;
+            }
+
+            this.core.middlewareComposer.add(historyMiddleware(historyConfig));
         }
 
         // add dev & hot-reload middlewares
@@ -271,7 +300,8 @@ export default class DevBuilder extends BaseBuilder {
         await new Promise(resolve => {
             this.devMiddleware.waitUntilValid(async () => {
                 if (!ssrEnabled) {
-                    console.log('[Lavas] SPA build completed.');
+                    let mode = entriesConfig.length === 0 ? 'SPA' : 'MPA';
+                    console.log(`[Lavas] ${mode} build completed.`);
                 }
                 else {
                     await this.renderer.refreshFiles();

@@ -4,7 +4,7 @@
  */
 
 import {distLavasPath, assetsPath, resolveAliasPath, isFromCDN, removeTrailingSlash} from '../../../dist/utils/path';
-import {join, sep} from 'path';
+import {sep} from 'path';
 import test from 'ava';
 
 // distLavasPath()
