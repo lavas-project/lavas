@@ -53,7 +53,9 @@
     ]
   },
   "nyc": {
-    "exclude": ["packages/lavas-core-vue/test/**/*.js"]
+    "exclude": [
+      "packages/lavas-core-vue/test/**/*.js"
+    ]
   },
   "dependencies": {
     "ajv": "^5.1.3",
