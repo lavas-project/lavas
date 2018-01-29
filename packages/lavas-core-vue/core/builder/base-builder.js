@@ -179,7 +179,7 @@ export default class BaseBuilder {
         let templatePath;
         let tempTemplatePath;
         if (entryName) {
-            htmlFilename = `${entryName}.html`;
+            htmlFilename = `${entryName}/${entryName}.html`;
             templatePath = join(rootDir, `entries/${entryName}/${TEMPLATE_HTML}`);
             tempTemplatePath = `${entryName}/${TEMPLATE_HTML}`;
         }
