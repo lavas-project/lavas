@@ -15,7 +15,7 @@ import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
 
-import {LAVAS_CONFIG_FILE, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH} from '../constants';
+import {LAVAS_CONFIG_FILE, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH, BUILD_SCRIPT} from '../constants';
 import {enableHotReload, writeFileInDev, removeTemplatedPath} from '../utils/webpack';
 import {isFromCDN} from '../utils/path';
 
@@ -158,6 +158,10 @@ export default class DevBuilder extends BaseBuilder {
 
         await this.routeManager.buildRoutes();
         await this.writeRuntimeConfig();
+        await this.writeFileToLavasDir(
+            BUILD_SCRIPT,
+            readFileSync(join(__dirname, `../templates/${BUILD_SCRIPT}`))
+        );
 
         // write middleware.js & store.js
         if (entriesConfig.length === 0) {
@@ -282,7 +286,7 @@ export default class DevBuilder extends BaseBuilder {
                 entriesConfig.forEach(entry => {
                     rewrites.push({
                         from: entry.urlReg,
-                        to: `${this.config.build.publicPath}${entry.name}.html`
+                        to: `${this.config.build.publicPath}${entry.name}/${entry.name}.html`
                     });
                 });
 
