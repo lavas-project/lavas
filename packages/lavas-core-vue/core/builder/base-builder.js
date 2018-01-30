@@ -158,11 +158,9 @@ export default class BaseBuilder {
      */
     async writeSkeletonEntry(skeletons, entryName) {
         const skeletonEntryTemplate = this.templatesPath('entry-skeleton.tmpl');
-        let a = template(await readFile(skeletonEntryTemplate, 'utf8'))({skeletons});
-        console.log(a)
         return await this.writeFileToLavasDir(
             `${entryName}/skeleton.js`,
-            a
+            template(await readFile(skeletonEntryTemplate, 'utf8'))({skeletons})
         );
     }
 
