@@ -209,7 +209,7 @@ export default class DevBuilder extends BaseBuilder {
 
             console.log(`[Lavas] ${mode} build starting...`);
             // create spa config first
-            spaConfig = await this.createSPAConfig(true);
+            spaConfig = await this.createSPAConfig(true, mode === 'SPA');
 
             // enable hotreload in every entry in dev mode
             await enableHotReload(this.lavasPath(), spaConfig, true);
