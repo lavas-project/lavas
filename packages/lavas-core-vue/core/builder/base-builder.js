@@ -156,11 +156,10 @@ export default class BaseBuilder {
      * @param {Array} skeleton routes
      * @return {string} entryPath
      */
-    async writeSkeletonEntry(skeletons) {
+    async writeSkeletonEntry(skeletons, entryName) {
         const skeletonEntryTemplate = this.templatesPath('entry-skeleton.tmpl');
-
         return await this.writeFileToLavasDir(
-            'skeleton.js',
+            `${entryName}/skeleton.js`,
             template(await readFile(skeletonEntryTemplate, 'utf8'))({skeletons})
         );
     }
@@ -173,12 +172,12 @@ export default class BaseBuilder {
      * @param {boolean} watcherEnabled enable watcher
      * @param {?string} entryName entry name in MPA, undefined in SPA
      */
-    async addHtmlPlugin(spaConfig, baseUrl = '/', watcherEnabled, entryName) {
+    async addHtmlPlugin(spaConfig, baseUrl = '/', watcherEnabled, isSPA, entryName) {
         let rootDir = this.config.globals.rootDir;
         let htmlFilename;
         let templatePath;
         let tempTemplatePath;
-        if (entryName) {
+        if (!isSPA) {
             htmlFilename = `${entryName}/${entryName}.html`;
             templatePath = join(rootDir, `entries/${entryName}/${TEMPLATE_HTML}`);
             tempTemplatePath = `${entryName}/${TEMPLATE_HTML}`;
@@ -231,39 +230,66 @@ export default class BaseBuilder {
      * use vue-skeleton-webpack-plugin
      *
      * @param {Object} spaConfig spaConfig
+     * @param {?string} entryName entry name in MPA, undefined in SPA
      */
-    async addSkeletonPlugin(spaConfig) {
-        let {router, skeleton} = this.config;
+    async addSkeletonPlugin(spaConfig, isSPA) {
+        let {router, skeleton, entries} = this.config;
         // if skeleton provided, we need to create an entry
         let skeletonConfig;
         let skeletonEntries = {};
+        let routes = [];
 
-        // add default skeleton path `@/core/Skeleton.vue`
-        if (!skeleton.routes || !skeleton.routes.length) {
-            skeleton.routes = [{
-                path: '*',
-                componentPath: DEFAULT_SKELETON_PATH
+        if (isSPA && (!skeleton || !skeleton.enable)) {
+            return;
+        }
+
+        // compatible with SPA
+        if (isSPA) {
+            entries = [{
+                name: DEFAULT_ENTRY_NAME,
+                skeleton,
+                defaultSkeletonInSPA: DEFAULT_SKELETON_PATH
             }];
         }
 
-        // check if all the componentPaths are existed first
-        let error = await this.validateSkeletonRoutes(skeleton.routes, spaConfig.resolve.alias);
-        if (error && error.msg) {
-            console.error(error.msg);
-        }
-        else {
-            // generate skeletonId based on componentPath
-            skeleton.routes.forEach(route => {
-                route.componentName = basename(route.componentPath, '.vue');
-                route.componentNameInDash = camelCaseToDash(route.componentName);
-                route.skeletonId = route.skeletonId || route.componentNameInDash;
-            });
+        for (let i = 0; i < entries.length; i++) {
+            let {name, skeleton, defaultSkeletonInSPA} = entries[i];
 
-            // marked as supported at this time
-            this.skeletonEnabled = true;
+            if (skeleton && skeleton.enable !== false) {
+                // add default skeleton path `@/core/Skeleton.vue`
+                if (!skeleton.routes || !skeleton.routes.length) {
+                    skeleton.routes = [{
+                        path: '*',
+                        componentPath: defaultSkeletonInSPA || `entries/${name}/Skeleton.vue`
+                    }];
+                }
+                // check if all the componentPaths are existed first
+                let error = await this.validateSkeletonRoutes(skeleton.routes, spaConfig.resolve.alias);
+                if (error && error.msg) {
+                    console.error(error.msg);
+                }
+                else {
+                    // generate skeletonId based on componentPath
+                    skeleton.routes.forEach(route => {
+                        route.componentName = basename(route.componentPath, '.vue');
+                        route.componentNameInDash = camelCaseToDash(route.componentName);
+                        route.skeletonId = route.skeletonId || route.componentNameInDash;
+                        // mark current entryName in MPA
+                        route.entryName = name;
+                    });
 
-            skeletonEntries[DEFAULT_ENTRY_NAME] = [await this.writeSkeletonEntry(skeleton.routes)];
+                    // marked as supported at this time
+                    this.skeletonEnabled = true;
 
+                    // in MPA
+                    skeletonEntries[name] = [await this.writeSkeletonEntry(skeleton.routes, name)];
+
+                    routes = routes.concat(skeleton.routes);
+                }
+            }
+        };
+
+        if (routes.length) {
             // when ssr skeleton, we need to extract css from js
             skeletonConfig = this.webpackConfig.server({cssExtract: true});
             // TODO: remove vue-ssr-client plugin
@@ -276,7 +302,7 @@ export default class BaseBuilder {
                 quiet: true,
                 router: {
                     mode: router.mode,
-                    routes: skeleton.routes
+                    routes
                 },
                 minimize: !this.isDev
             }));
@@ -332,10 +358,11 @@ export default class BaseBuilder {
      * create a webpack config which will be compiled later
      *
      * @param {boolean} watcherEnabled enable watcher
+     * @param {boolean} isSPA SPA or MPA
      * @return {Object} spaConfig webpack config for SPA
      */
-    async createSPAConfig(watcherEnabled) {
-        let {globals, build, router, skeleton, entries} = this.config;
+    async createSPAConfig(watcherEnabled, isSPA) {
+        let {globals, build, router, entries} = this.config;
         let rootDir = globals.rootDir;
 
         // create spa config based on client config
@@ -346,64 +373,32 @@ export default class BaseBuilder {
         spaConfig.name = 'spaclient';
         spaConfig.context = rootDir;
 
+        if (isSPA) {
+            entries = [{
+                name: DEFAULT_ENTRY_NAME
+            }];
+        }
+
         /**
-         * for SPA, we will:
+         * for SPA & MPA, we will:
          * 1. add a html-webpack-plugin to output a HTML file
          * 2. create an entry if a skeleton component is provided
          */
-        if (entries.length === 0) {
+        let entryNames = [];
+        await Promise.all(entries.map(async entry => {
+            let entryName = entry.name;
+            entryNames.push(entryName);
             // set client entry first
-            spaConfig.entry[DEFAULT_ENTRY_NAME] = ['./core/entry-client.js'];
+            spaConfig.entry[entryName] = [
+                isSPA ? './core/entry-client.js' : `./entries/${entryName}/entry-client.js`
+            ];
 
-            // add html-webpack-plugin
-            await this.addHtmlPlugin(spaConfig, router.base, watcherEnabled);
+            // 1. add html-webpack-plugin
+            await this.addHtmlPlugin(spaConfig, router.base, watcherEnabled, isSPA, entryName);
+        }));
 
-            // add vue-skeleton-webpack-plugin
-            if (skeleton && skeleton.enable) {
-                await this.addSkeletonPlugin(spaConfig);
-            }
-        }
-        else {
-            await Promise.all(entries.map(async entry => {
-                let entryName = entry.name;
-                // set client entry first
-                spaConfig.entry[entryName] = [`./entries/${entryName}/entry-client.js`];
-
-                // add html-webpack-plugin
-                await this.addHtmlPlugin(spaConfig, router.base, watcherEnabled, entryName);
-
-                // if skeleton provided, we need to create an entry
-                if (build.skeleton && build.skeleton.enable) {
-                    let skeletonConfig;
-                    let skeletonEntries = {};
-                    let skeletonPath;
-                    let skeletonImportPath;
-                    let skeletonRelativePath = build.skeleton.path || DEFAULT_SKELETON_PATH;
-
-                    skeletonPath = join(rootDir, skeletonRelativePath);
-                    skeletonImportPath = `@/${skeletonRelativePath}`;
-
-                    if (await pathExists(skeletonPath)) {
-
-                        // marked as supported at this time
-                        this.skeletonEnabled = true;
-
-                        skeletonEntries[DEFAULT_ENTRY_NAME] = [await this.writeSkeletonEntry(skeletonImportPath)];
-
-                        // when ssr skeleton, we need to extract css from js
-                        skeletonConfig = this.webpackConfig.server({cssExtract: true});
-                        // remove vue-ssr-client plugin
-                        skeletonConfig.plugins.pop();
-                        skeletonConfig.entry = skeletonEntries;
-
-                        // add skeleton plugin
-                        spaConfig.plugins.push(new SkeletonWebpackPlugin({
-                            webpackConfig: skeletonConfig
-                        }));
-                    }
-                }
-            }));
-        }
+        // 2. add vue-skeleton-webpack-plugin
+        await this.addSkeletonPlugin(spaConfig, isSPA);
 
         return spaConfig;
     }
