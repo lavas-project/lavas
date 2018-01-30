@@ -116,7 +116,7 @@
     "vue-meta": "^1.0.5",
     "vue-router": "^2.7.0",
     "vue-server-renderer": "^2.5.2",
-    "vue-skeleton-webpack-plugin": "^1.1.9",
+    "vue-skeleton-webpack-plugin": "^1.1.10",
     "vue-template-compiler": "^2.5.2",
     "vuex": "^2.3.1",
     "webpack": "^3.6.0",
