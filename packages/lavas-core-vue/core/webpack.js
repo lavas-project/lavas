@@ -15,7 +15,6 @@ import CopyWebpackPlugin from 'copy-webpack-plugin';
 import VueSSRServerPlugin from 'vue-server-renderer/server-plugin';
 import {BundleAnalyzerPlugin} from 'webpack-bundle-analyzer';
 import SWRegisterWebpackPlugin from 'sw-register-webpack-plugin';
-import {InjectManifest} from './plugins/workbox-webpack-plugin';
 
 import {vueLoaders, styleLoaders} from './utils/loader';
 import {assetsPath} from './utils/path';
@@ -246,42 +245,36 @@ export default class WebpackConfig {
         });
 
         // Use workbox@3.x
-        let workboxInjectManifestConfig = {
-            importWorkboxFrom: 'disabled',
-            globDirectory: '.',
-            exclude: [
-                /\.map$/,
-                /^manifest.*\.js(?:on)?$/,
-                /\.hot-update\.js$/,
-                /sw-register\.js/
-            ]
-        };
-        if (entries && entries.length) {
-            entries.forEach(({name}) => {
-                clientConfig.plugins.push(
-                    new InjectManifest(Object.assign({}, workboxConfig, workboxInjectManifestConfig, {
-                        manifestFilename: `${name}/[manifest]`,
-                        swSrc: join(globals.rootDir, `entries/${name}/service-worker.js`),
-                        swDest: `${name}/service-worker.js`,
-                        excludeChunks: entries
-                            .map(e => e.name).filter(n => n !== name),
-                        exclude: [
-                            ...workboxInjectManifestConfig.exclude,
-                            ...entries.map(e => e.name)
-                                .filter(n => n !== name)
-                                .map(n => new RegExp(`^${n}/`))
-                        ]
-                    }))
-                );
-            });
+        if (this.config.entries.length === 0 && workboxConfig && workboxConfig.enable !== false) {
+            useWorkbox(clientConfig, this.config);
         }
-        else {
-            clientConfig.plugins.push(
-                new InjectManifest(Object.assign({}, workboxConfig, workboxInjectManifestConfig, {
-                    swSrc: join(globals.rootDir, `core/service-worker.js`),
-                    swDest: `service-worker.js`
-                })));
+
+        if (this.config.entries.length !== 0) {
+            let entryNames = this.config.entries.map(e => e.name);
+            this.config.entries.forEach(entryConfig => {
+                if (entryConfig.serviceWorker && entryConfig.serviceWorker.enable !== false) {
+                    useWorkbox(clientConfig, this.config, entryConfig, entryNames);
+                }
+            })
         }
+
+
+        // if (entries && entries.length) {
+        //     entries.forEach(({name}) => {
+        //
+        //         clientConfig.plugins.push(
+        //             new InjectManifest(Object.assign({}, workboxConfig, workboxInjectManifestConfig, {
+        //                 ))
+        //         );
+        //     });
+        // }
+        // else {
+        //     clientConfig.plugins.push(
+        //         new InjectManifest(Object.assign({}, workboxConfig, workboxInjectManifestConfig, {
+        //             swSrc: join(globals.rootDir, `core/service-worker.js`),
+        //             swDest: `service-worker.js`
+        //         })));
+        // }
 
         // Copy static files to /dist.
         let copyList = [{
