@@ -15,6 +15,7 @@ import CopyWebpackPlugin from 'copy-webpack-plugin';
 import VueSSRServerPlugin from 'vue-server-renderer/server-plugin';
 import {BundleAnalyzerPlugin} from 'webpack-bundle-analyzer';
 import SWRegisterWebpackPlugin from 'sw-register-webpack-plugin';
+import {InjectManifest} from './plugins/workbox-webpack-plugin';
 
 import {vueLoaders, styleLoaders} from './utils/loader';
 import {assetsPath} from './utils/path';
@@ -43,7 +44,7 @@ export default class WebpackConfig {
      * @return {Object} webpack base config
      */
     base(buildConfig = {}) {
-        let {globals, build, serviceWorker, entries} = this.config;
+        let {globals, build, serviceWorker} = this.config;
         /* eslint-disable fecs-one-var-per-line */
         let {path, publicPath, filenames, babel, cssSourceMap, cssMinimize,
             cssExtract, jsSourceMap,
@@ -119,11 +120,6 @@ export default class WebpackConfig {
                 cssProcessorOptions: {
                     safe: true
                 }
-            }),
-            new SWRegisterWebpackPlugin({
-                filePath: resolve(__dirname, 'templates/sw-register.js'),
-                prefix: (serviceWorker && serviceWorker.swPath) || publicPath,
-                entries
             })
         ];
 
@@ -162,8 +158,7 @@ export default class WebpackConfig {
      * @return {Object} client base config
      */
     client(buildConfig = {}) {
-        let {buildVersion, globals, build, manifest, serviceWorker: workboxConfig} = this.config;
-
+        let {buildVersion, globals, build, manifest, serviceWorker: workboxConfig, entries} = this.config;
         /* eslint-disable fecs-one-var-per-line */
         let {publicPath, filenames, cssSourceMap, cssMinimize, cssExtract,
             jsSourceMap, bundleAnalyzerReport, extend,
@@ -239,24 +234,53 @@ export default class WebpackConfig {
                     chunks: ['vue']
                 }),
 
+                new SWRegisterWebpackPlugin({
+                    filePath: resolve(__dirname, 'templates/sw-register.js'),
+                    prefix: (workboxConfig && workboxConfig.swPath) || publicPath,
+                    entries
+                }),
+
                 // add custom plugins in client side
                 ...clientPlugins
             ]
         });
 
-        // Use workbox@2.x in prod mode.
-        if (this.isProd) {
-            if (this.config.entries.length === 0 && workboxConfig && workboxConfig.enable !== false) {
-                useWorkbox(clientConfig, this.config);
-            }
-
-            if (this.config.entries.length !== 0) {
-                this.config.entries.forEach(entryConfig => {
-                    if (entryConfig.serviceWorker && entryConfig.serviceWorker.enable !== false) {
-                        useWorkbox(clientConfig, this.config, entryConfig);
-                    }
-                })
-            }
+        // Use workbox@3.x
+        let workboxInjectManifestConfig = {
+            importWorkboxFrom: 'disabled',
+            globDirectory: '.',
+            exclude: [
+                /\.map$/,
+                /^manifest.*\.js(?:on)?$/,
+                /\.hot-update\.js$/,
+                /sw-register\.js/
+            ]
+        };
+        if (entries && entries.length) {
+            entries.forEach(({name}) => {
+                clientConfig.plugins.push(
+                    new InjectManifest(Object.assign({}, workboxConfig, workboxInjectManifestConfig, {
+                        manifestFilename: `${name}/[manifest]`,
+                        swSrc: join(globals.rootDir, `entries/${name}/service-worker.js`),
+                        swDest: `${name}/service-worker.js`,
+                        excludeChunks: entries
+                            .map(e => e.name).filter(n => n !== name),
+                        exclude: [
+                            ...workboxInjectManifestConfig.exclude,
+                            ...entries.map(e => e.name)
+                                .filter(n => n !== name)
+                                .map(n => new RegExp(`^${n}/`))
+                        ]
+                    }))
+                );
+            });
+        }
+        else {
+            clientConfig.plugins.push(
+                new InjectManifest(Object.assign({}, workboxConfig, workboxInjectManifestConfig, {
+                    swSrc: join(globals.rootDir, `core/service-worker.js`),
+                    swDest: `service-worker.js`
+                })));
         }
 
         // Copy static files to /dist.
@@ -265,18 +289,6 @@ export default class WebpackConfig {
             to: ASSETS_DIRNAME_IN_DIST,
             ignore: ['*.md']
         }];
-        // Copy workbox.dev|prod.js from node_modules manually.
-        if (this.isProd && workboxConfig) {
-            copyList = copyList.concat(
-                getWorkboxFiles(this.isProd)
-                    .map(f => {
-                        return {
-                            from: join(WORKBOX_PATH, `../${f}`),
-                            to: assetsPath(`js/${f}`)
-                        };
-                    })
-            );
-        }
         clientConfig.plugins.push(new CopyWebpackPlugin(copyList));
 
         // Bundle analyzer.
