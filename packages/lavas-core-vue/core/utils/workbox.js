@@ -94,11 +94,12 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) 
     let serviceWorkerContent = readFileSync(swSrc);
 
     // import workbox-sw
+    let {version: workboxBuildVersion} = require('workbox-build/package.json');
     let importWorkboxClause = `
-        importScripts('${publicPath}static/workbox-v3.0.0-alpha.6/workbox-sw.js');
+        importScripts('${publicPath}static/workbox-v${workboxBuildVersion}/workbox-sw.js');
 
         workbox.setConfig({
-            modulePathPrefix: '${publicPath}static/workbox-v3.0.0-alpha.6/'
+            modulePathPrefix: '${publicPath}static/workbox-v${workboxBuildVersion}/'
         });
     `;
     serviceWorkerContent = importWorkboxClause + serviceWorkerContent;
