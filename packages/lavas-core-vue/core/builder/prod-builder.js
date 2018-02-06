@@ -6,7 +6,9 @@
 import {emptyDir, outputFile, copy, readFileSync} from 'fs-extra';
 import {join} from 'path';
 
-import {CONFIG_FILE} from '../constants';
+import {copyWorkboxLibraries} from 'workbox-build';
+
+import {CONFIG_FILE, ASSETS_DIRNAME_IN_DIST} from '../constants';
 import {webpackCompile} from '../utils/webpack';
 import {distLavasPath} from '../utils/path';
 
@@ -31,6 +33,8 @@ export default class ProdBuilder extends BaseBuilder {
 
         // clear dist/ first
         await emptyDir(build.path);
+
+        await copyWorkboxLibraries(ASSETS_DIRNAME_IN_DIST);
 
         await this.routeManager.buildRoutes();
         await this.writeRuntimeConfig();

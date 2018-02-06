@@ -14,8 +14,9 @@ import historyMiddleware from 'connect-history-api-fallback';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
+import {copyWorkboxLibraries} from 'workbox-build';
 
-import {LAVAS_CONFIG_FILE, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH, BUILD_SCRIPT} from '../constants';
+import {LAVAS_CONFIG_FILE, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH, BUILD_SCRIPT, ASSETS_DIRNAME_IN_DIST} from '../constants';
 import {enableHotReload, writeFileInDev, removeTemplatedPath} from '../utils/webpack';
 import {isFromCDN} from '../utils/path';
 
@@ -155,6 +156,8 @@ export default class DevBuilder extends BaseBuilder {
             throw new Error('[Lavas] Multi Entries cannot use SSR mode. Try to set ssr to `false`');
             return;
         }
+
+        await copyWorkboxLibraries(ASSETS_DIRNAME_IN_DIST);
 
         await this.routeManager.buildRoutes();
         await this.writeRuntimeConfig();
