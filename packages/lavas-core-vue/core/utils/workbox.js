@@ -32,7 +32,6 @@ export function getWorkboxFiles(isProd) {
  * @param {?Object} entryConfig entry config (undefined when SPA and SSR)
  */
 export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) {
-    console.log('useWorkbox')
     let {buildVersion, build: {publicPath, ssr}, globals, router: {base = '/'}} = lavasConfig;
     let workboxConfig = entryConfig ? entryConfig.serviceWorker : lavasConfig.serviceWorker;
     let {swSrc, swDest = 'service-worker.js', appshellUrl, appshellUrls} = workboxConfig;

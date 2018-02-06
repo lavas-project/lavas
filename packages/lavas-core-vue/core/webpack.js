@@ -44,7 +44,7 @@ export default class WebpackConfig {
      * @return {Object} webpack base config
      */
     base(buildConfig = {}) {
-        let {globals, build, serviceWorker} = this.config;
+        let {globals, build, serviceWorker, entries} = this.config;
         /* eslint-disable fecs-one-var-per-line */
         let {path, publicPath, filenames, babel, cssSourceMap, cssMinimize,
             cssExtract, jsSourceMap,
@@ -120,12 +120,24 @@ export default class WebpackConfig {
                 cssProcessorOptions: {
                     safe: true
                 }
+            }),
+            new SWRegisterWebpackPlugin({
+                filePath: resolve(__dirname, 'templates/sw-register.js'),
+                prefix: (serviceWorker && serviceWorker.swPath) || publicPath,
+                entries
             })
         ];
 
         let pluginsInDev = [
             new FriendlyErrorsPlugin()
         ];
+        if (serviceWorker.enable !== false) {
+            pluginsInDev.push(new SWRegisterWebpackPlugin({
+                filePath: resolve(__dirname, 'templates/sw-register.js'),
+                prefix: (serviceWorker && serviceWorker.swPath) || publicPath,
+                entries
+            }))
+        }
 
         baseConfig.plugins = [
             ...(this.isProd ? pluginsInProd : pluginsInDev),
@@ -239,12 +251,6 @@ export default class WebpackConfig {
                     chunks: ['vue']
                 }),
 
-                new SWRegisterWebpackPlugin({
-                    filePath: resolve(__dirname, 'templates/sw-register.js'),
-                    prefix: (workboxConfig && workboxConfig.swPath) || publicPath,
-                    entries
-                }),
-
                 // add custom plugins in client side
                 ...clientPlugins
             ]
@@ -261,7 +267,7 @@ export default class WebpackConfig {
                 if (entryConfig.serviceWorker && entryConfig.serviceWorker.enable !== false) {
                     useWorkbox(clientConfig, this.config, entryConfig, entryNames);
                 }
-            })
+            });
         }
 
 
