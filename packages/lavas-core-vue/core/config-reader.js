@@ -129,6 +129,12 @@ export default class ConfigReader {
         }
     }
 
+    mergeEnv(config) {
+        if (config[this.env]) {
+            merge(config, config[this.env], mergeArray);
+        }
+    }
+
     /**
      * generate a config object according to config directory and NODE_ENV
      *
@@ -145,15 +151,17 @@ export default class ConfigReader {
             buildVersion: Date.now()
         }, mergeArray);
 
-        if (config[this.env]) {
-            merge(config, config[this.env], mergeArray);
-        }
+        this.mergeEnv(config);
 
         // read from custom config
         if (this.customConfigPath) {
             console.log(`[Lavas] use custom config: ${this.customConfigPath}`);
             delete require.cache[require.resolve(this.customConfigPath)];
-            merge(config, await import(this.customConfigPath), mergeArray);
+
+            let customConfig = await import(this.customConfigPath);
+            this.mergeEnv(customConfig)
+            merge(config, customConfig, mergeArray);
+
             return this.processEntryConfig(config);
         }
 
@@ -162,7 +170,11 @@ export default class ConfigReader {
         if (await pathExists(singleConfigPath)) {
             console.log('[Lavas] read lavas.config.js.');
             delete require.cache[require.resolve(singleConfigPath)];
-            merge(config, await import(singleConfigPath), mergeArray);
+
+            let singleConfig = await import(singleConfigPath);
+            this.mergeEnv(singleConfig);
+            merge(config, singleConfig, mergeArray);
+
             return this.processEntryConfig(config);
         }
 
@@ -202,12 +214,7 @@ export default class ConfigReader {
                 ? merge(cur[name], exportContent, mergeArray) : exportContent;
         }));
 
-        let temp = config.env || {};
-
-        // merge config according env
-        if (temp[this.env]) {
-            merge(config, temp[this.env], mergeArray);
-        }
+        this.mergeEnv(config);
 
         return this.processEntryConfig(config);
     }
