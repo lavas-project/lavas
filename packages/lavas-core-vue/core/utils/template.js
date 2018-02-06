@@ -11,13 +11,25 @@ import path from 'path';
 const serverTemplatePath = fs.readFileSync(path.resolve(__dirname, '../templates/server.html.tmpl'));
 const clientTemplatePath = fs.readFileSync(path.resolve(__dirname, '../templates/client.html.tmpl'));
 
-function inner(customTemplate, ssr, baseUrl) {
+/**
+ * 模板替换
+ *
+ * @param {string} customTemplate 开发者项目中的模板内容
+ * @param {boolean} ssr 是否 SSR
+ * @param {string} baseUrl router.base，可用作静态资源URL前缀
+ * @param {?Object} templateObject 要替换的变量对象。*只在MPA下生效*
+ * @return {string} 替换后的模板，供 Vue 使用
+ */
+function inner(customTemplate, ssr, baseUrl, templateObject = {}) {
     let isDeprecated = /<%=\s*(render|useCustomOnly|baseUrl)/.test(customTemplate);
 
+    // latest version (without renderXXX)
     if (!isDeprecated) {
-        return template(customTemplate)({ssr}).replace(/<</g, '<%').replace(/>>/g, '%>');
+        templateObject.ssr = ssr;
+        return template(customTemplate)(templateObject).replace(/<</g, '<%').replace(/>>/g, '%>');
     }
 
+    // deprecated version (with renderXXX)
     console.log('[Lavas] core/index.html.tmpl deprecated! '
         + 'See https://lavas.baidu.com/guide/v2/advanced/core#indexhtmltmpl for more infomation');
     let templatePath = ssr ? serverTemplatePath : clientTemplatePath;
@@ -79,6 +91,6 @@ function inner(customTemplate, ssr, baseUrl) {
 }
 
 export default {
-    client: (customTemplate, baseUrl) => inner(customTemplate, false, baseUrl),
+    client: (customTemplate, baseUrl, templateObject) => inner(customTemplate, false, baseUrl, templateObject),
     server: (customTemplate, baseUrl) => inner(customTemplate, true, baseUrl)
 };

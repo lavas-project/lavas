@@ -7,7 +7,7 @@ import {readFile, pathExists} from 'fs-extra';
 import {join} from 'path';
 import glob from 'glob';
 import {merge, isArray} from 'lodash';
-import {CONFIG_FILE, LAVAS_CONFIG_FILE} from './constants';
+import {CONFIG_FILE, LAVAS_CONFIG_FILE, ENTRY_DIRNAME} from './constants';
 import {distLavasPath} from './utils/path';
 import * as JsonUtil from './utils/json';
 
@@ -212,22 +212,47 @@ export default class ConfigReader {
         return this.processEntryConfig(config);
     }
 
-    processEntryConfig(config) {
-        if (config.entries.length !== 0) {
-            config.entries = config.entries.map(entry => {
-                if (typeof entry === 'string') {
-                    entry = {name: entry};
+    /**
+     * merge general default config
+     *
+     * @param {Object} config config
+     * @return {Object} config after merge
+     */
+    async processEntryConfig(config) {
+        let entryDirPath = join(this.cwd, ENTRY_DIRNAME);
+        let hasEntries = await pathExists(entryDirPath);
+
+        if (hasEntries) {
+            let entryConfigDirs = glob.sync(
+                'entries/*/', {
+                    cwd: join(),
+                    ignore: 'node_modules'
+                }
+            );
+
+            config.entries = await Promise.all(entryConfigDirs.map(async entryConfigDir => {
+                let entryName = entryConfigDir.match(/entries\/(.+)\/$/)[1];
+                let entryConfigPath = join(this.cwd, entryConfigDir, 'config.js');
+                let entryConfig;
+
+                if (await pathExists(entryConfigPath)) {
+                    entryConfig = require(entryConfigPath);
+                }
+                else {
+                    entryConfig = {};
                 }
 
                 let finalConfig = {};
-                let urlReg = entry.name === 'index' ? /^\// : new RegExp(`^/${entry.name}`);
+                let urlReg = entryName === 'index' ? /^\// : new RegExp(`^/${entryName}`);
                 merge(finalConfig, {
                     serviceWorker: config.serviceWorker,
+                    templatePath: config.templatePath,
+                    name: entryName,
                     urlReg
-                }, entry);
+                }, entryConfig);
 
                 return finalConfig;
-            });
+            }));
         }
 
         return config;

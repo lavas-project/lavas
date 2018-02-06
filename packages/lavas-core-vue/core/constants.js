@@ -5,6 +5,7 @@
 
 export const LAVAS_DIRNAME_IN_DIST = 'lavas';
 export const SKELETON_DIRNAME = 'skeletons';
+export const ENTRY_DIRNAME = 'entries';
 export const ASSETS_DIRNAME_IN_DIST = 'static';
 export const LAVAS_CONFIG_FILE = 'lavas.config.js';
 

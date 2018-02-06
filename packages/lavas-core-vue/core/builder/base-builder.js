@@ -165,6 +165,15 @@ export default class BaseBuilder {
         );
     }
 
+    getTemplatePath(entryName) {
+        let templatePath = this.config.templatePath;
+        let rootDir = this.config.globals.rootDir;
+
+        return templatePath
+            ? join(rootDir, templatePath.replace(/\[entryName\]/g, entryName))
+            : join(rootDir, `core/${TEMPLATE_HTML}`);
+    }
+
     /**
      * use html webpack plugin
      *
@@ -180,12 +189,12 @@ export default class BaseBuilder {
         let tempTemplatePath;
         if (entryName) {
             htmlFilename = `${entryName}/${entryName}.html`;
-            templatePath = join(rootDir, `entries/${entryName}/${TEMPLATE_HTML}`);
+            templatePath = this.getTemplatePath(entryName);
             tempTemplatePath = `${entryName}/${TEMPLATE_HTML}`;
         }
         else {
             htmlFilename = `${DEFAULT_ENTRY_NAME}.html`;
-            templatePath = join(rootDir, `core/${TEMPLATE_HTML}`);
+            templatePath = this.getTemplatePath();
             tempTemplatePath = TEMPLATE_HTML;
         }
 
@@ -193,10 +202,15 @@ export default class BaseBuilder {
             throw new Error(`${TEMPLATE_HTML} required for entry: ${entryName || DEFAULT_ENTRY_NAME}`);
         }
 
+        // fetch templateObject from entries/[entryName]/config.js
+        let templateObject = entryName
+            ? this.config.entries.find(entry => entry.name === entryName).templateObject
+            : {};
+
         // write HTML template used by html-webpack-plugin which doesn't support template STRING
         let resolvedTemplatePath = await this.writeFileToLavasDir(
             tempTemplatePath,
-            templateUtil.client(await readFile(templatePath, 'utf8'), baseUrl)
+            templateUtil.client(await readFile(templatePath, 'utf8'), baseUrl, templateObject)
         );
 
         // add html webpack plugin
@@ -221,7 +235,7 @@ export default class BaseBuilder {
             this.addWatcher(templatePath, 'change', async () => {
                 await this.writeFileToLavasDir(
                     tempTemplatePath,
-                    templateUtil.client(await readFile(templatePath, 'utf8'), baseUrl)
+                    templateUtil.client(await readFile(templatePath, 'utf8'), baseUrl, templateObject)
                 );
             });
         }

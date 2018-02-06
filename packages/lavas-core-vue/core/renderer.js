@@ -3,7 +3,7 @@
  * @author *__ author __*{% if: *__ email __* %}(*__ email __*){% /if %}
  */
 
-import {join} from 'path';
+import {join, basename} from 'path';
 import {pathExists, readFile, readJson, outputFile} from 'fs-extra';
 import {merge} from 'lodash';
 import {createBundleRenderer} from 'vue-server-renderer';
@@ -30,24 +30,12 @@ export default class Renderer {
     }
 
     /**
-     * get template name
-     *
-     * @return {string} template path
-     */
-    getTemplateName() {
-        return TEMPLATE_HTML;
-    }
-
-    /**
      * get template path
      *
-     * @param {?string} entryName entryName when MPA, undefined when SPA & SSR
      * @return {string} template path
      */
-    getTemplatePath(entryName) {
-        return entryName
-            ? join(this.rootDir, `${entryName}/${TEMPLATE_HTML}`)
-            : join(this.rootDir, `core/${TEMPLATE_HTML}`);
+    getTemplatePath() {
+        return join(this.rootDir, this.config.templatePath || `core/${TEMPLATE_HTML}`);
     }
 
     /**
@@ -82,7 +70,7 @@ export default class Renderer {
     async createWithBundle() {
         this.serverBundle = await readJson(distLavasPath(this.cwd, SERVER_BUNDLE));
 
-        let templatePath = distLavasPath(this.cwd, this.getTemplateName());
+        let templatePath = distLavasPath(this.cwd, basename(this.getTemplatePath()));
         let manifestPath = distLavasPath(this.cwd, CLIENT_MANIFEST);
         if (this.config.build.ssr) {
             this.template = await readFile(templatePath, 'utf-8');
@@ -103,7 +91,7 @@ export default class Renderer {
             let templateContent = await this.getTemplate(this.config.router.base);
             let distTemplatePath = distLavasPath(
                 this.config.build.path,
-                this.getTemplateName()
+                basename(this.getTemplatePath())
             );
 
             await outputFile(distTemplatePath, templateContent);
