@@ -4,7 +4,8 @@
  */
 import {basename, join} from 'path';
 import {readFileSync, writeFileSync} from 'fs-extra';
-import WorkboxWebpackPlugin from 'workbox-webpack-plugin';
+// import WorkboxWebpackPlugin from 'workbox-webpack-plugin';
+import {InjectManifest} from '../plugins/workbox-webpack-plugin';
 
 export const WORKBOX_PATH = require.resolve('workbox-sw');
 
@@ -30,15 +31,59 @@ export function getWorkboxFiles(isProd) {
  * @param {Object} lavasConfig lavas config
  * @param {?Object} entryConfig entry config (undefined when SPA and SSR)
  */
-export function useWorkbox(webpackConfig, lavasConfig, entryConfig) {
+export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) {
     let {buildVersion, build: {publicPath, ssr}, globals, router: {base = '/'}} = lavasConfig;
     let workboxConfig = entryConfig ? entryConfig.serviceWorker : lavasConfig.serviceWorker;
-    let {swSrc, appshellUrl, appshellUrls} = workboxConfig;
+    let {swSrc, swDest = 'service-worker.js', appshellUrl, appshellUrls} = workboxConfig;
 
+    // workbox precache inject point
+    const WORKBOX_PRECACHE_REG = /workbox\.precaching\.precacheAndRoute\(self\.__precacheManifest\);/;
+
+    // default config for workbox.InjectManifest
+    let workboxInjectManifestConfig = {
+        importWorkboxFrom: 'disabled',
+        globDirectory: '.',
+        exclude: [
+            /\.map$/,
+            /^manifest.*\.js(?:on)?$/,
+            /\.hot-update\.js$/,
+            /sw-register\.js/
+        ]
+    };
+
+    // in workbox@3.x swDest must be a relative path
+    swDest = basename(swDest);
+
+    // MPA
     if (entryConfig) {
         swSrc = getEntryConfigValue(swSrc, entryConfig.name);
-        workboxConfig.swDest = getEntryConfigValue(workboxConfig.swDest, entryConfig.name);
-        workboxConfig.swPath = getEntryConfigValue(workboxConfig.swPath, entryConfig.name);
+
+        // workboxConfig.swPath = getEntryConfigValue(workboxConfig.swPath, entryConfig.name);
+        let manifestFilename = `${entryConfig.name}/[manifest]`;
+        if (entryConfig.name === 'index') {
+            manifestFilename = null;
+        }
+        else {
+            swDest = `${entryConfig.name}/${swDest}`;
+        }
+
+        workboxConfig = Object.assign({}, workboxInjectManifestConfig, {
+            manifestFilename,
+            swDest,
+            excludeChunks: entryNames.filter(n => n !== entryConfig.name),
+            exclude: [
+                ...workboxInjectManifestConfig.exclude,
+                ...entryNames
+                    .filter(n => n !== entryConfig.name)
+                    .map(n => new RegExp(`^${n}/`))
+            ]
+        });
+    }
+    // SPA & SSR
+    else {
+        workboxConfig = Object.assign({}, workboxInjectManifestConfig, {
+            swDest
+        });
     }
 
     if (base !== '/' && !base.endsWith('/')) {
@@ -49,7 +94,13 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig) {
     let serviceWorkerContent = readFileSync(swSrc);
 
     // import workbox-sw
-    let importWorkboxClause = `importScripts('${publicPath}static/js/workbox-sw.prod.v2.1.2.js');`;
+    let importWorkboxClause = `
+        importScripts('${publicPath}static/workbox-v3.0.0-alpha.6/workbox-sw.js');
+
+        workbox.setConfig({
+            modulePathPrefix: '${publicPath}static/workbox-v3.0.0-alpha.6/'
+        });
+    `;
     serviceWorkerContent = importWorkboxClause + serviceWorkerContent;
 
     // register navigation in the end
@@ -75,22 +126,28 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig) {
                 [appshellUrl]: `${buildVersion}`
             };
 
-            registerNavigationClause = `workboxSW.router.registerNavigationRoute('${appshellUrl}');`;
+            registerNavigationClause = `workbox.routing.registerNavigationRoute('${appshellUrl}');`;
         }
     }
     else {
-        let entryHtml = entryConfig ? `${entryConfig.name}.html` : 'index.html';
-        registerNavigationClause = `workboxSW.router.registerNavigationRoute('${base}${entryHtml}');`;
+        let entryHtml = 'index.html';
+        let whitelistClause = '';
+        if (entryConfig) {
+            entryHtml = `${entryConfig.name}/${entryConfig.name}.html`;
+            if (entryConfig.name === 'index') {
+                whitelistClause = ', {whitelist: [/^\\/$/]}';
+            }
+        }
+        registerNavigationClause = `workbox.routing.registerNavigationRoute('${base}${entryHtml}'${whitelistClause});`;
     }
 
-    if (/workboxSW\.precache\(\[\]\);/.test(serviceWorkerContent)) {
-        serviceWorkerContent = serviceWorkerContent.replace(/workboxSW\.precache\(\[\]\);/,
-            `workboxSW.precache([]);\n${registerNavigationClause}\n`);
+    if (WORKBOX_PRECACHE_REG.test(serviceWorkerContent)) {
+        serviceWorkerContent = serviceWorkerContent.replace(WORKBOX_PRECACHE_REG,
+            `workbox.precaching.precacheAndRoute(self.__precacheManifest);\n${registerNavigationClause}\n`);
     }
     else {
         serviceWorkerContent += registerNavigationClause;
     }
-
 
     // write new service worker in .lavas/sw.js
     let tempSwSrc = entryConfig
@@ -99,8 +156,13 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig) {
     writeFileSync(tempSwSrc, serviceWorkerContent, 'utf8');
     workboxConfig.swSrc = tempSwSrc;
 
-    // use workbox-webpack-plugin@2.x
-    webpackConfig.plugins.push(new WorkboxWebpackPlugin(workboxConfig));
+    // delete some custom props such as `swPath` and `appshellUrls`, otherwise workbox will throw an error
+    delete workboxConfig.swPath;
+    delete workboxConfig.appshellUrls;
+    delete workboxConfig.appshellUrl;
+
+    // use workbox-webpack-plugin@3.x
+    webpackConfig.plugins.push(new InjectManifest(workboxConfig));
 }
 
 /**

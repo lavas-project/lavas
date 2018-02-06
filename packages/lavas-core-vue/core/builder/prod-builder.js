@@ -89,7 +89,7 @@ export default class ProdBuilder extends BaseBuilder {
         else {
             let mode = entriesConfig.length === 0 ? 'SPA' : 'MPA';
             console.log(`[Lavas] ${mode} build starting...`);
-            await webpackCompile(await this.createSPAConfig());
+            await webpackCompile(await this.createSPAConfig(false, mode === 'SPA'));
             console.log(`[Lavas] ${mode} build completed.`);
         }
     }

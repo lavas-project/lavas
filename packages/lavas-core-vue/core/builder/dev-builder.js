@@ -173,16 +173,6 @@ export default class DevBuilder extends BaseBuilder {
             await Promise.all(entriesConfig.map(entry => this.writeStore()));
         }
 
-        // write middleware.js & store.js
-        if (entriesConfig.length === 0) {
-            await this.writeMiddleware();
-            await this.writeStore();
-        }
-        else {
-            await this.writeLavasLink();
-            await Promise.all(entriesConfig.map(entry => this.writeStore()));
-        }
-
         // SSR build process
         if (ssrEnabled) {
             console.log('[Lavas] SSR build starting...');
@@ -219,7 +209,7 @@ export default class DevBuilder extends BaseBuilder {
 
             console.log(`[Lavas] ${mode} build starting...`);
             // create spa config first
-            spaConfig = await this.createSPAConfig(true);
+            spaConfig = await this.createSPAConfig(true, mode === 'SPA');
 
             // enable hotreload in every entry in dev mode
             await enableHotReload(this.lavasPath(), spaConfig, true);
