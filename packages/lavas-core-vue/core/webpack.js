@@ -15,6 +15,7 @@ import CopyWebpackPlugin from 'copy-webpack-plugin';
 import VueSSRServerPlugin from 'vue-server-renderer/server-plugin';
 import {BundleAnalyzerPlugin} from 'webpack-bundle-analyzer';
 import SWRegisterWebpackPlugin from 'sw-register-webpack-plugin';
+import TimeFixWebpackPlugin from './plugins/timefix-webpack-plugin';
 
 import {vueLoaders, styleLoaders} from './utils/loader';
 import {assetsPath} from './utils/path';
@@ -138,6 +139,11 @@ export default class WebpackConfig {
                     filename: assetsPath(filenames.css)
                 })
             );
+        }
+
+        // In dev mode, fix watchpack time problem.
+        if (this.isDev) {
+            baseConfig.plugins.unshift(new TimeFixWebpackPlugin());
         }
 
         if (typeof extend === 'function') {
