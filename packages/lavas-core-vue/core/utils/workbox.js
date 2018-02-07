@@ -135,7 +135,7 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) 
         let whitelistClause = '';
         if (entryConfig) {
             entryHtml = `${entryConfig.name}/${entryConfig.name}.html`;
-            if (entryConfig.name === 'index') {
+            if (entryConfig.name === 'index' && entryConfig.urlReg.toString() === '/^\\//') {
                 whitelistClause = ', {whitelist: [/^\\/$/]}';
             }
         }

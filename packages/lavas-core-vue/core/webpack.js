@@ -131,13 +131,6 @@ export default class WebpackConfig {
         let pluginsInDev = [
             new FriendlyErrorsPlugin()
         ];
-        if (serviceWorker.enable !== false) {
-            pluginsInDev.push(new SWRegisterWebpackPlugin({
-                filePath: resolve(__dirname, 'templates/sw-register.js'),
-                prefix: (serviceWorker && serviceWorker.swPath) || publicPath,
-                entries
-            }))
-        }
 
         baseConfig.plugins = [
             ...(this.isProd ? pluginsInProd : pluginsInDev),
@@ -257,17 +250,19 @@ export default class WebpackConfig {
         });
 
         // Use workbox@3.x
-        if (this.config.entries.length === 0 && workboxConfig && workboxConfig.enable !== false) {
-            useWorkbox(clientConfig, this.config);
-        }
+        if (this.isProd) {
+            if (this.config.entries.length === 0 && workboxConfig && workboxConfig.enable !== false) {
+                useWorkbox(clientConfig, this.config);
+            }
 
-        if (this.config.entries.length !== 0) {
-            let entryNames = this.config.entries.map(e => e.name);
-            this.config.entries.forEach(entryConfig => {
-                if (entryConfig.serviceWorker && entryConfig.serviceWorker.enable !== false) {
-                    useWorkbox(clientConfig, this.config, entryConfig, entryNames);
-                }
-            });
+            if (this.config.entries.length !== 0) {
+                let entryNames = this.config.entries.map(e => e.name);
+                this.config.entries.forEach(entryConfig => {
+                    if (entryConfig.serviceWorker && entryConfig.serviceWorker.enable !== false) {
+                        useWorkbox(clientConfig, this.config, entryConfig, entryNames);
+                    }
+                });
+            }
         }
 
 

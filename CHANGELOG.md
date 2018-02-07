@@ -2,6 +2,15 @@
 
 =======
 
+## Lavas-core-vue [1.0.6-rc.9] - 2018-2-7
+
+### Changed
+
+- [Feature] Support customized configuration in each entry with `entries/[entryName]/config.js`
+- [Feature] Support `templateObject` in `entries/[entryName]/config.js` which can be used in `index.html.tmpl`
+- [Feature] Support using single `index.html.tmpl` in each entry and move it to `/core/`
+- [Feature] Upgrade Workbox from 2.1.2 to 3.x
+
 ## Lavas-core-vue [1.0.6-rc.6] - 2018-1-29
 
 ### Changed
