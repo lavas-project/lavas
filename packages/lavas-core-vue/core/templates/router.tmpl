@@ -59,8 +59,14 @@ const LAVAS_HISTORY_STATE_STACK_LOCAL_KEY = 'LAVAS_HISTORY_STATE_STACK_LOCAL_KEY
  */
 let HISTORY_STATE_STACK = [];
 
-// 是否支持history
-const supportHistory = window.history && 'state' in history;
+let supportHistory = false;
+
+if (process.env.VUE_ENV === 'client') {
+
+    // 是否支持history
+    supportHistory = window.history && 'state' in history;
+
+}
 
 // 存储数据到本地
 function saveHistoryToLocal(key, data) {
