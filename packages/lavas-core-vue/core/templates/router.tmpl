@@ -265,11 +265,13 @@ export function createRouter() {
 
 <% if (router.pageTransition.enable) { %>
 
-    if (supportHistory) {
-        initHistoryStateStack();
-    }
-    else {
-        initHistoryArrayStack(router.options.base);
+    if (process.env.VUE_ENV === 'client') {
+        if (supportHistory) {
+            initHistoryStateStack();
+        }
+        else {
+            initHistoryArrayStack(router.options.base);
+        }
     }
 
     router.beforeEach((to, from, next) => {
