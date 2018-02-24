@@ -24,7 +24,7 @@ export default class ProdBuilder extends BaseBuilder {
      * build in production mode
      */
     async build() {
-        let {build, globals, entries: entriesConfig} = this.config;
+        let {build, globals, entries: entriesConfig, serviceWorker} = this.config;
 
         if (build.ssr && entriesConfig.length !== 0) {
             throw new Error('[Lavas] Multi Entries cannot use SSR mode. Try to set ssr to `false`');
@@ -34,7 +34,9 @@ export default class ProdBuilder extends BaseBuilder {
         // clear dist/ first
         await emptyDir(build.path);
 
-        await copyWorkboxLibraries(ASSETS_DIRNAME_IN_DIST);
+        if (serviceWorker.enable !== false) {
+            await copyWorkboxLibraries(ASSETS_DIRNAME_IN_DIST);
+        }
 
         await this.routeManager.buildRoutes();
         await this.writeRuntimeConfig();
