@@ -159,10 +159,11 @@ export default class BaseBuilder {
      * @param {Array} skeleton routes
      * @return {string} entryPath
      */
-    async writeSkeletonEntry(skeletons, entryName) {
+    async writeSkeletonEntry(skeletons) {
         const skeletonEntryTemplate = this.templatesPath('entry-skeleton.tmpl');
+
         return await this.writeFileToLavasDir(
-            `${entryName}/skeleton.js`,
+            'skeleton.js',
             template(await readFile(skeletonEntryTemplate, 'utf8'))({skeletons})
         );
     }
@@ -172,14 +173,16 @@ export default class BaseBuilder {
      *
      * @param {Object} spaConfig spaConfig
      * @param {string} baseUrl baseUrl from config/router
+     * @param {?string} entryName entry name in MPA, undefined in SPA
      */
-    async addHtmlPlugin(spaConfig, baseUrl = '/') {
+    async addHtmlPlugin(spaConfig, baseUrl = '/', entryName) {
         // allow user to provide a custom HTML template
         let rootDir = this.config.globals.rootDir;
         let htmlFilename;
         let templatePath;
         let tempTemplatePath;
-        if (!isSPA) {
+
+        if (entryName) {
             htmlFilename = `${entryName}/${entryName}.html`;
             templatePath = join(rootDir, `entries/${entryName}/${TEMPLATE_HTML}`);
             tempTemplatePath = `${entryName}/${TEMPLATE_HTML}`;
@@ -217,7 +220,7 @@ export default class BaseBuilder {
             config: this.config // use config in template
         }]);
 
-        return customTemplatePath;
+        return resolvedTemplatePath;
     }
 
     /**

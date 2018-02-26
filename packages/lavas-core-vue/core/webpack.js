@@ -299,7 +299,7 @@ export default class WebpackConfig {
             );
 
             // Use workbox@2.x in prod mode.
-            useWorkbox(clientConfig, serviceWorker, this.config);
+            useWorkbox(clientConfig, this.config);
 
             // inject register code for service worker into HTML
             clientConfig.plugin('sw-register').use(SWRegisterWebpackPlugin, [{
