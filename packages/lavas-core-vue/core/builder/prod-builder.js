@@ -6,7 +6,7 @@
 import {emptyDir, outputFile, copy, readFileSync} from 'fs-extra';
 import {join} from 'path';
 
-import {CONFIG_FILE, STORE_FILE} from '../constants';
+import {CONFIG_FILE} from '../constants';
 import {webpackCompile} from '../utils/webpack';
 import {distLavasPath} from '../utils/path';
 import Logger from '../utils/logger';
@@ -23,7 +23,13 @@ export default class ProdBuilder extends BaseBuilder {
      * build in production mode
      */
     async build() {
-        let {build, globals} = this.config;
+        let {build, globals, entries: entriesConfig} = this.config;
+
+        if (build.ssr && entriesConfig.length !== 0) {
+            throw new Error('[Lavas] Multi Entries cannot use SSR mode. Try to set ssr to `false`');
+            return;
+        }
+
         // clear dist/ first
         Logger.info('build', `start clearing ${build.path}...`, true);
         await emptyDir(build.path);

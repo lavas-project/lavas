@@ -7,7 +7,7 @@ import {join} from 'path';
 import test from 'ava';
 import LavasCore from '../../dist';
 
-import {syncConfig, isKoaSupport, request, createApp} from '../utils';
+import {isKoaSupport, request, createApp} from '../utils';
 
 let app;
 let server;
@@ -34,7 +34,7 @@ async function runCommonTestCases(t) {
     let ssrContent = '<div id="app" data-server-rendered="true">';
     let indexPageTitle = '<title data-vue-meta="true">Home</title>';
     // config.build.defines: {base: {}}
-    let webpackDefineContent= 'test-var</span>';
+    let webpackDefineContent = 'test-var</span>';
     let res = await request(app)
         .get('/?a=1&b=2');
     t.is(200, res.status);

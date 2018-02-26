@@ -13,7 +13,7 @@ test('it should parse & stringify JSON with regexp', async t => {
         nested: {
             subName: 'test-nested',
             regExp: /^\/test-nested$/
-        },
+        }
     };
 
     t.deepEqual(json, parse(stringify(json)));
@@ -24,7 +24,7 @@ test('it should deep pick object correctly', async t => {
         one: 1,
         two: true,
         three: 'Three',
-        four: [1,2,3,4],
+        four: [1, 2, 3, 4],
         five: {
             alpha: 1,
             beta: 2,
@@ -37,7 +37,7 @@ test('it should deep pick object correctly', async t => {
         },
         answer: '42.00',
         description: 'This is an object.'
-      };
+    };
 
     let schema = {
         one: true,
@@ -51,6 +51,9 @@ test('it should deep pick object correctly', async t => {
         }
     };
 
-    t.is(JSON.stringify(deepPick(input, schema)), '{"one":1,"three":"Three","four":[1,2,3,4],"five":{"alpha":1,"teta":{"beh":2}}}');
+    t.is(
+        JSON.stringify(deepPick(input, schema)),
+        '{"one":1,"three":"Three","four":[1,2,3,4],"five":{"alpha":1,"teta":{"beh":2}}}'
+    );
 });
 

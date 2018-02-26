@@ -20,9 +20,9 @@ test('it should generate routes according to the structure of directory', async 
         name: 'detail',
         children: [
             {
-                component: "pages/detail/_id.vue",
-                name: "detailId",
-                path: ":id",
+                component: 'pages/detail/_id.vue',
+                name: 'detailId',
+                path: ':id'
             }
         ]
     });
@@ -38,15 +38,15 @@ test('it should generate routes according to the structure of directory', async 
         component: 'pages/Index.vue',
         children: [
             {
-                component: "pages/index/index/Index.vue",
-                name: "index",
-                path: ""
+                component: 'pages/index/index/Index.vue',
+                name: 'index',
+                path: ''
             },
             {
-                component: "pages/index/normal.vue",
-                name: "indexNormal",
-                path: "normal"
-            },
+                component: 'pages/index/normal.vue',
+                name: 'indexNormal',
+                path: 'normal'
+            }
         ]
     });
 
@@ -57,28 +57,28 @@ test('it should generate routes according to the structure of directory', async 
         name: 'parent',
         children: [
             {
-                component: "pages/parent/Child1.vue",
-                name: "parentChild1",
-                path: "child1",
+                component: 'pages/parent/Child1.vue',
+                name: 'parentChild1',
+                path: 'child1'
             },
             {
-                component: "pages/parent/Child2.vue",
-                name: "parentChild2",
-                path: "child2",
+                component: 'pages/parent/Child2.vue',
+                name: 'parentChild2',
+                path: 'child2'
             }
         ]
     });
 
     t.deepEqual(routes[5], {
-        component: "pages/test/Index.vue",
-        name: "test",
-        path: "/test",
+        component: 'pages/test/Index.vue',
+        name: 'test',
+        path: '/test'
     });
 
     t.deepEqual(routes[4], {
-        component: "pages/test/_id.vue",
-        name: "testId",
-        path: "/test/:id",
+        component: 'pages/test/_id.vue',
+        name: 'testId',
+        path: '/test/:id'
     });
 });
 
@@ -108,8 +108,9 @@ test('it should check if a url matches a route pattern', t => {
 
     // function case
     let routeObj = {
-        test: (url) => url.startsWith('/detail')
-    }
+        test: url => url.startsWith('/detail')
+    };
+
     t.true(matchUrl(routeObj, url));
 
     // combined case, in an array

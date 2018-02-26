@@ -26,8 +26,7 @@ export default class LavasCore extends EventEmitter {
      * @param {Object} options options
      * @param {string} options.config custom config file path
      */
-    async init(env, isInBuild, options) {
-        options = options || {};
+    async init(env, isInBuild, options = {}) {
         this.env = env;
         this.isProd = this.env === 'production';
         this.configReader = new ConfigReader(this.cwd, this.env, options.config);

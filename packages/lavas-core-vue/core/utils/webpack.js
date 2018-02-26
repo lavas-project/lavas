@@ -102,5 +102,5 @@ export async function enableHotReload(dir, config, subscribeReload = false) {
  * @return {string} path path without templated path
  */
 export function removeTemplatedPath(path) {
-    return path.replace(/\[(chunkhash|contenthash|hash)(:\d?)?\]\./g, '')
+    return path.replace(/\[(chunkhash|contenthash|hash)(:\d?)?\]\./g, '');
 }

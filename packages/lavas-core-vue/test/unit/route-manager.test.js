@@ -42,20 +42,20 @@ test.serial('it should modify route objects based on router config', async t => 
     Object.assign(core.builder.routeManager.config, {
         router: {
             rewrite: [
-               {
-                   from: '/detail',
-                   to: '/rewrite/detail'
-               }
+                {
+                    from: '/detail',
+                    to: '/rewrite/detail'
+                }
             ],
             routes: [
-               {
-                   pattern: /\/detail/,
-                   lazyLoading: true,
-                   chunkname: 'my-chunk',
-                   meta: {
-                       keepAlive: true
-                   }
-               }
+                {
+                    pattern: /\/detail/,
+                    lazyLoading: true,
+                    chunkname: 'my-chunk',
+                    meta: {
+                        keepAlive: true
+                    }
+                }
             ]
         }
     });

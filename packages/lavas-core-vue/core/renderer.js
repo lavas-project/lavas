@@ -8,7 +8,6 @@ import {pathExists, readFile, readJson, outputFile} from 'fs-extra';
 import {merge} from 'lodash';
 import {createBundleRenderer} from 'vue-server-renderer';
 
-import {DEFAULT_ENTRY_NAME} from './constants';
 import {distLavasPath} from './utils/path';
 import {webpackCompile} from './utils/webpack';
 import templateUtil from './utils/template';
@@ -37,20 +36,23 @@ export default class Renderer {
      * @return {string} template path
      */
     getTemplateName() {
-        return this.config.router.templateFile || TEMPLATE_HTML;
+        return TEMPLATE_HTML;
     }
 
     /**
      * get template path
      *
+     * @param {?string} entryName entryName when MPA, undefined when SPA & SSR
      * @return {string} template path
      */
-    getTemplatePath() {
-        return join(this.rootDir, `core/${this.getTemplateName()}`);
+    getTemplatePath(entryName) {
+        return entryName
+            ? join(this.rootDir, `${entryName}/${TEMPLATE_HTML}`)
+            : join(this.rootDir, `core/${TEMPLATE_HTML}`);
     }
 
     /**
-     * return ssr template
+     * return SSR template content
      *
      * @param {string} base base url
      * @return {string} templateContent
@@ -153,6 +155,11 @@ export default class Renderer {
         }
     }
 
+    /**
+     * only called in SSR mode
+     * @param {object} clientConfig client webpack config
+     * @param {object} serverConfig server webpack config
+     */
     async build(clientConfig, serverConfig) {
         this.clientConfig = clientConfig;
         this.serverConfig = serverConfig;

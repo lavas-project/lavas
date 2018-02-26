@@ -5,7 +5,7 @@
 
 import template from 'lodash.template';
 import {readFile, pathExists, copySync} from 'fs-extra';
-import {join, basename} from 'path';
+import {join, basename, normalize} from 'path';
 
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
@@ -126,17 +126,43 @@ export default class BaseBuilder {
         );
     }
 
+    async writeStore() {
+        const storeTemplate = this.templatesPath('store.tmpl');
+        let isEmpty = !(await pathExists(join(this.config.globals.rootDir, 'store')));
+
+        await this.writeFileToLavasDir(
+            STORE_FILE,
+            template(await readFile(storeTemplate, 'utf8'))({
+                isEmpty
+            })
+        );
+    }
+
+    async writeLavasLink() {
+        let lavasLinkTemplate = await readFile(this.templatesPath('LavasLink.js.tmpl'), 'utf8');
+        await this.writeFileToLavasDir('LavasLink.js', template(lavasLinkTemplate)({
+            entryConfig: JsonUtil.stringify(this.config.entries.map(entry => {
+                // only select necessary keys
+                return {
+                    name: entry.name,
+                    urlReg: entry.urlReg
+                };
+            })),
+            base: this.config.router.base,
+            mode: this.config.router.mode
+        }));
+    }
+
     /**
      * write an entry file for skeleton components
      *
      * @param {Array} skeleton routes
      * @return {string} entryPath
      */
-    async writeSkeletonEntry(skeletons) {
+    async writeSkeletonEntry(skeletons, entryName) {
         const skeletonEntryTemplate = this.templatesPath('entry-skeleton.tmpl');
-
         return await this.writeFileToLavasDir(
-            'skeleton.js',
+            `${entryName}/skeleton.js`,
             template(await readFile(skeletonEntryTemplate, 'utf8'))({skeletons})
         );
     }
@@ -150,17 +176,28 @@ export default class BaseBuilder {
     async addHtmlPlugin(spaConfig, baseUrl = '/') {
         // allow user to provide a custom HTML template
         let rootDir = this.config.globals.rootDir;
-        let htmlFilename = `${DEFAULT_ENTRY_NAME}.html`;
-        let customTemplatePath = join(rootDir, `core/${TEMPLATE_HTML}`);
+        let htmlFilename;
+        let templatePath;
+        let tempTemplatePath;
+        if (!isSPA) {
+            htmlFilename = `${entryName}/${entryName}.html`;
+            templatePath = join(rootDir, `entries/${entryName}/${TEMPLATE_HTML}`);
+            tempTemplatePath = `${entryName}/${TEMPLATE_HTML}`;
+        }
+        else {
+            htmlFilename = `${DEFAULT_ENTRY_NAME}.html`;
+            templatePath = join(rootDir, `core/${TEMPLATE_HTML}`);
+            tempTemplatePath = TEMPLATE_HTML;
+        }
 
-        if (!await pathExists(customTemplatePath)) {
-            throw new Error(`${TEMPLATE_HTML} required for entry: ${DEFAULT_ENTRY_NAME}`);
+        if (!await pathExists(templatePath)) {
+            throw new Error(`${TEMPLATE_HTML} required for entry: ${entryName || DEFAULT_ENTRY_NAME}`);
         }
 
         // write HTML template used by html-webpack-plugin which doesn't support template STRING
         let resolvedTemplatePath = await this.writeFileToLavasDir(
-            TEMPLATE_HTML,
-            templateUtil.client(await readFile(customTemplatePath, 'utf8'), baseUrl)
+            tempTemplatePath,
+            templateUtil.client(await readFile(templatePath, 'utf8'), baseUrl)
         );
 
         // add html webpack plugin
@@ -176,7 +213,7 @@ export default class BaseBuilder {
             favicon: assetsPath('img/icons/favicon.ico'),
             chunksSortMode: 'dependency',
             cache: false,
-            chunks: ['manifest', 'vue', 'vendor', DEFAULT_ENTRY_NAME],
+            chunks: ['manifest', 'vue', 'vendor', entryName || DEFAULT_ENTRY_NAME],
             config: this.config // use config in template
         }]);
 
@@ -277,7 +314,9 @@ export default class BaseBuilder {
             ]
             for (let j = 0; j < resolvedPaths.length; j++) {
                 if (await pathExists(resolvedPaths[j])) {
-                    currentRoute.componentPath = resolvedPaths[j];
+                    // in Windows, normalize will replace posix.sep`/` with win32.sep`\\`
+                    currentRoute.componentPath = normalize(resolvedPaths[j])
+                        .replace(/\\/g, '\\\\'); // escape backslash before writing to skeleton template
                     isComponentPathResolved = true;
                     break;
                 }
