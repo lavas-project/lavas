@@ -74,12 +74,14 @@ export function useWorkbox(webpackConfig, workboxConfig, lavasConfig) {
         registerNavigationClause = `workboxSW.router.registerNavigationRoute('${base}index.html');`;
     }
 
-    if (/workboxSW\.precache\(\[\]\);/.test(serviceWorkerContent)) {
-        serviceWorkerContent = serviceWorkerContent.replace(/workboxSW\.precache\(\[\]\);/,
-            `workboxSW.precache([]);\n${registerNavigationClause}\n`);
-    }
-    else {
-        serviceWorkerContent += registerNavigationClause;
+    if (!/workboxSW\.router\.registerNavigationRoute/.test(serviceWorkerContent)) {
+        if (/workboxSW\.precache\(\[\]\);/.test(serviceWorkerContent)) {
+            serviceWorkerContent = serviceWorkerContent.replace(/workboxSW\.precache\(\[\]\);/,
+                `workboxSW.precache([]);\n${registerNavigationClause}\n`);
+        }
+        else {
+            serviceWorkerContent += registerNavigationClause;
+        }
     }
 
 
@@ -89,5 +91,5 @@ export function useWorkbox(webpackConfig, workboxConfig, lavasConfig) {
     workboxConfig.swSrc = tempSwSrc;
 
     // use workbox-webpack-plugin@2.x
-    webpackConfig.plugins.push(new WorkboxWebpackPlugin(workboxConfig));
+    webpackConfig.plugin('workbox').use(WorkboxWebpackPlugin, [workboxConfig]);
 }

@@ -23,7 +23,7 @@ test('it should read from config directory when lavas.config.js does not exist',
     t.true(!core.config.build.ssr);
     t.is(core.config.build.publicPath, '/from-dir/');
     t.is(core.config.router.base, '/from-dir/');
-    t.true(!core.config.build.cssExtract);
+    t.true(core.config.build.cssExtract);
 
     // resume
     await rename(

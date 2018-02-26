@@ -6,6 +6,7 @@
 import {readFile} from 'fs-extra';
 import {join} from 'path';
 import {matchUrl} from '../utils/router';
+import Logger from '../utils/logger';
 
 /**
  * generate ssr middleware
@@ -23,7 +24,7 @@ export default function (core) {
         let url = req.url;
         let errorHandler = err => next(err);
 
-        console.log(`[Lavas] route middleware: ssr ${url}`);
+        Logger.info('route middleware', `ssr ${url}`);
 
         let {err, html} = await renderer.render({
             url,

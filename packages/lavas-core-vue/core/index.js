@@ -8,8 +8,8 @@ import ConfigReader from './config-reader';
 import ProdBuilder from './builder/prod-builder';
 import DevBuilder from './builder/dev-builder';
 import MiddlewareComposer from './middleware-composer';
+import Logger from './utils/logger';
 
-import ora from 'ora';
 import EventEmitter from 'events';
 
 export default class LavasCore extends EventEmitter {
@@ -82,16 +82,12 @@ export default class LavasCore extends EventEmitter {
      *
      */
     async build() {
-        let spinner = ora();
-        spinner.start();
-
         try {
             await this.builder.build();
-            spinner.succeed(`[Lavas] ${this.env} build completed.`);
         }
         catch (e) {
             console.error(e);
-            spinner.fail(`[Lavas] ${this.env} build failed.`)
+            Logger.error('build', `[Lavas] ${this.env} build failed.`);
         }
 
     }

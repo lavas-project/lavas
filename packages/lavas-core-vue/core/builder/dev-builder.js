@@ -15,9 +15,11 @@ import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
 
+
 import {LAVAS_CONFIG_FILE, STORE_FILE, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH} from '../constants';
-import {enableHotReload, writeFileInDev, removeTemplatedPath} from '../utils/webpack';
+import {writeFileInDev, removeTemplatedPath, enableHotReload} from '../utils/webpack';
 import {isFromCDN} from '../utils/path';
+import Logger from '../utils/logger';
 
 import BaseBuilder from './base-builder';
 
@@ -150,19 +152,24 @@ export default class DevBuilder extends BaseBuilder {
         let clientMFS;
         let ssrEnabled = this.config.build.ssr;
 
+        Logger.info('build', 'start compiling routes...', true);
         await this.routeManager.buildRoutes();
+        Logger.info('build', 'compiling routes completed.', true);
+
+        Logger.info('build', 'start writing files to /.lavas...', true);
         await this.writeRuntimeConfig();
         await this.writeMiddleware();
         await this.writeFileToLavasDir(
             STORE_FILE,
             readFileSync(join(__dirname, `../templates/${STORE_FILE}`))
         );
+        Logger.info('build', 'writing files to /.lavas completed', true);
 
         // SSR build process
         if (ssrEnabled) {
-            console.log('[Lavas] SSR build starting...');
-            clientConfig = this.webpackConfig.client();
-            serverConfig = this.webpackConfig.server();
+            // create config for both client & server side
+            clientConfig = await this.createSSRClientConfig();
+            serverConfig = await this.createSSRServerConfig();
             let serverMFS = new MFS();
 
             // pass addWatcher & reloadClient to renderer
@@ -190,18 +197,8 @@ export default class DevBuilder extends BaseBuilder {
         }
         // SPA build process
         else {
-            console.log('[Lavas] SPA build starting...');
             // create spa config first
-            spaConfig = await this.createSPAConfig(true);
-
-            // enable hotreload in every entry in dev mode
-            await enableHotReload(this.lavasPath(), spaConfig, true);
-
-            // add skeleton routes
-            if (this.skeletonEnabled) {
-                // TODO: handle skeleton routes in dev mode
-                // this.addSkeletonRoutes(spaConfig);
-            }
+            spaConfig = await this.createSPAConfig();
         }
 
         // create a compiler based on spa config
@@ -270,12 +267,8 @@ export default class DevBuilder extends BaseBuilder {
         // wait until webpack building finished
         await new Promise(resolve => {
             this.devMiddleware.waitUntilValid(async () => {
-                if (!ssrEnabled) {
-                    console.log('[Lavas] SPA build completed.');
-                }
-                else {
+                if (ssrEnabled) {
                     await this.renderer.refreshFiles();
-                    console.log('[Lavas] SSR build completed.');
                 }
 
                 // publish reload event to old client

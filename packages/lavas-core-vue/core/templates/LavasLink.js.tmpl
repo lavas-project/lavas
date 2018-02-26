@@ -1,0 +1,91 @@
+'use strict';
+
+let entryConfig = <%= entryConfig %>;
+// 将entryConfig中的正则复原
+entryConfig.forEach(config => config.urlReg = getRegExp(config.urlReg));
+let base = getBase('<%= base %>');
+let mode = '<%= mode %>';
+
+// 将super-json转化的正则对象复原
+function getRegExp(regExpStr) {
+    if (typeof regExpStr === 'string' && regExpStr.indexOf('#!RegExp') === 0) {
+        let match = regExpStr.match(/^#!RegExp(\[.*\])$/);
+        let tmp = JSON.parse(match[1]);
+        return new RegExp(tmp[0], tmp[1]);
+    }
+
+    return regExpStr;
+}
+
+// 获得对应的entryConfig
+function getEntry({name, url}) {
+    return entryConfig.find(entry => name ? entry.name === name : entry.urlReg.test(url));
+}
+
+// remove trailing slash
+// '/some-entry/' -> '/some-entry'
+// '/'' => ''
+function getBase(rawBase = '/') {
+    if (rawBase.endsWith('/')) {
+        return rawBase.substring(0, rawBase.length - 1);
+    }
+
+    return rawBase;
+}
+
+export default {
+    name: 'lavas-link',
+    props: {
+        to: {
+            type: [String, Object],
+            required: true
+        },
+        tag: {
+            type: String,
+            default: 'a'
+        },
+        exact: Boolean,
+        append: Boolean,
+        replace: Boolean,
+        activeClass: String,
+        exactActiveClass: String,
+        event: {
+            type: [String, Array],
+            default: 'click'
+        },
+        entry: String
+    },
+    render (createElement) {
+        let currentEntry = getEntry({url: getBase(this.$router.options.base) + this.$route.path});
+        let toEntry = getEntry({name: this.entry});
+
+        // within same entry, use <router-link>
+        if (!toEntry || toEntry.name === currentEntry.name) {
+            return createElement('router-link', {
+                attrs: {
+                    to: this.to,
+                    tag: this.tag,
+                    exact: this.exact,
+                    append: this.append,
+                    replace: this.replace,
+                    activeClass: this.activeClass,
+                    exactActiveClass: this.exactActiveClass,
+                    event: this.event
+                }
+            }, this.$slots.default);
+        }
+
+        // cross entry, use <a>
+        let to = base + this.to
+
+        if (mode === 'hash' && to.indexOf('#') === -1) {
+            to += '#' + to;
+        }
+
+        return createElement('a', {
+            attrs: {
+                href: to
+            }
+        }, this.$slots.default);
+    }
+}

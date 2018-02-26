@@ -9,6 +9,7 @@ import {join} from 'path';
 import {CONFIG_FILE, STORE_FILE} from '../constants';
 import {webpackCompile} from '../utils/webpack';
 import {distLavasPath} from '../utils/path';
+import Logger from '../utils/logger';
 
 import BaseBuilder from './base-builder';
 
@@ -24,22 +25,29 @@ export default class ProdBuilder extends BaseBuilder {
     async build() {
         let {build, globals} = this.config;
         // clear dist/ first
+        Logger.info('build', `start clearing ${build.path}...`, true);
         await emptyDir(build.path);
+        Logger.info('build', `${build.path} cleared.`, true);
 
+        Logger.info('build', 'start compiling routes...', true);
         await this.routeManager.buildRoutes();
+        Logger.info('build', 'compiling routes completed.', true);
+
+        Logger.info('build', 'start writing files to /.lavas...', true);
         await this.writeRuntimeConfig();
         await this.writeMiddleware();
         await this.writeFileToLavasDir(
             STORE_FILE,
             readFileSync(join(__dirname, `../templates/${STORE_FILE}`))
         );
+        Logger.info('build', 'writing files to /.lavas completed', true);
 
         // SSR build process
         if (build.ssr) {
-            console.log('[Lavas] SSR build starting...');
-            // webpack client & server config
-            let clientConfig = this.webpackConfig.client();
-            let serverConfig = this.webpackConfig.server();
+
+            // create config for both client & server side
+            let clientConfig = await this.createSSRClientConfig();
+            let serverConfig = await this.createSSRServerConfig();
 
             // build bundle renderer
             await this.renderer.build(clientConfig, serverConfig);
@@ -73,13 +81,10 @@ export default class ProdBuilder extends BaseBuilder {
                     }
                 ));
             }
-            console.log('[Lavas] SSR build completed.');
         }
         // SPA build process
         else {
-            console.log('[Lavas] SPA build starting...');
-            await webpackCompile(await this.createSPAConfig());
-            console.log('[Lavas] SPA build completed.');
+            await webpackCompile(await this.createSPAConfig(), build.stats);
         }
     }
 }

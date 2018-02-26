@@ -284,8 +284,6 @@ export default class RouteManager {
         const {routes: routesConfig = [], rewrite: rewriteRules = [], pathRule} = this.config.router;
         this.flatRoutes = new Set();
 
-        console.log('[Lavas] auto compile routes...');
-
         // generate routes according to pages dir
         this.routes = await generateRoutes(join(this.lavasDir, '../pages'), {routerOption: {pathRule}});
 
@@ -299,7 +297,5 @@ export default class RouteManager {
             // write routes.json
             await this.writeRoutesJsonFile();
         }
-
-        console.log('[Lavas] all routes are already generated.');
     }
 }

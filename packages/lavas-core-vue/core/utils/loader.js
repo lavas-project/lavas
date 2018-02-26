@@ -71,7 +71,8 @@ export function styleLoaders(options) {
     Object.keys(loaders).forEach(extension => {
         output.push({
             test: new RegExp(`\\.${extension}$`),
-            use: loaders[extension]
+            use: loaders[extension],
+            name: extension
         });
     });
 

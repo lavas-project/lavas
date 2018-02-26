@@ -10,6 +10,7 @@ import {merge, isArray} from 'lodash';
 import {CONFIG_FILE, LAVAS_CONFIG_FILE} from './constants';
 import {distLavasPath} from './utils/path';
 import * as JsonUtil from './utils/json';
+import Logger from './utils/logger';
 
 function mergeArray(a, b) {
     if (isArray(a)) {
@@ -59,7 +60,20 @@ const DEFAULT_CONFIG = {
         nodeExternalsWhitelist: [],
         watch: null,
         extend: null,
-        ssrCopy: []
+        ssrCopy: [],
+        // https://doc.webpack-china.org/configuration/stats/
+        stats: {
+            assetsSort: 'name',
+            chunks: false,
+            children: true,
+            modules: false,
+            colors: true,
+            timings: true,
+            excludeAssets: [
+                /.map$/,
+                /.html$/
+            ]
+        }
     },
     skeleton: {
         enable: true
@@ -120,6 +134,12 @@ export default class ConfigReader {
         }
     }
 
+    mergeEnv(config) {
+        if (config[this.env]) {
+            merge(config, config[this.env], mergeArray);
+        }
+    }
+
     /**
      * generate a config object according to config directory and NODE_ENV
      *
@@ -136,29 +156,36 @@ export default class ConfigReader {
             buildVersion: Date.now()
         }, mergeArray);
 
-        if (config[this.env]) {
-            merge(config, config[this.env], mergeArray);
-        }
+        this.mergeEnv(config);
 
         // read from custom config
         if (this.customConfigPath) {
-            console.log(`[Lavas] use custom config: ${this.customConfigPath}`);
+            Logger.info('build', `read custom config: ${this.customConfigPath}...`, true);
             delete require.cache[require.resolve(this.customConfigPath)];
-            merge(config, await import(this.customConfigPath), mergeArray);
+
+            let customConfig = await import(this.customConfigPath);
+            this.mergeEnv(customConfig)
+            merge(config, customConfig, mergeArray);
+
             return config;
         }
 
         // read from lavas.config.js
         let singleConfigPath = join(this.cwd, LAVAS_CONFIG_FILE);
         if (await pathExists(singleConfigPath)) {
-            console.log('[Lavas] read lavas.config.js.');
+            Logger.info('build', 'read lavas.config.js...', true);
             delete require.cache[require.resolve(singleConfigPath)];
-            merge(config, await import(singleConfigPath), mergeArray);
+
+            let singleConfig = await import(singleConfigPath);
+            this.mergeEnv(singleConfig);
+            merge(config, singleConfig, mergeArray);
+
+            Logger.info('build', 'reading config completed.', true);
             return config;
         }
 
         // read from config/
-        console.log('[Lavas] config directory is deprecated! Try to use lavas.config.js instead.');
+        Logger.warn('build', 'config directory is deprecated! Try to use lavas.config.js instead.');
         let configDir = join(this.cwd, 'config');
         let files = glob.sync(
             '**/*.js', {
@@ -193,12 +220,9 @@ export default class ConfigReader {
                 ? merge(cur[name], exportContent, mergeArray) : exportContent;
         }));
 
-        let temp = config.env || {};
+        this.mergeEnv(config);
 
-        // merge config according env
-        if (temp[this.env]) {
-            merge(config, temp[this.env], mergeArray);
-        }
+        Logger.info('build', 'finish reading config.', true, true);
 
         return config;
     }
@@ -209,6 +233,9 @@ export default class ConfigReader {
      * @return {Object} config
      */
     async readConfigFile() {
-        return JsonUtil.parse(await readFile(distLavasPath(this.cwd, CONFIG_FILE), 'utf8'));
+        Logger.info('build', 'start reading config...', true);
+        let parsedConfig = JsonUtil.parse(await readFile(distLavasPath(this.cwd, CONFIG_FILE), 'utf8'));
+        Logger.info('build', 'finish reading config.', true, true);
+        return parsedConfig;
     }
 }

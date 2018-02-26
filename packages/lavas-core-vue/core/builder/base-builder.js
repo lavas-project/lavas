@@ -9,9 +9,12 @@ import {join, basename} from 'path';
 
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
+import VueSSRClientPlugin from 'vue-server-renderer/client-plugin';
 
-import {TEMPLATE_HTML, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH, CONFIG_FILE} from '../constants';
+import {TEMPLATE_HTML, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH, CONFIG_FILE,
+    LAVAS_DIRNAME_IN_DIST, CLIENT_MANIFEST} from '../constants';
 import {assetsPath, resolveAliasPath, camelCaseToDash} from '../utils/path';
+import {enableHotReload} from '../utils/webpack';
 import * as JsonUtil from '../utils/json';
 import templateUtil from '../utils/template';
 
@@ -143,9 +146,8 @@ export default class BaseBuilder {
      *
      * @param {Object} spaConfig spaConfig
      * @param {string} baseUrl baseUrl from config/router
-     * @param {boolean} watcherEnabled enable watcher
      */
-    async addHtmlPlugin(spaConfig, baseUrl = '/', watcherEnabled) {
+    async addHtmlPlugin(spaConfig, baseUrl = '/') {
         // allow user to provide a custom HTML template
         let rootDir = this.config.globals.rootDir;
         let htmlFilename = `${DEFAULT_ENTRY_NAME}.html`;
@@ -162,7 +164,7 @@ export default class BaseBuilder {
         );
 
         // add html webpack plugin
-        spaConfig.plugins.unshift(new HtmlWebpackPlugin({
+        spaConfig.plugin('html').use(HtmlWebpackPlugin, [{
             filename: htmlFilename,
             template: resolvedTemplatePath,
             inject: true,
@@ -176,17 +178,9 @@ export default class BaseBuilder {
             cache: false,
             chunks: ['manifest', 'vue', 'vendor', DEFAULT_ENTRY_NAME],
             config: this.config // use config in template
-        }));
+        }]);
 
-        // watch template in development mode
-        if (watcherEnabled) {
-            this.addWatcher(customTemplatePath, 'change', async () => {
-                await this.writeFileToLavasDir(
-                    TEMPLATE_HTML,
-                    templateUtil.client(await readFile(customTemplatePath, 'utf8'), baseUrl)
-                );
-            });
-        }
+        return customTemplatePath;
     }
 
     /**
@@ -209,7 +203,7 @@ export default class BaseBuilder {
         }
 
         // check if all the componentPaths are existed first
-        let error = await this.validateSkeletonRoutes(skeleton.routes, spaConfig.resolve.alias);
+        let error = await this.validateSkeletonRoutes(skeleton.routes, spaConfig.resolve.alias.entries());
         if (error && error.msg) {
             console.error(error.msg);
         }
@@ -224,16 +218,26 @@ export default class BaseBuilder {
             // marked as supported at this time
             this.skeletonEnabled = true;
 
-            skeletonEntries[DEFAULT_ENTRY_NAME] = [await this.writeSkeletonEntry(skeleton.routes)];
+            let skeletonEntryPath = await this.writeSkeletonEntry(skeleton.routes);
 
             // when ssr skeleton, we need to extract css from js
-            skeletonConfig = this.webpackConfig.server({cssExtract: true});
-            // TODO: remove vue-ssr-client plugin
-            skeletonConfig.plugins.pop();
-            skeletonConfig.entry = skeletonEntries;
+            skeletonConfig = await this.webpackConfig.server({
+                cssExtract: true,
+                extendWithWebpackChain: (serverConfig, {type}) => {
+                    if (type === 'server') {
+                        serverConfig.entry(DEFAULT_ENTRY_NAME).add(skeletonEntryPath);
+                        // remove some plugins
+                        serverConfig.plugins
+                            .delete('ssr-server')
+                            .delete('progress-bar')
+                            .delete('progress')
+                            .delete('friendly-error');
+                    }
+                }
+            });
 
             // add skeleton plugin
-            spaConfig.plugins.push(new SkeletonWebpackPlugin({
+            spaConfig.plugin('skeleton').use(SkeletonWebpackPlugin, [{
                 webpackConfig: skeletonConfig,
                 quiet: true,
                 router: {
@@ -241,7 +245,7 @@ export default class BaseBuilder {
                     routes: skeleton.routes
                 },
                 minimize: !this.isDev
-            }));
+            }]);
         }
     }
 
@@ -291,39 +295,98 @@ export default class BaseBuilder {
     /**
      * create a webpack config which will be compiled later
      *
-     * @param {boolean} watcherEnabled enable watcher
      * @return {Object} spaConfig webpack config for SPA
      */
-    async createSPAConfig(watcherEnabled) {
+    async createSPAConfig() {
         let {globals, build, router, skeleton} = this.config;
         let rootDir = globals.rootDir;
 
         // create spa config based on client config
-        let spaConfig = this.webpackConfig.client();
+        return await this.webpackConfig.client({
+            extendWithWebpackChain: async (clientConfig, {type}) => {
+                if (type === 'client') {
+                    clientConfig.name = 'spaclient';
+                    clientConfig
+                        .context(rootDir)
+                        .entry(DEFAULT_ENTRY_NAME).add('./core/entry-client.js');
 
-        // set context and clear entries
-        spaConfig.entry = {};
-        spaConfig.name = 'spaclient';
-        spaConfig.context = rootDir;
+                    // add html-webpack-plugin
+                    let customTemplatePath = await this.addHtmlPlugin(clientConfig, router.base);
 
-        /**
-         * for SPA, we will:
-         * 1. add a html-webpack-plugin to output a HTML file
-         * 2. create an entry if a skeleton component is provided
-         */
-        if (!build.ssr) {
-            // set client entry first
-            spaConfig.entry[DEFAULT_ENTRY_NAME] = [`./core/entry-client.js`];
+                    // add vue-skeleton-webpack-plugin
+                    if (skeleton && skeleton.enable) {
+                        await this.addSkeletonPlugin(clientConfig);
+                    }
 
-            // add html-webpack-plugin
-            await this.addHtmlPlugin(spaConfig, router.base, watcherEnabled);
+                    // watch template in development mode
+                    if (this.isDev) {
+                        // watch html
+                        this.addWatcher(customTemplatePath, 'change', async () => {
+                            await this.writeFileToLavasDir(
+                                TEMPLATE_HTML,
+                                templateUtil.client(await readFile(customTemplatePath, 'utf8'), router.base)
+                            );
+                        });
 
-            // add vue-skeleton-webpack-plugin
-            if (skeleton && skeleton.enable) {
-                await this.addSkeletonPlugin(spaConfig);
+                        // enable hotreload in every entry in dev mode
+                        await enableHotReload(this.lavasPath(), clientConfig, true);
+
+                        // add skeleton routes
+                        if (this.skeletonEnabled) {
+                            // TODO: handle skeleton routes in dev mode
+                            // this.addSkeletonRoutes(spaConfig);
+                        }
+                    }
+                }
             }
-        }
+        });
+    }
 
-        return spaConfig;
+    /**
+     * create a webpack config which will be compiled later
+     *
+     * @param {boolean} isDev enable watcher
+     * @return {Object} SSRClientConfig webpack config for SSRClient
+     */
+    async createSSRClientConfig() {
+        return await this.webpackConfig.client({
+            extendWithWebpackChain: async (clientConfig, {type}) => {
+                if (type === 'client') {
+                    clientConfig.name = 'ssrclient';
+                    clientConfig
+                        .context(this.config.globals.rootDir)
+                        .entry(DEFAULT_ENTRY_NAME).add('./core/entry-client.js');
+
+                    // add vue-ssr-client-plugin
+                    clientConfig.plugin('ssr-client')
+                        .use(VueSSRClientPlugin, [{
+                            filename: join(LAVAS_DIRNAME_IN_DIST, CLIENT_MANIFEST)
+                        }]);
+
+                    if (this.isDev) {
+                        // enable hot-reload
+                        await enableHotReload(this.lavasPath(), clientConfig, true);
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * create a webpack config which will be compiled later
+     *
+     * @return {Object} SSRServerConfig webpack config for SSRServer
+     */
+    async createSSRServerConfig() {
+        return await this.webpackConfig.server({
+            extendWithWebpackChain: async (serverConfig, {type}) => {
+                if (type === 'server') {
+                    serverConfig.name = 'ssrserver';
+                    serverConfig
+                        .context(this.config.globals.rootDir)
+                        .entry(DEFAULT_ENTRY_NAME).add('./core/entry-server.js');
+                }
+            }
+        });
     }
 }

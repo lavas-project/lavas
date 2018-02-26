@@ -7,14 +7,14 @@ import {join} from 'path';
 import {pathExists, readFile, readJson, outputFile} from 'fs-extra';
 import {merge} from 'lodash';
 import {createBundleRenderer} from 'vue-server-renderer';
-import VueSSRClientPlugin from 'vue-server-renderer/client-plugin';
 
 import {DEFAULT_ENTRY_NAME} from './constants';
 import {distLavasPath} from './utils/path';
-import {webpackCompile, enableHotReload} from './utils/webpack';
+import {webpackCompile} from './utils/webpack';
 import templateUtil from './utils/template';
+import Logger from './utils/logger';
 
-import {LAVAS_DIRNAME_IN_DIST, TEMPLATE_HTML, SERVER_BUNDLE, CLIENT_MANIFEST} from './constants';
+import {TEMPLATE_HTML, SERVER_BUNDLE, CLIENT_MANIFEST} from './constants';
 
 export default class Renderer {
     constructor(core) {
@@ -65,17 +65,6 @@ export default class Renderer {
     }
 
     /**
-     * add custom ssr client plugin in config
-     */
-    addSSRClientPlugin() {
-        this.clientConfig.plugins.push(
-            new VueSSRClientPlugin({
-                filename: join(LAVAS_DIRNAME_IN_DIST, CLIENT_MANIFEST)
-            })
-        );
-    }
-
-    /**
      * create renderer with built serverBundle & clientManifest in production mode
      */
     async createWithBundle() {
@@ -92,16 +81,16 @@ export default class Renderer {
     }
 
     async buildProd() {
-        this.addSSRClientPlugin();
+        let {ssr, path, stats} = this.config.build;
 
         // start to build client & server configs
-        await webpackCompile([this.clientConfig, this.serverConfig]);
+        await webpackCompile([this.clientConfig, this.serverConfig], stats);
 
         // copy index.template.html to dist/lavas/
-        if (this.config.build.ssr) {
+        if (ssr) {
             let templateContent = await this.getTemplate(this.config.router.base);
             let distTemplatePath = distLavasPath(
-                this.config.build.path,
+                path,
                 this.getTemplateName()
             );
 
@@ -117,11 +106,6 @@ export default class Renderer {
         this.addWatcher(templatePath, 'change', async () => {
             await this.refreshFiles();
         });
-
-        await enableHotReload(lavasDir, this.clientConfig, true);
-
-        // add custom ssr client plugin
-        this.addSSRClientPlugin();
     }
 
     /**
@@ -129,7 +113,7 @@ export default class Renderer {
      * create new renderer
      */
     async refreshFiles() {
-        console.log('[Lavas] refresh ssr bundle & manifest.');
+        Logger.info('build', 'refresh ssr bundle & manifest');
 
         let changed = false;
         let templateChanged = false;
@@ -173,28 +157,12 @@ export default class Renderer {
         this.clientConfig = clientConfig;
         this.serverConfig = serverConfig;
 
-        // set entries in both client & server webpack config
-        this.setWebpackEntries();
-
         if (this.isProd) {
             await this.buildProd();
         }
         else {
             await this.buildDev();
         }
-    }
-
-    /**
-     * set entries in both client & server webpack config
-     */
-    setWebpackEntries() {
-        // set context in both configs first
-        this.clientConfig.context = this.rootDir;
-        this.clientConfig.name = 'ssrclient';
-        this.clientConfig.entry = {[DEFAULT_ENTRY_NAME]: ['./core/entry-client.js']};
-
-        this.serverConfig.context = this.rootDir;
-        this.serverConfig.entry = './core/entry-server.js';
     }
 
     /**
