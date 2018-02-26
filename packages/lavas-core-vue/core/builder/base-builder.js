@@ -12,7 +12,7 @@ import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
 import VueSSRClientPlugin from 'vue-server-renderer/client-plugin';
 
 import {TEMPLATE_HTML, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH, CONFIG_FILE,
-    LAVAS_DIRNAME_IN_DIST, CLIENT_MANIFEST} from '../constants';
+    LAVAS_DIRNAME_IN_DIST, CLIENT_MANIFEST, STORE_FILE} from '../constants';
 import {assetsPath, resolveAliasPath, camelCaseToDash} from '../utils/path';
 import {enableHotReload} from '../utils/webpack';
 import * as JsonUtil from '../utils/json';
