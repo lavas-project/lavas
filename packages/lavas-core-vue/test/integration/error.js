@@ -20,7 +20,8 @@ test.before('init lavas-core & server', async t => {
     app = createApp();
 });
 
-test.after('clean', t => {
+test.after('clean', async t => {
+    await core.close();
     server && server.close();
 });
 
