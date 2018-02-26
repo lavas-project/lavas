@@ -15,7 +15,7 @@ import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
 
-import {LAVAS_CONFIG_FILE, STORE_FILE, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH} from '../constants';
+import {LAVAS_CONFIG_FILE, STORE_FILE, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH, BUILD_SCRIPT} from '../constants';
 import {writeFileInDev, removeTemplatedPath, enableHotReload} from '../utils/webpack';
 import {isFromCDN} from '../utils/path';
 import Logger from '../utils/logger';
