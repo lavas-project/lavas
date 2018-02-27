@@ -42,10 +42,7 @@ export default class ProdBuilder extends BaseBuilder {
         Logger.info('build', 'start writing files to /.lavas...', true);
         await this.writeRuntimeConfig();
         await this.writeMiddleware();
-        await this.writeFileToLavasDir(
-            STORE_FILE,
-            readFileSync(join(__dirname, `../templates/${STORE_FILE}`))
-        );
+        await this.writeStore();
         Logger.info('build', 'writing files to /.lavas completed', true);
 
         // SSR build process
