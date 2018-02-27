@@ -7,7 +7,7 @@ import webpack from 'webpack';
 import MFS from 'memory-fs';
 import chokidar from 'chokidar';
 import {readFileSync} from 'fs-extra';
-import {join, posix} from 'path';
+import {join} from 'path';
 import {debounce} from 'lodash';
 
 import historyMiddleware from 'connect-history-api-fallback';
@@ -15,8 +15,8 @@ import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
 
-import {LAVAS_CONFIG_FILE, STORE_FILE, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH, BUILD_SCRIPT} from '../constants';
-import {writeFileInDev, removeTemplatedPath, enableHotReload} from '../utils/webpack';
+import {LAVAS_CONFIG_FILE, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH, BUILD_SCRIPT} from '../constants';
+import {writeFileInDev, removeTemplatedPath} from '../utils/webpack';
 import {isFromCDN} from '../utils/path';
 import Logger from '../utils/logger';
 
@@ -104,7 +104,7 @@ export default class DevBuilder extends BaseBuilder {
         let {globals, build} = this.config;
         let skeletonRelativePath = build.skeleton && build.skeleton.path || DEFAULT_SKELETON_PATH;
         clientConfig.module.rules.push(SkeletonWebpackPlugin.loader({
-            resource: [join(globals.rootDir, `.lavas/router`)],
+            resource: [join(globals.rootDir, '.lavas/router')],
             options: {
                 entry: [DEFAULT_ENTRY_NAME],
                 importTemplate: `import [nameHash] from '@/${skeletonRelativePath}';`,
@@ -154,7 +154,6 @@ export default class DevBuilder extends BaseBuilder {
 
         if (ssrEnabled && entriesConfig.length !== 0) {
             throw new Error('[Lavas] Multi Entries cannot use SSR mode. Try to set ssr to `false`');
-            return;
         }
 
         Logger.info('build', 'start compiling routes...', true);
@@ -275,7 +274,6 @@ export default class DevBuilder extends BaseBuilder {
 
             if (entriesConfig.length !== 0) {
                 let rewrites = [];
-                let indexObject;
 
                 entriesConfig.forEach(entry => {
                     rewrites.push({

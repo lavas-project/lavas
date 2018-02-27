@@ -79,6 +79,7 @@ export default class MiddlewareComposer {
      * compose middlewares into a chain.
      * NOTE: MUST be called in Node >= 7.6.0 because of "async" syntax.
      *
+     * @param {Array<Function>|Function} selectedMiddlewares middlewares selected by user
      * @return {Function} koaMiddleware
      */
     koa(selectedMiddlewares = ALL_MIDDLEWARES) {
@@ -184,6 +185,7 @@ export default class MiddlewareComposer {
     /**
      * compose middlewares into a chain.
      *
+     * @param {Array<Function>|Function} selectedMiddlewares middlewares selected by user
      * @return {Function} expressMiddleware
      */
     express(selectedMiddlewares = ALL_MIDDLEWARES) {
@@ -192,7 +194,7 @@ export default class MiddlewareComposer {
         }
 
         let expressRouter = Router;
-        let {router: {base}, build: {ssr, publicPath, compress}, serviceWorker, errorHandler} = this.config;
+        let {router: {base}, build: {ssr, publicPath}, serviceWorker, errorHandler} = this.config;
         base = removeTrailingSlash(base || '/');
 
         if (selectedMiddlewares.includes(INTERNAL_MIDDLEWARE.COMPRESSION)) {

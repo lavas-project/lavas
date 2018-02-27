@@ -66,13 +66,12 @@ export default class WebpackConfig {
      * @return {Object} webpackChain config
      */
     async base(buildConfig = {}) {
-        let {globals, build, serviceWorker} = this.config;
+        let {globals, build} = this.config;
         /* eslint-disable fecs-one-var-per-line */
         let {path, publicPath, filenames, babel, cssSourceMap, cssMinimize,
-            cssExtract, jsSourceMap, profile,
+            cssExtract, jsSourceMap,
             alias: {base: baseAlias = {}},
-            defines: {base: baseDefines = {}},
-            plugins: {base: basePlugins = []}
+            defines: {base: baseDefines = {}}
         } = Object.assign({}, build, buildConfig);
         /* eslint-enable fecs-one-var-per-line */
 
@@ -196,7 +195,7 @@ export default class WebpackConfig {
      * @return {Object} client base config
      */
     async client(internalBuildConfig = {}) {
-        let {buildVersion, globals, build, manifest, serviceWorker} = this.config;
+        let {globals, build, serviceWorker} = this.config;
 
         /* eslint-disable fecs-one-var-per-line */
         let {publicPath, filenames, cssSourceMap, cssMinimize, cssExtract,
@@ -229,12 +228,11 @@ export default class WebpackConfig {
         clientConfig.devtool(jsSourceMap ? (this.isDev ? 'cheap-module-eval-source-map' : 'nosources-source-map') : false);
 
         // modify vars in DefinePlugin
-        clientConfig.plugin('define').init((Plugin, args) => {
-            return new Plugin(Object.assign(args[0], {
+        clientConfig.plugin('define').init((Plugin, args) =>
+            new Plugin(Object.assign(args[0], {
                 'process.env.VUE_ENV': '"client"',
                 'process.env.NODE_ENV': `"${this.env}"`
-            }, clientDefines));
-        });
+            }, clientDefines)));
 
         // split vendor js into its own file
         clientConfig.plugin('chunk-vendor').use(webpack.optimize.CommonsChunkPlugin, [{
@@ -395,12 +393,11 @@ export default class WebpackConfig {
         }));
 
         // modify vars in DefinePlugin
-        serverConfig.plugin('define').init((Plugin, args) => {
-            return new Plugin(Object.assign(args[0], {
+        serverConfig.plugin('define').init((Plugin, args) =>
+            new Plugin(Object.assign(args[0], {
                 'process.env.VUE_ENV': '"server"',
                 'process.env.NODE_ENV': `"${this.env}"`
-            }, serverDefines));
-        });
+            }, serverDefines)));
 
         // add vue-ssr-server-plugin
         serverConfig.plugin('ssr-server').use(VueSSRServerPlugin, [{

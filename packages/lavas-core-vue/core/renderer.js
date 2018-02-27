@@ -101,8 +101,6 @@ export default class Renderer {
     }
 
     async buildDev() {
-        let lavasDir = join(this.rootDir, './.lavas');
-
         // add watcher for each template
         let templatePath = this.getTemplatePath();
         this.addWatcher(templatePath, 'change', async () => {
@@ -157,8 +155,9 @@ export default class Renderer {
 
     /**
      * only called in SSR mode
-     * @param {object} clientConfig client webpack config
-     * @param {object} serverConfig server webpack config
+     *
+     * @param {Object} clientConfig client webpack config
+     * @param {Object} serverConfig server webpack config
      */
     async build(clientConfig, serverConfig) {
         this.clientConfig = clientConfig;
@@ -184,7 +183,7 @@ export default class Renderer {
                 {
                     template: this.template,
                     clientManifest: this.clientManifest,
-                    shouldPrefetch: (file, type) => {
+                    shouldPrefetch: function (file, type) {
                         if (type === 'script') {
                             // exclude the workbox files in /static copied by copy-webpack-plugin
                             return !/(workbox-v\d+\.\d+\.\d+.*)|(sw-register\.js)|(precache-manifest\.)/.test(file);
@@ -209,7 +208,7 @@ export default class Renderer {
         // merge with default context
         merge(ctx, {
             title: 'Lavas', // default title
-            config: this.config, // mount config to ctx which will be used when rendering template
+            config: this.config // mount config to ctx which will be used when rendering template
         }, context);
 
         let renderer = await (this.renderer
@@ -217,9 +216,7 @@ export default class Renderer {
 
         // render to string
         return new Promise(resolve => {
-            renderer.renderToString(ctx, (err, html) => {
-                return resolve({err, html});
-            });
+            renderer.renderToString(ctx, (err, html) => resolve({err, html}));
         });
     }
 }

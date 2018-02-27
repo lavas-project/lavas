@@ -3,9 +3,6 @@
  * @author lavas
  */
 
-import {readFile} from 'fs-extra';
-import {join} from 'path';
-import {matchUrl} from '../utils/router';
 import Logger from '../utils/logger';
 
 /**
@@ -15,7 +12,6 @@ import Logger from '../utils/logger';
  * @return {Function} koa middleware
  */
 export default function (core) {
-    let {cwd, config, renderer, builder, isProd} = core;
     return async function (req, res, next) {
         if (req.lavasIgnoreFlag) {
             return next();
@@ -26,7 +22,7 @@ export default function (core) {
 
         Logger.info('route middleware', `ssr ${url}`);
 
-        let {err, html} = await renderer.render({
+        let {err, html} = await core.renderer.render({
             url,
             req,
             res,

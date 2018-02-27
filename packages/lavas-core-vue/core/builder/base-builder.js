@@ -4,7 +4,7 @@
  */
 
 import template from 'lodash.template';
-import {readFile, pathExists, copySync} from 'fs-extra';
+import {readFile, pathExists} from 'fs-extra';
 import {join, basename, normalize} from 'path';
 
 import HtmlWebpackPlugin from 'html-webpack-plugin';
@@ -156,7 +156,7 @@ export default class BaseBuilder {
     /**
      * write an entry file for skeleton components
      *
-     * @param {Array} skeleton routes
+     * @param {Array} skeletons routes for skeletons
      * @return {string} entryPath
      */
     async writeSkeletonEntry(skeletons) {
@@ -174,6 +174,7 @@ export default class BaseBuilder {
      * @param {Object} spaConfig spaConfig
      * @param {string} baseUrl baseUrl from config/router
      * @param {?string} entryName entry name in MPA, undefined in SPA
+     * @return {string} resolvedTemplatePath html template's path
      */
     async addHtmlPlugin(spaConfig, baseUrl = '/', entryName) {
         // allow user to provide a custom HTML template
@@ -232,7 +233,6 @@ export default class BaseBuilder {
         let {router, skeleton} = this.config;
         // if skeleton provided, we need to create an entry
         let skeletonConfig;
-        let skeletonEntries = {};
 
         // add default skeleton path `@/core/Skeleton.vue`
         if (!skeleton.routes || !skeleton.routes.length) {
@@ -314,7 +314,7 @@ export default class BaseBuilder {
             resolvedPaths = [
                 join(this.config.globals.rootDir, currentRoute.componentPath),
                 resolveAliasPath(alias, currentRoute.componentPath)
-            ]
+            ];
             for (let j = 0; j < resolvedPaths.length; j++) {
                 if (await pathExists(resolvedPaths[j])) {
                     // in Windows, normalize will replace posix.sep`/` with win32.sep`\\`
@@ -340,7 +340,7 @@ export default class BaseBuilder {
      * @return {Object} spaConfig webpack config for SPA
      */
     async createSPAConfig() {
-        let {globals, build, router, skeleton} = this.config;
+        let {globals, router, skeleton} = this.config;
         let rootDir = globals.rootDir;
 
         // create spa config based on client config

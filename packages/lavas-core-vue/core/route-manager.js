@@ -12,7 +12,7 @@ import {createHash} from 'crypto';
 import serialize from 'serialize-javascript';
 import template from 'lodash.template';
 
-import {generateRoutes, matchUrl, routes2Reg} from './utils/router';
+import {generateRoutes, routes2Reg} from './utils/router';
 import {writeFileInDev} from './utils/webpack';
 import {distLavasPath} from './utils/path';
 

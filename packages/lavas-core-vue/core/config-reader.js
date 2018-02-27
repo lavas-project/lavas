@@ -173,7 +173,7 @@ export default class ConfigReader {
             delete require.cache[require.resolve(this.customConfigPath)];
 
             let customConfig = await import(this.customConfigPath);
-            this.mergeEnv(customConfig)
+            this.mergeEnv(customConfig);
             merge(config, customConfig, mergeArray);
 
             return config;

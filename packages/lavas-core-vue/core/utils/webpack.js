@@ -11,6 +11,7 @@ import template from 'lodash.template';
  * start to compile with webpack, record the errors & warnings in process
  *
  * @param {Object|Array} config webpack config
+ * @param {Object?} statsConfig config for showing webpack stats
  * @return {Promise} promise
  */
 export function webpackCompile(config, statsConfig) {
