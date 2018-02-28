@@ -31,8 +31,8 @@ export function request(app) {
  *
  * @return {Object} app app
  */
-export function createApp() {
-    if (isKoaSupport) {
+export function createApp(isForceExpress) {
+    if (isKoaSupport && !isForceExpress) {
         const Koa = require('koa');
         return new Koa();
     }
