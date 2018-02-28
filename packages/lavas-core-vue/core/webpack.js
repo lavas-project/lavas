@@ -18,6 +18,7 @@ import {BundleAnalyzerPlugin} from 'webpack-bundle-analyzer';
 import SWRegisterWebpackPlugin from 'sw-register-webpack-plugin';
 import ProgressBarPlugin from 'progress-bar-webpack-plugin';
 import TimeFixWebpackPlugin from './plugins/timefix-webpack-plugin';
+import UglifyJSPlugin from 'uglifyjs-webpack-plugin';
 
 import {vueLoaders, styleLoaders} from './utils/loader';
 import {assetsPath} from './utils/path';
@@ -158,15 +159,14 @@ export default class WebpackConfig {
             // https://webpack.js.org/plugins/hashed-module-ids-plugin
             baseConfig.plugin('hashed-module-ids').use(webpack.HashedModuleIdsPlugin);
 
-            // enable `parallel` option
+            // disable uglify-js in TEST mode
             // https://github.com/lavas-project/lavas/issues/77
-            baseConfig.plugin('uglify-js').use(webpack.optimize.UglifyJsPlugin, [{
-                compress: {
-                    warnings: false
-                },
-                parallel: true,
-                sourceMap: jsSourceMap
-            }]);
+            if (!process.env.BABEL_ENV || !process.env.BABEL_ENV === 'test') {
+                baseConfig.plugin('uglify-js').use(UglifyJSPlugin, [{
+                    parallel: true, // enable `parallel` option
+                    sourceMap: jsSourceMap
+                }]);
+            }
 
             baseConfig.plugin('optimize-css').use(OptimizeCSSPlugin, [{
                 cssProcessorOptions: {

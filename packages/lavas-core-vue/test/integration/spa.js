@@ -26,27 +26,27 @@ test.after('clean', async t => {
     server && server.close();
 });
 
-// test.serial('it should run in development mode correctly', async t => {
-//     await core.init('development', true);
-//
-//     // switch to SPA mode
-//     core.config.build.ssr = false;
-//     syncConfig(core, core.config);
-//
-//     await core.build();
-//
-//     // set middlewares & start a server
-//     app.use(isKoaSupport ? core.koaMiddleware() : core.expressMiddleware());
-//     server = app.listen(port);
-//
-//     // serve main.html
-//     let skeletonContent = `<div data-server-rendered=true>`;
-//     res = await request(app)
-//         .get('/index.html');
-//     t.is(200, res.status);
-//     // include skeleton
-//     t.true(res.text.indexOf(skeletonContent) > -1);
-// });
+test.serial('it should run in development mode correctly', async t => {
+    await core.init('development', true);
+
+    // switch to SPA mode
+    core.config.build.ssr = false;
+    syncConfig(core, core.config);
+
+    await core.build();
+
+    // set middlewares & start a server
+    app.use(isKoaSupport ? core.koaMiddleware() : core.expressMiddleware());
+    server = app.listen(port);
+
+    // serve main.html
+    let skeletonContent = `<div data-server-rendered=true>`;
+    res = await request(app)
+        .get('/index.html');
+    t.is(200, res.status);
+    // include skeleton
+    t.true(res.text.indexOf(skeletonContent) > -1);
+});
 
 test.serial('it should run in production mode correctly', async t => {
     await core.init('production', true);

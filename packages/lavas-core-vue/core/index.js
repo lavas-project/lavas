@@ -86,7 +86,7 @@ export default class LavasCore extends EventEmitter {
         }
         catch (e) {
             console.error(e);
-            Logger.error('build', `[Lavas] ${this.env} build failed.`);
+            Logger.error('build', `${this.env} build failed.`);
         }
 
     }
