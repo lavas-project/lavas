@@ -17,5 +17,12 @@
     ],
     "ignore": [
         "core/templates"
-    ]
+    ],
+    "env": {
+        "test": {
+            "plugins": [
+                "istanbul"
+            ]
+        }
+    }
 }
