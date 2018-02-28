@@ -89,7 +89,7 @@
     "koa-mount": "^3.0.0",
     "koa-send": "^4.1.1",
     "koa-static": "^4.0.1",
-    "lavas-core-vue": "^1.0.6",
+    "lavas-core-vue": "^1.0.7",
     "lerna": "^2.5.1",
     "lodash": "^4.17.4",
     "lodash.template": "^4.4.0",
