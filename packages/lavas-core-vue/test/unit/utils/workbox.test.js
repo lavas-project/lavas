@@ -7,9 +7,9 @@ import test from 'ava';
 import {join} from 'path';
 import {readFile, writeFile} from 'fs-extra';
 import merge from 'webpack-merge';
-import {getWorkboxFiles} from '../../../dist/utils/workbox';
+import {getWorkboxFiles} from '../../../core/utils/workbox';
 import {syncConfig} from '../../utils';
-import LavasCore from '../../../dist';
+import LavasCore from '../../../core';
 
 let core;
 

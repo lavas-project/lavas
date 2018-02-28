@@ -3,7 +3,7 @@
  * @author wangyisheng@baidu.com (wangyisheng)
  */
 
-import {client, server} from '../../../dist/utils/template';
+import {client, server} from '../../../core/utils/template';
 import test from 'ava';
 import {resolve} from 'path';
 import {readFileSync} from 'fs-extra';
