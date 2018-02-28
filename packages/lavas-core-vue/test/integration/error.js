@@ -5,6 +5,7 @@
 
 import {join} from 'path';
 import test from 'ava';
+import http from 'http';
 import Koa from 'koa';
 import rp  from 'request-promise';
 import supertest from 'supertest';
@@ -43,7 +44,7 @@ test('it should show error page correctly', async t => {
     await core.build();
 
     koaApp.use(koaError());
-    koaServer = koaApp.listen(port);
+    koaServer = http.createServer(koaApp.callback()).listen(port);
 
     expressApp.use(expressError('/'));
     expressServer = expressApp.listen(3031);
