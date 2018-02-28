@@ -7,7 +7,7 @@
 
 import {join} from 'path';
 import test from 'ava';
-import LavasCore from '../../../dist';
+import LavasCore from '../../../core';
 
 test('it should read from config.json after building', async t => {
     let core = new LavasCore(join(__dirname, '../../fixtures/simple'));

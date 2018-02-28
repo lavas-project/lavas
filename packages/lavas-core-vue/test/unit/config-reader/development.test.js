@@ -8,7 +8,7 @@
 import merge from 'webpack-merge';
 import {join} from 'path';
 import test from 'ava';
-import LavasCore from '../../../dist';
+import LavasCore from '../../../core';
 import {syncConfig} from '../../utils';
 
 let core;
