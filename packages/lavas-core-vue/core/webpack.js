@@ -159,14 +159,11 @@ export default class WebpackConfig {
             // https://webpack.js.org/plugins/hashed-module-ids-plugin
             baseConfig.plugin('hashed-module-ids').use(webpack.HashedModuleIdsPlugin);
 
-            // disable uglify-js in TEST mode
             // https://github.com/lavas-project/lavas/issues/77
-            if (!process.env.BABEL_ENV || !process.env.BABEL_ENV === 'test') {
-                baseConfig.plugin('uglify-js').use(UglifyJSPlugin, [{
-                    parallel: true, // enable `parallel` option
-                    sourceMap: jsSourceMap
-                }]);
-            }
+            baseConfig.plugin('uglify-js').use(UglifyJSPlugin, [{
+                parallel: true, // enable `parallel` option
+                sourceMap: jsSourceMap
+            }]);
 
             baseConfig.plugin('optimize-css').use(OptimizeCSSPlugin, [{
                 cssProcessorOptions: {

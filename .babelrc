@@ -4,7 +4,7 @@
             "env",
             {
                 "targets": {
-                    "node": 5
+                    "node": "current"
                 }
             }
         ],
@@ -17,10 +17,5 @@
     ],
     "ignore": [
         "core/templates"
-    ],
-    "env": {
-        "test": {
-            "plugins": ["istanbul"]
-        }
-    }
+    ]
 }

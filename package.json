@@ -10,7 +10,7 @@
     "build:lavas-core-vue": "babel packages/lavas-core-vue/core --out-dir packages/lavas-core-vue/dist --copy-files",
     "build:lavas-cli": "babel packages/lavas-cli/src --out-dir packages/lavas-cli/dist --copy-files",
     "lint": "fecs ./ --rule --type 'vue,js,css'",
-    "test": "cross-env BABEL_ENV=test nyc ava",
+    "test": "nyc ava -v",
     "nyc:report": "nyc report --reporter=html",
     "publish:core": "lerna publish --scope=lavas-core-vue"
   },
@@ -54,9 +54,7 @@
   "nyc": {
     "exclude": [
         "packages/lavas-core-vue/test/**/*.js"
-    ],
-    "sourceMap": false,
-    "instrument": false
+    ]
   },
   "dependencies": {
     "ajv": "^5.1.3",
@@ -137,7 +135,6 @@
     "babel-helper-explode-class": "^6.24.1",
     "babel-plugin-add-module-exports": "^0.2.0",
     "babel-plugin-dynamic-import-node": "^1.0.2",
-    "babel-plugin-istanbul": "^4.1.5",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-decorators": "^6.24.1",
     "babel-plugin-transform-imports": "^1.4.1",
