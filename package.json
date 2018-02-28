@@ -149,6 +149,8 @@
     "fecs": "^1.4.0",
     "koa": "^2.3.0",
     "nyc": "^10.3.2",
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2",
     "semver": "^5.4.1",
     "superkoa": "^1.0.3",
     "supertest": "^3.0.0",
