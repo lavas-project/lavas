@@ -5,7 +5,7 @@
 
 import {join} from 'path';
 import test from 'ava';
-import LavasCore from '../../dist';
+import LavasCore from '../../core';
 
 import {syncConfig, isKoaSupport, request, createApp} from '../utils';
 

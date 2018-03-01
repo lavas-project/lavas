@@ -4,11 +4,10 @@
             "env",
             {
                 "targets": {
-                    "node": 5
+                    "node": "current"
                 }
             }
-        ],
-        "stage-2"
+        ]
     ],
     "plugins": [
         "transform-runtime",

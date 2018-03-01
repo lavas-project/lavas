@@ -3,7 +3,7 @@
  * @author wangyisheng@baidu.com (wangyisheng)
  */
 
-import {vueLoaders, cssLoaders, styleLoaders} from '../../../dist/utils/loader';
+import {vueLoaders, cssLoaders, styleLoaders} from '../../../core/utils/loader';
 import test from 'ava';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 

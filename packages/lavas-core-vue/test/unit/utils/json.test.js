@@ -3,7 +3,7 @@
  * @author wangyisheng@baidu.com (wangyisheng)
  */
 
-import {stringify, parse, deepPick} from '../../../dist/utils/json';
+import {stringify, parse, deepPick} from '../../../core/utils/json';
 import test from 'ava';
 
 test('it should parse & stringify JSON with regexp', async t => {
