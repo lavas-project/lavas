@@ -31,7 +31,7 @@
   "author": "sfe-sy <sfe-sy@baidu.com>",
   "license": "ISC",
   "engines": {
-    "node": ">= 4.0.0",
+    "node": ">= 6.9.0",
     "npm": ">= 3.0.0"
   },
   "ava": {
@@ -53,7 +53,7 @@
   },
   "nyc": {
     "exclude": [
-        "packages/lavas-core-vue/test/**/*.js"
+      "packages/lavas-core-vue/test/**/*.js"
     ]
   },
   "dependencies": {
@@ -148,7 +148,7 @@
     "cross-env": "^5.0.5",
     "express": "^4.16.2",
     "fecs": "^1.4.0",
-    "koa": "^2.3.0",
+    "koa": "^2.5.0",
     "nyc": "^10.3.2",
     "semver": "^5.4.1",
     "superkoa": "^1.0.3",

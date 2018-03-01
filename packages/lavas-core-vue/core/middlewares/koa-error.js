@@ -9,7 +9,7 @@
  * @param {string} errPath errPath
  * @return {Function} koa middleware
  */
-export default function (errPath) {
+export default function ({errorPath, defaultErrorMessage, showRealErrorMessage}) {
 
     return async (ctx, next) => {
         if (ctx.req.lavasIgnoreFlag) {
@@ -19,22 +19,15 @@ export default function (errPath) {
             await next();
         }
         catch (err) {
-            let errorMsg = 'Internal Server Error';
-            if (err.status !== 404) {
-                console.log('[Lavas] error middleware catch error:');
-                console.log(err);
-            }
-            else {
-                errorMsg = `${ctx.req.url} not found`;
-                console.log(errorMsg);
-            }
+            console.log('[Lavas] error middleware catch error:');
+            console.log(err);
 
             if (ctx.headerSent || !ctx.writable) {
                 err.headerSent = true;
                 return;
             }
 
-            if (errPath === ctx.path.replace(/\?.+$/, '')) {
+            if (errorPath === ctx.path.replace(/\?.+$/, '')) {
                 // if already in error procedure, then end this request immediately, avoid infinite loop
                 ctx.res.end();
                 return;
@@ -44,7 +37,7 @@ export default function (errPath) {
             ctx.res._headers = {};
 
             // redirect to the corresponding url
-            ctx.redirect(`${errPath}?error=${encodeURIComponent(errorMsg)}`);
+            ctx.redirect(`${errorPath}?error=${encodeURIComponent(showRealErrorMessage ? err.message : defaultErrorMessage)}`);
 
             ctx.res.end();
         }

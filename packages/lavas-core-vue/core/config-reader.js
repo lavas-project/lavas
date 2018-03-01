@@ -80,6 +80,8 @@ const DEFAULT_CONFIG = {
     },
     router: {},
     errorHandler: {
+        defaultErrorMessage: 'Internal Server Error',
+        showRealErrorMessage: false,
         errorPath: '/error'
     },
     middleware: {

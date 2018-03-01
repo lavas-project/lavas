@@ -67,13 +67,13 @@ async function runCommonTestCases(t) {
     t.true(res.text.indexOf(errorPageTitle) > -1);
 }
 
-// test.serial('it should run in development mode correctly', async t => {
-//     // init, build and start a dev server
-//     await core.init('development', true);
-//     await core.build();
-//
-//     await runCommonTestCases(t);
-// });
+test.serial('it should run in development mode correctly', async t => {
+    // init, build and start a dev server
+    await core.init('development', true);
+    await core.build();
+
+    await runCommonTestCases(t);
+});
 
 test.serial('it should run in production mode correctly', async t => {
     // build in production mode
