@@ -3,12 +3,13 @@
  * @author lavas
  */
 
-import {emptyDir, outputFile, copy, readFileSync} from 'fs-extra';
+import {emptyDir, outputFile, copy} from 'fs-extra';
 import {join} from 'path';
 
 import {CONFIG_FILE} from '../constants';
 import {webpackCompile} from '../utils/webpack';
 import {distLavasPath} from '../utils/path';
+import Logger from '../utils/logger';
 
 import BaseBuilder from './base-builder';
 
@@ -26,30 +27,29 @@ export default class ProdBuilder extends BaseBuilder {
 
         if (build.ssr && entriesConfig.length !== 0) {
             throw new Error('[Lavas] Multi Entries cannot use SSR mode. Try to set ssr to `false`');
-            return;
         }
 
         // clear dist/ first
+        Logger.info('build', `start clearing ${build.path}...`, true);
         await emptyDir(build.path);
+        Logger.info('build', `${build.path} cleared.`, true);
 
+        Logger.info('build', 'start compiling routes...', true);
         await this.routeManager.buildRoutes();
+        Logger.info('build', 'compiling routes completed.', true);
+
+        Logger.info('build', 'start writing files to /.lavas...', true);
         await this.writeRuntimeConfig();
-        // write middleware.js & store.js
-        if (entriesConfig.length === 0) {
-            await this.writeMiddleware();
-            await this.writeStore();
-        }
-        else {
-            await this.writeLavasLink();
-            await Promise.all(entriesConfig.map(entry => this.writeStore()));
-        }
+        await this.writeMiddleware();
+        await this.writeStore();
+        Logger.info('build', 'writing files to /.lavas completed', true);
 
         // SSR build process
         if (build.ssr) {
-            console.log('[Lavas] SSR build starting...');
-            // webpack client & server config
-            let clientConfig = this.webpackConfig.client();
-            let serverConfig = this.webpackConfig.server();
+
+            // create config for both client & server side
+            let clientConfig = await this.createSSRClientConfig();
+            let serverConfig = await this.createSSRServerConfig();
 
             // build bundle renderer
             await this.renderer.build(clientConfig, serverConfig);
@@ -83,14 +83,10 @@ export default class ProdBuilder extends BaseBuilder {
                     }
                 ));
             }
-            console.log('[Lavas] SSR build completed.');
         }
         // SPA build process
         else {
-            let mode = entriesConfig.length === 0 ? 'SPA' : 'MPA';
-            console.log(`[Lavas] ${mode} build starting...`);
-            await webpackCompile(await this.createSPAConfig(false, mode === 'SPA'));
-            console.log(`[Lavas] ${mode} build completed.`);
+            await webpackCompile(await this.createSPAConfig(), build.stats);
         }
     }
 }

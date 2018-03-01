@@ -56,4 +56,3 @@ test('it should deep pick object correctly', async t => {
         '{"one":1,"three":"Three","four":[1,2,3,4],"five":{"alpha":1,"teta":{"beh":2}}}'
     );
 });
-

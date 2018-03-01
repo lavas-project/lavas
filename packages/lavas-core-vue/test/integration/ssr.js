@@ -19,7 +19,8 @@ test.beforeEach('init lavas-core & server', async t => {
     app = createApp();
 });
 
-test.afterEach('clean', t => {
+test.afterEach('clean', async t => {
+    await core.close();
     server && server.close();
 });
 
@@ -57,13 +58,6 @@ async function runCommonTestCases(t) {
     t.true(res.text.startsWith(`{
     "start_url": "/?utm_source=homescreen",
 `));
-
-    // render error page for invalid route path
-    let errorPageTitle = '<title data-vue-meta="true">服务器开小差了</title>';
-    res = await request(app)
-        .get('/invalid/path');
-    t.is(200, res.status);
-    t.true(res.text.indexOf(errorPageTitle) > -1);
 }
 
 test.serial('it should run in development mode correctly', async t => {
