@@ -20,10 +20,14 @@ test.beforeEach('init', async t => {
 
 test.serial('it should get workbox files', t => {
     let devFiles = getWorkboxFiles(false);
-    t.deepEqual(devFiles, ['workbox-sw.dev.v2.1.2.js', 'workbox-sw.dev.v2.1.2.js.map']);
+    t.true(devFiles.length === 2);
+    t.true(/^workbox-sw\.dev\.v[\d\.]+\.js$/.test(devFiles[0]));
+    t.true(/^workbox-sw\.dev\.v[\d\.]+\.js\.map$/.test(devFiles[1]));
 
     let prodFiles = getWorkboxFiles(true);
-    t.deepEqual(prodFiles, ['workbox-sw.prod.v2.1.2.js', 'workbox-sw.prod.v2.1.2.js.map']);
+    t.true(prodFiles.length === 2);
+    t.true(/^workbox-sw\.prod\.v[\d\.]+\.js$/.test(prodFiles[0]));
+    t.true(/^workbox-sw\.prod\.v[\d\.]+\.js\.map$/.test(prodFiles[1]));
 });
 
 test.serial('it should generate service-worker.js in SSR mode', async t => {
@@ -31,7 +35,7 @@ test.serial('it should generate service-worker.js in SSR mode', async t => {
 
     let swContent = await readFile(join(__dirname, '../../fixtures/simple/dist/service-worker.js'), 'utf8');
 
-    t.true(swContent.indexOf('importScripts(\'/static/js/workbox-sw.prod.v2.1.2.js\');') !== -1);
+    t.true(swContent.indexOf('importScripts(\'/static/js/workbox-sw.prod') !== -1);
     t.true(swContent.indexOf('workboxSW.router.registerNavigationRoute(\'/appshell\');') !== -1);
 });
 
