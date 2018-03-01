@@ -2,6 +2,18 @@
 
 =======
 
+## Lavas-core-vue [1.0.7] - 2018-2-28
+
+### Added
+
+- [Feature] Use progress-bar-webpack-plugin for better console logging effect. ([#55][i55])
+- [Feature] Use webpack-chain and add `build.extendWithWebpackChain()` in `lavas.config.js`. ([#76][i76])
+- [Feature] Optimize building process. ([#77][i77])
+
+[i55]: https://github.com/lavas-project/lavas/issues/55
+[i76]: https://github.com/lavas-project/lavas/issues/76
+[i77]: https://github.com/lavas-project/lavas/issues/77
+
 ## Lavas-core-vue [1.0.6-rc.6] - 2018-1-29
 
 ### Changed

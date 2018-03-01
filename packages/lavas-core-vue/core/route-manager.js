@@ -12,7 +12,7 @@ import {createHash} from 'crypto';
 import serialize from 'serialize-javascript';
 import template from 'lodash.template';
 
-import {generateRoutes, matchUrl, routes2Reg} from './utils/router';
+import {generateRoutes, routes2Reg} from './utils/router';
 import {writeFileInDev} from './utils/webpack';
 import {distLavasPath} from './utils/path';
 
@@ -329,8 +329,6 @@ export default class RouteManager {
         const {routes: routesConfig = [], rewrite: rewriteRules = [], pathRule} = this.config.router;
         this.flatRoutes = new Set();
 
-        console.log('[Lavas] auto compile routes...');
-
         // generate routes according to pages dir
         this.routes = await generateRoutes(
             join(this.lavasDir, '../pages'),
@@ -350,7 +348,5 @@ export default class RouteManager {
             // write routes.json
             await this.writeRoutesJsonFile();
         }
-
-        console.log('[Lavas] all routes are already generated.');
     }
 }

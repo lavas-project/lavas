@@ -11,9 +11,10 @@ import template from 'lodash.template';
  * start to compile with webpack, record the errors & warnings in process
  *
  * @param {Object|Array} config webpack config
+ * @param {Object?} statsConfig config for showing webpack stats
  * @return {Promise} promise
  */
-export function webpackCompile(config) {
+export function webpackCompile(config, statsConfig) {
     return new Promise((resolve, reject) => {
         webpack(config, (err, stats) => {
             if (err) {
@@ -35,6 +36,14 @@ export function webpackCompile(config) {
 
             if (stats.hasWarnings()) {
                 info.warnings.forEach(warning => console.warn(warning));
+            }
+
+            /**
+             * output stats info if a config is provided
+             * https://doc.webpack-china.org/configuration/stats/
+             */
+            if (statsConfig) {
+                console.log('\n' + stats.toString(statsConfig));
             }
 
             resolve();
@@ -67,12 +76,10 @@ export async function writeFileInDev(path, content) {
  * @param {boolean} subscribeReload whether subscribe reload action
  */
 export async function enableHotReload(dir, config, subscribeReload = false) {
-    let {entry, plugins, name: compilerName} = config;
-
     let hotReloadEntryTemplate = join(__dirname, '../templates/entry-hot-reload.tmpl');
-    let hotReloadEntryPath = join(dir, `${compilerName}-hot-reload.js`);
+    let hotReloadEntryPath = join(dir, `${config.name}-hot-reload.js`);
     let templateContent = template(await readFile(hotReloadEntryTemplate, 'utf8'))({
-        compilerName,
+        compilerName: config.name,
         subscribeReload
     });
 
@@ -80,18 +87,13 @@ export async function enableHotReload(dir, config, subscribeReload = false) {
     await writeFileInDev(hotReloadEntryPath, templateContent);
 
     // add hot-reload entry in every entry
-    Object.keys(entry).forEach(entryName => {
-        let currentEntry = entry[entryName];
-        if (Array.isArray(currentEntry)) {
-            entry[entryName] = [hotReloadEntryPath, ...currentEntry];
-        }
+    Object.keys(config.entryPoints.entries()).forEach(entryKey => {
+        config.entryPoints.get(entryKey).prepend(hotReloadEntryPath);
     });
 
     // add relative plugins
-    plugins.push(
-        new webpack.HotModuleReplacementPlugin(),
-        new webpack.NoEmitOnErrorsPlugin()
-    );
+    config.plugin('hot-module-replacement').use(webpack.HotModuleReplacementPlugin).end()
+        .plugin('no-emit-on-errors').use(webpack.NoEmitOnErrorsPlugin);
 }
 
 /**

@@ -7,7 +7,7 @@ import webpack from 'webpack';
 import MFS from 'memory-fs';
 import chokidar from 'chokidar';
 import {readFileSync} from 'fs-extra';
-import {join, posix} from 'path';
+import {join} from 'path';
 import {debounce} from 'lodash';
 
 import historyMiddleware from 'connect-history-api-fallback';
@@ -16,8 +16,9 @@ import webpackHotMiddleware from 'webpack-hot-middleware';
 import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
 
 import {LAVAS_CONFIG_FILE, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH, BUILD_SCRIPT} from '../constants';
-import {enableHotReload, writeFileInDev, removeTemplatedPath} from '../utils/webpack';
+import {writeFileInDev, removeTemplatedPath} from '../utils/webpack';
 import {isFromCDN} from '../utils/path';
+import Logger from '../utils/logger';
 
 import BaseBuilder from './base-builder';
 
@@ -103,7 +104,7 @@ export default class DevBuilder extends BaseBuilder {
         let {globals, build} = this.config;
         let skeletonRelativePath = build.skeleton && build.skeleton.path || DEFAULT_SKELETON_PATH;
         clientConfig.module.rules.push(SkeletonWebpackPlugin.loader({
-            resource: [join(globals.rootDir, `.lavas/router`)],
+            resource: [join(globals.rootDir, '.lavas/router')],
             options: {
                 entry: [DEFAULT_ENTRY_NAME],
                 importTemplate: `import [nameHash] from '@/${skeletonRelativePath}';`,
@@ -153,15 +154,19 @@ export default class DevBuilder extends BaseBuilder {
 
         if (ssrEnabled && entriesConfig.length !== 0) {
             throw new Error('[Lavas] Multi Entries cannot use SSR mode. Try to set ssr to `false`');
-            return;
         }
 
+        Logger.info('build', 'start compiling routes...', true);
         await this.routeManager.buildRoutes();
+        Logger.info('build', 'compiling routes completed.', true);
+
+        Logger.info('build', 'start writing files to /.lavas...', true);
         await this.writeRuntimeConfig();
         await this.writeFileToLavasDir(
             BUILD_SCRIPT,
             readFileSync(join(__dirname, `../templates/${BUILD_SCRIPT}`))
         );
+        Logger.info('build', 'writing files to /.lavas completed', true);
 
         // write middleware.js & store.js
         if (entriesConfig.length === 0) {
@@ -175,9 +180,9 @@ export default class DevBuilder extends BaseBuilder {
 
         // SSR build process
         if (ssrEnabled) {
-            console.log('[Lavas] SSR build starting...');
-            clientConfig = this.webpackConfig.client();
-            serverConfig = this.webpackConfig.server();
+            // create config for both client & server side
+            clientConfig = await this.createSSRClientConfig();
+            serverConfig = await this.createSSRServerConfig();
             let serverMFS = new MFS();
 
             // pass addWatcher & reloadClient to renderer
@@ -205,20 +210,8 @@ export default class DevBuilder extends BaseBuilder {
         }
         // SPA build process
         else {
-            let mode = entriesConfig.length === 0 ? 'SPA' : 'MPA';
-
-            console.log(`[Lavas] ${mode} build starting...`);
             // create spa config first
-            spaConfig = await this.createSPAConfig(true, mode === 'SPA');
-
-            // enable hotreload in every entry in dev mode
-            await enableHotReload(this.lavasPath(), spaConfig, true);
-
-            // add skeleton routes
-            if (this.skeletonEnabled) {
-                // TODO: handle skeleton routes in dev mode
-                // this.addSkeletonRoutes(spaConfig);
-            }
+            spaConfig = await this.createSPAConfig();
         }
 
         // create a compiler based on spa config
@@ -281,7 +274,6 @@ export default class DevBuilder extends BaseBuilder {
 
             if (entriesConfig.length !== 0) {
                 let rewrites = [];
-                let indexObject;
 
                 entriesConfig.forEach(entry => {
                     rewrites.push({
@@ -303,13 +295,8 @@ export default class DevBuilder extends BaseBuilder {
         // wait until webpack building finished
         await new Promise(resolve => {
             this.devMiddleware.waitUntilValid(async () => {
-                if (!ssrEnabled) {
-                    let mode = entriesConfig.length === 0 ? 'SPA' : 'MPA';
-                    console.log(`[Lavas] ${mode} build completed.`);
-                }
-                else {
+                if (ssrEnabled) {
                     await this.renderer.refreshFiles();
-                    console.log('[Lavas] SSR build completed.');
                 }
 
                 // publish reload event to old client
