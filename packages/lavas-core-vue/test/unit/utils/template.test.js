@@ -21,7 +21,7 @@ test('it should generate server side template', async t => {
             <head>
                 <meta charset="utf-8">
                 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
 
                 {{{ meta.title.text() }}}
                 {{{ meta.meta.text() }}}
@@ -65,7 +65,7 @@ test('it should generate client side template', async t => {
                 <title></title>
                 <meta charset="utf-8">
                 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
 
                 <!-- Add to home screen for Android and modern mobile browsers -->
                 <link rel="manifest" href="<%= htmlWebpackPlugin.options.config.build.publicPath %>static/manifest.json?v=<%= htmlWebpackPlugin.options.config.buildVersion %>">
@@ -77,7 +77,11 @@ test('it should generate client side template', async t => {
                     <link rel="preload" href="<%= jsFilePath %>" as="script">
                 <% } %>
                 <% for (var cssFilePath of htmlWebpackPlugin.files.css) { %>
-                    <link rel="preload" href="<%= cssFilePath %>" as="style">
+                    <% if (htmlWebpackPlugin.options.config.enableAsyncCSS) { %>
+                        <link rel="preload" href="<%= cssFilePath %>" as="style" onload="this.onload=null;this.rel='stylesheet';window.STYLE_READY=1;">
+                    <% }else { %>
+                        <link rel="preload" href="<%= cssFilePath %>" as="style">
+                    <% } %>
                 <% } %>
             </head>
             <body>
@@ -93,7 +97,7 @@ test('it should generate normal client template html', async t => {
     let indexHtmlTmpl =
         `<html>
             <head>
-                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
                 <%= renderMeta() %>
                 <%= renderManifest() %>
             </head>
@@ -120,10 +124,14 @@ test('it should generate normal client template html', async t => {
                     <link rel="preload" href="<%= jsFilePath %>" as="script">
                 <% } %>
                 <% for (var cssFilePath of htmlWebpackPlugin.files.css) { %>
-                    <link rel="preload" href="<%= cssFilePath %>" as="style">
+                    <% if (htmlWebpackPlugin.options.config.enableAsyncCSS) { %>
+                        <link rel="preload" href="<%= cssFilePath %>" as="style" onload="this.onload=null;this.rel='stylesheet';window.STYLE_READY=1;">
+                    <% }else { %>
+                        <link rel="preload" href="<%= cssFilePath %>" as="style">
+                    <% } %>
                 <% } %>
 
-                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
             </head>
             <body>
                 <div id="app"></div>
@@ -168,7 +176,11 @@ test('it should generate client customized template html', async t => {
                     <link rel="preload" href="<%= jsFilePath %>" as="script">
                 <% } %>
                 <% for (var cssFilePath of htmlWebpackPlugin.files.css) { %>
-                    <link rel="preload" href="<%= cssFilePath %>" as="style">
+                    <% if (htmlWebpackPlugin.options.config.enableAsyncCSS) { %>
+                        <link rel="preload" href="<%= cssFilePath %>" as="style" onload="this.onload=null;this.rel='stylesheet';window.STYLE_READY=1;">
+                    <% } else { %>
+                        <link rel="preload" href="<%= cssFilePath %>" as="style">
+                    <% } %>
                 <% } %>
 
                 <script src="/some-base-url/some-static-script.js"></script>
@@ -190,7 +202,7 @@ test('it should generate normal server template html', async t => {
     let indexHtmlTmpl =
         `<html>
             <head>
-                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
                 <%= renderMeta() %>
                 <%= renderManifest() %>
             </head>
@@ -223,7 +235,7 @@ test('it should generate normal server template html', async t => {
                 {{{ renderResourceHints() }}}
                 {{{ renderStyles() }}}
 
-                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
             </head>
             <body {{{ meta.bodyAttrs.text() }}}>
                 <!--vue-ssr-outlet-->
