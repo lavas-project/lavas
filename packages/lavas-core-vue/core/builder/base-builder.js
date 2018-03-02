@@ -18,6 +18,7 @@ import {assetsPath, resolveAliasPath, camelCaseToDash} from '../utils/path';
 import {enableHotReload} from '../utils/webpack';
 import * as JsonUtil from '../utils/json';
 import templateUtil from '../utils/template';
+import Logger from '../utils/logger';
 
 import RouteManager from '../route-manager';
 import WebpackConfig from '../webpack';
@@ -174,29 +175,21 @@ export default class BaseBuilder {
      *
      * @param {Object} spaConfig spaConfig
      * @param {string} baseUrl baseUrl from config/router
-     * @param {?string} entryName entry name in MPA, undefined in SPA
      * @return {string} resolvedTemplatePath html template's path
      */
-    async addHtmlPlugin(spaConfig, baseUrl = '/', entryName) {
+    async addHtmlPlugin(spaConfig, baseUrl = '/') {
         // allow user to provide a custom HTML template
         let {globals: {rootDir}, skeleton: {enable: enableSkeleton}, build: {cssExtract}} = this.config;
         let htmlFilename;
         let templatePath;
         let tempTemplatePath;
 
-        if (entryName) {
-            htmlFilename = `${entryName}/${entryName}.html`;
-            templatePath = join(rootDir, `entries/${entryName}/${TEMPLATE_HTML}`);
-            tempTemplatePath = `${entryName}/${TEMPLATE_HTML}`;
-        }
-        else {
-            htmlFilename = `${DEFAULT_ENTRY_NAME}.html`;
-            templatePath = join(rootDir, `core/${TEMPLATE_HTML}`);
-            tempTemplatePath = TEMPLATE_HTML;
-        }
+        htmlFilename = `${DEFAULT_ENTRY_NAME}.html`;
+        templatePath = join(rootDir, `core/${TEMPLATE_HTML}`);
+        tempTemplatePath = TEMPLATE_HTML;
 
         if (!await pathExists(templatePath)) {
-            throw new Error(`${TEMPLATE_HTML} required for entry: ${entryName || DEFAULT_ENTRY_NAME}`);
+            throw new Error(`${TEMPLATE_HTML} required for entry: ${DEFAULT_ENTRY_NAME}`);
         }
 
         // write HTML template used by html-webpack-plugin which doesn't support template STRING
@@ -210,7 +203,12 @@ export default class BaseBuilder {
          * use <link rel=preload> to load CSS asynchronously instead
          * https://github.com/lavas-project/lavas/issues/73
          */
-        let enableAsyncCSS = enableSkeleton && cssExtract;
+        let entryClientContent = await readFile(join(rootDir, 'core/entry-client.js'), 'utf8');
+        let shouldUpdateLavasTemplate = entryClientContent.indexOf('window.mountLavas') === -1;
+        if (shouldUpdateLavasTemplate) {
+            Logger.warn('build', 'please update `entry-client.js`, you can refer to https://github.com/lavas-project/lavas/issues/73.');
+        }
+        let enableAsyncCSS = enableSkeleton && cssExtract && !shouldUpdateLavasTemplate;
         this.config.enableAsyncCSS = enableAsyncCSS;
         if (enableAsyncCSS) {
             spaConfig.plugin('ommit-css').use(OmmitCSSPlugin);
@@ -229,7 +227,7 @@ export default class BaseBuilder {
             favicon: assetsPath('img/icons/favicon.ico'),
             chunksSortMode: 'dependency',
             cache: false,
-            chunks: ['manifest', 'vue', 'vendor', entryName || DEFAULT_ENTRY_NAME],
+            chunks: ['manifest', 'vue', 'vendor', DEFAULT_ENTRY_NAME],
             config: this.config // use config in template
         }]);
 
