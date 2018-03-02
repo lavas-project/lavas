@@ -3,8 +3,8 @@
  * @author *__ author __*{% if: *__ email __* %}(*__ email __*){% /if %}
  */
 
-import {join} from 'path';
-import {pathExists, readFile, readJson, outputFile} from 'fs-extra';
+import {join, basename} from 'path';
+import {pathExists, pathExistsSync, readFile, readJson, outputFile} from 'fs-extra';
 import {merge} from 'lodash';
 import {createBundleRenderer} from 'vue-server-renderer';
 
@@ -13,7 +13,9 @@ import {webpackCompile} from './utils/webpack';
 import templateUtil from './utils/template';
 import Logger from './utils/logger';
 
-import {TEMPLATE_HTML, SERVER_BUNDLE, CLIENT_MANIFEST} from './constants';
+import {TEMPLATE_HTML, SSR_TEMPLATE_HTML, SERVER_BUNDLE, CLIENT_MANIFEST} from './constants';
+
+let templateName;
 
 export default class Renderer {
     constructor(core) {
@@ -36,7 +38,11 @@ export default class Renderer {
      * @return {string} template path
      */
     getTemplateName() {
-        return TEMPLATE_HTML;
+        if (templateName) {
+            return templateName;
+        }
+
+        return basename(getTemplatePath());
     }
 
     /**
@@ -45,10 +51,24 @@ export default class Renderer {
      * @param {?string} entryName entryName when MPA, undefined when SPA & SSR
      * @return {string} template path
      */
-    getTemplatePath(entryName) {
-        return entryName
-            ? join(this.rootDir, `${entryName}/${TEMPLATE_HTML}`)
-            : join(this.rootDir, `core/${TEMPLATE_HTML}`);
+    getTemplatePath() {
+        if (templateName) {
+            return join(this.rootDir, `core/${templateName}`);
+        }
+
+        // core/ssr.html.tmpl
+        let tempPath = join(this.rootDir, `core/${SSR_TEMPLATE_HTML}`);
+        if (!pathExistsSync(tempPath)) {
+            // core/index.html.tmpl
+            tempPath = join(this.rootDir, `core/${TEMPLATE_HTML}`);
+        }
+
+        if (!pathExistsSync(tempPath)) {
+            throw new Error(`${SSR_TEMPLATE_HTML} or ${TEMPLATE_HTML} required`);
+        }
+
+        templateName = basename(tempPath);
+        return tempPath;
     }
 
     /**
@@ -59,9 +79,6 @@ export default class Renderer {
      */
     async getTemplate(base = '/') {
         let templatePath = this.getTemplatePath();
-        if (!await pathExists(templatePath)) {
-            throw new Error(`${templatePath} required`);
-        }
 
         return templateUtil.server(await readFile(templatePath, 'utf8'), base);
     }

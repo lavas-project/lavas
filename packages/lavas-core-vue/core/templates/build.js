@@ -12,9 +12,10 @@ if (process.argv.length >= 3 && process.argv[2] !== 'build') {
 
 process.env.NODE_ENV = 'production';
 
-async function startBuild() {
-    await core.init(process.env.NODE_ENV, true, {config});
-    await core.build();
-}
+// async function startBuild() {
+//     await core.init(process.env.NODE_ENV, true, {config});
+//     await core.build();
+// }
 
-startBuild();
+// startBuild();
+core.init(process.env.NODE_ENV, true, {config}).then(core.build);
