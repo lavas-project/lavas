@@ -10,6 +10,7 @@ import {join, basename, normalize} from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
 import VueSSRClientPlugin from 'vue-server-renderer/client-plugin';
+import OmmitCSSPlugin from '../plugins/ommit-css-webpack-plugin';
 
 import {TEMPLATE_HTML, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH, CONFIG_FILE,
     LAVAS_DIRNAME_IN_DIST, CLIENT_MANIFEST, STORE_FILE} from '../constants';
@@ -178,7 +179,7 @@ export default class BaseBuilder {
      */
     async addHtmlPlugin(spaConfig, baseUrl = '/', entryName) {
         // allow user to provide a custom HTML template
-        let rootDir = this.config.globals.rootDir;
+        let {globals: {rootDir}, skeleton: {enable: enableSkeleton}, build: {cssExtract}} = this.config;
         let htmlFilename;
         let templatePath;
         let tempTemplatePath;
@@ -203,6 +204,17 @@ export default class BaseBuilder {
             tempTemplatePath,
             templateUtil.client(await readFile(templatePath, 'utf8'), baseUrl)
         );
+
+        /**
+         * don't inject <link rel=stylesheet> in head,
+         * use <link rel=preload> to load CSS asynchronously instead
+         * https://github.com/lavas-project/lavas/issues/73
+         */
+        let enableAsyncCSS = enableSkeleton && cssExtract;
+        this.config.enableAsyncCSS = enableAsyncCSS;
+        if (enableAsyncCSS) {
+            spaConfig.plugin('ommit-css').use(OmmitCSSPlugin);
+        }
 
         // add html webpack plugin
         spaConfig.plugin('html').use(HtmlWebpackPlugin, [{
