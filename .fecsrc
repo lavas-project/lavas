@@ -15,7 +15,8 @@
             "no-console": 0,
             "brace-style": [2, "1tabs"],
             "fecs-no-require": "off",
-            "fecs-prefer-async-await": "off"
+            "fecs-prefer-async-await": "off",
+            "fecs-one-var-per-line": "off"
         }
     }
 }

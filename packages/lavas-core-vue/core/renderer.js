@@ -7,12 +7,13 @@ import {join} from 'path';
 import {pathExists, readFile, readJson, outputFile} from 'fs-extra';
 import {merge} from 'lodash';
 import {createBundleRenderer} from 'vue-server-renderer';
-import VueSSRClientPlugin from 'vue-server-renderer/client-plugin';
 
 import {distLavasPath} from './utils/path';
-import {webpackCompile, enableHotReload} from './utils/webpack';
+import {webpackCompile} from './utils/webpack';
 import templateUtil from './utils/template';
-import {DEFAULT_ENTRY_NAME, LAVAS_DIRNAME_IN_DIST, TEMPLATE_HTML, SERVER_BUNDLE, CLIENT_MANIFEST} from './constants';
+import Logger from './utils/logger';
+
+import {TEMPLATE_HTML, SERVER_BUNDLE, CLIENT_MANIFEST} from './constants';
 
 export default class Renderer {
     constructor(core) {
@@ -66,17 +67,6 @@ export default class Renderer {
     }
 
     /**
-     * add custom ssr client plugin in config
-     */
-    addSSRClientPlugin() {
-        this.clientConfig.plugins.push(
-            new VueSSRClientPlugin({
-                filename: join(LAVAS_DIRNAME_IN_DIST, CLIENT_MANIFEST)
-            })
-        );
-    }
-
-    /**
      * create renderer with built serverBundle & clientManifest in production mode
      */
     async createWithBundle() {
@@ -93,16 +83,16 @@ export default class Renderer {
     }
 
     async buildProd() {
-        this.addSSRClientPlugin();
+        let {ssr, path, stats} = this.config.build;
 
         // start to build client & server configs
-        await webpackCompile([this.clientConfig, this.serverConfig]);
+        await webpackCompile([this.clientConfig, this.serverConfig], stats);
 
         // copy index.template.html to dist/lavas/
-        if (this.config.build.ssr) {
+        if (ssr) {
             let templateContent = await this.getTemplate(this.config.router.base);
             let distTemplatePath = distLavasPath(
-                this.config.build.path,
+                path,
                 this.getTemplateName()
             );
 
@@ -111,18 +101,11 @@ export default class Renderer {
     }
 
     async buildDev() {
-        let lavasDir = join(this.rootDir, './.lavas');
-
         // add watcher for each template
         let templatePath = this.getTemplatePath();
         this.addWatcher(templatePath, 'change', async () => {
             await this.refreshFiles();
         });
-
-        await enableHotReload(lavasDir, this.clientConfig, true);
-
-        // add custom ssr client plugin
-        this.addSSRClientPlugin();
     }
 
     /**
@@ -130,7 +113,7 @@ export default class Renderer {
      * create new renderer
      */
     async refreshFiles() {
-        console.log('[Lavas] refresh ssr bundle & manifest.');
+        Logger.info('build', 'refresh ssr bundle & manifest');
 
         let changed = false;
         let templateChanged = false;
@@ -172,15 +155,13 @@ export default class Renderer {
 
     /**
      * only called in SSR mode
-     * @param {object} clientConfig client webpack config
-     * @param {object} serverConfig server webpack config
+     *
+     * @param {Object} clientConfig client webpack config
+     * @param {Object} serverConfig server webpack config
      */
     async build(clientConfig, serverConfig) {
         this.clientConfig = clientConfig;
         this.serverConfig = serverConfig;
-
-        // set entries in both client & server webpack config
-        this.setWebpackEntries();
 
         if (this.isProd) {
             await this.buildProd();
@@ -188,19 +169,6 @@ export default class Renderer {
         else {
             await this.buildDev();
         }
-    }
-
-    /**
-     * set entries in both client & server webpack config
-     */
-    setWebpackEntries() {
-        // set context in both configs first
-        this.clientConfig.context = this.rootDir;
-        this.clientConfig.name = 'ssrclient';
-        this.clientConfig.entry = {[DEFAULT_ENTRY_NAME]: ['./core/entry-client.js']};
-
-        this.serverConfig.context = this.rootDir;
-        this.serverConfig.entry = './core/entry-server.js';
     }
 
     /**
@@ -215,7 +183,7 @@ export default class Renderer {
                 {
                     template: this.template,
                     clientManifest: this.clientManifest,
-                    shouldPrefetch: (file, type) => {
+                    shouldPrefetch: function (file, type) {
                         if (type === 'script') {
                             // exclude the workbox files in /static copied by copy-webpack-plugin
                             return !/(workbox-v\d+\.\d+\.\d+.*)|(sw-register\.js)|(precache-manifest\.)/.test(file);
@@ -240,7 +208,7 @@ export default class Renderer {
         // merge with default context
         merge(ctx, {
             title: 'Lavas', // default title
-            config: this.config, // mount config to ctx which will be used when rendering template
+            config: this.config // mount config to ctx which will be used when rendering template
         }, context);
 
         let renderer = await (this.renderer
@@ -248,9 +216,7 @@ export default class Renderer {
 
         // render to string
         return new Promise(resolve => {
-            renderer.renderToString(ctx, (err, html) => {
-                return resolve({err, html});
-            });
+            renderer.renderToString(ctx, (err, html) => resolve({err, html}));
         });
     }
 }

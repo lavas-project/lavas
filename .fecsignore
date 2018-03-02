@@ -3,5 +3,7 @@ node_modules
 dist
 bin
 test
-core/templates
+packages/lavas-core-vue/test
+packages/lavas-core-vue/core/templates
+packages/lavas-core-vue/dist
 *.html

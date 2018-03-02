@@ -67,6 +67,7 @@ export function removeTrailingSlash(base) {
  * convert camelcase to dash
  *
  * borrow from https://gist.github.com/youssman/745578062609e8acac9f
+ *
  * @param {string} str string in camel case
  * @return {string} dash string
  */
