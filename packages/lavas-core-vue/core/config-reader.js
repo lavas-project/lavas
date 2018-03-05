@@ -250,12 +250,14 @@ export default class ConfigReader {
                 }
 
                 let finalConfig = {};
-                let urlReg = entryName === 'index' ? /^\// : new RegExp(`^/${entryName}`);
+                let pages = [entryName];
+                // let urlReg = entryName === 'index' ? /^\// : new RegExp(`^/${entryName}`);
                 merge(finalConfig, {
+                    name: entryName,
                     serviceWorker: config.serviceWorker,
                     templatePath: config.templatePath,
-                    name: entryName,
-                    urlReg
+                    // urlReg,
+                    pages
                 }, entryConfig);
 
                 return finalConfig;

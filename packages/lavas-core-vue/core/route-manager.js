@@ -336,7 +336,7 @@ export default class RouteManager {
             join(this.lavasDir, '../pages'),
             {
                 routerOption: {pathRule},
-                enableEntry: this.config.entries.length !== 0
+                entryConfig: this.config.entries
             }
         );
 

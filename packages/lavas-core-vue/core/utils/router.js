@@ -41,12 +41,12 @@ export function matchUrl(routes, url) {
  * @param {Object} options generate options
  * @return {Promise} resolve generated router, reject error
  */
-export function generateRoutes(baseDir, {globOptions, routerOption, enableEntry = false} = {}) {
+export function generateRoutes(baseDir, {globOptions, routerOption, entryConfig = []} = {}) {
     return getDirs(baseDir, '.vue', globOptions)
         .then(dirs => {
             let tree = mapDirsInfo(dirs, baseDir)
                 .reduce((tree, info) => appendToTree(tree, info.levels, info), []);
-            return treeToRouter(tree[0].children, {dir: basename(baseDir)}, routerOption, enableEntry);
+            return treeToRouter(tree[0].children, {dir: basename(baseDir)}, routerOption, entryConfig);
         });
 }
 
@@ -146,10 +146,10 @@ function appendToTree(tree, levels, info) {
     return tree;
 }
 
-function treeToRouter(tree, parent, {pathRule = 'kebabCase'} = {}, enableEntry) {
+function treeToRouter(tree, parent, {pathRule = 'kebabCase'} = {}, entryConfig) {
     let rr = tree.reduce((router, {info, children}) => {
         if (info.type === 'flat') {
-            return router.concat(treeToRouter(children, parent, {pathRule}, enableEntry));
+            return router.concat(treeToRouter(children, parent, {pathRule}, entryConfig));
         }
 
         let route = {
@@ -157,8 +157,11 @@ function treeToRouter(tree, parent, {pathRule = 'kebabCase'} = {}, enableEntry) 
             component: info.dir + '.vue'
         };
 
-        if (enableEntry && info.levels.length > 2) {
-            route.entryName = info.levels[1];
+        if (entryConfig.length !== 0 && info.levels.length > 2) {
+            let matchedEntry = entryConfig.find(entry => entry.pages.indexOf(info.levels[1]) !== -1);
+            if (matchedEntry) {
+                route.entryName = matchedEntry.name;
+            }
         }
 
         if (!children || children.every(child => !/(\/index)+$/i.test(child.info.dir))) {
