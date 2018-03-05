@@ -251,14 +251,21 @@ export default class ConfigReader {
 
                 let finalConfig = {};
                 let pages = [entryName];
-                // let urlReg = entryName === 'index' ? /^\// : new RegExp(`^/${entryName}`);
+
                 merge(finalConfig, {
                     name: entryName,
                     serviceWorker: config.serviceWorker,
                     templatePath: config.templatePath,
-                    // urlReg,
                     pages
                 }, entryConfig);
+
+                // set urlReg
+                if (finalConfig.pages.indexOf('index') !== -1) {
+                    finalConfig.urlReg = /^\//;
+                }
+                else {
+                    finalConfig.urlReg = new RegExp(`^/(${finalConfig.pages.join('|')})/`)
+                }
 
                 return finalConfig;
             }));
