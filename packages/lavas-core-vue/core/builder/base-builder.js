@@ -138,21 +138,6 @@ export default class BaseBuilder {
         );
     }
 
-    async writeLavasLink() {
-        let lavasLinkTemplate = await readFile(this.templatesPath('LavasLink.js.tmpl'), 'utf8');
-        await this.writeFileToLavasDir('LavasLink.js', template(lavasLinkTemplate)({
-            entryConfig: JsonUtil.stringify(this.config.entries.map(entry => {
-                // only select necessary keys
-                return {
-                    name: entry.name,
-                    urlReg: entry.urlReg
-                };
-            })),
-            base: this.config.router.base,
-            mode: this.config.router.mode
-        }));
-    }
-
     /**
      * write an entry file for skeleton components
      *
@@ -173,29 +158,21 @@ export default class BaseBuilder {
      *
      * @param {Object} spaConfig spaConfig
      * @param {string} baseUrl baseUrl from config/router
-     * @param {?string} entryName entry name in MPA, undefined in SPA
      * @return {string} resolvedTemplatePath html template's path
      */
-    async addHtmlPlugin(spaConfig, baseUrl = '/', entryName) {
+    async addHtmlPlugin(spaConfig, baseUrl = '/') {
         // allow user to provide a custom HTML template
         let rootDir = this.config.globals.rootDir;
         let htmlFilename;
         let templatePath;
         let tempTemplatePath;
 
-        if (entryName) {
-            htmlFilename = `${entryName}/${entryName}.html`;
-            templatePath = join(rootDir, `entries/${entryName}/${TEMPLATE_HTML}`);
-            tempTemplatePath = `${entryName}/${TEMPLATE_HTML}`;
-        }
-        else {
-            htmlFilename = `${DEFAULT_ENTRY_NAME}.html`;
-            templatePath = join(rootDir, `core/${TEMPLATE_HTML}`);
-            tempTemplatePath = TEMPLATE_HTML;
-        }
+        htmlFilename = `${DEFAULT_ENTRY_NAME}.html`;
+        templatePath = join(rootDir, `core/${TEMPLATE_HTML}`);
+        tempTemplatePath = TEMPLATE_HTML;
 
         if (!await pathExists(templatePath)) {
-            throw new Error(`${TEMPLATE_HTML} required for entry: ${entryName || DEFAULT_ENTRY_NAME}`);
+            throw new Error(`${TEMPLATE_HTML} required for entry: ${DEFAULT_ENTRY_NAME}`);
         }
 
         // write HTML template used by html-webpack-plugin which doesn't support template STRING
@@ -217,7 +194,7 @@ export default class BaseBuilder {
             favicon: assetsPath('img/icons/favicon.ico'),
             chunksSortMode: 'dependency',
             cache: false,
-            chunks: ['manifest', 'vue', 'vendor', entryName || DEFAULT_ENTRY_NAME],
+            chunks: ['manifest', 'vue', 'vendor', DEFAULT_ENTRY_NAME],
             config: this.config // use config in template
         }]);
 

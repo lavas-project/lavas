@@ -23,11 +23,7 @@ export default class ProdBuilder extends BaseBuilder {
      * build in production mode
      */
     async build() {
-        let {build, globals, entries: entriesConfig} = this.config;
-
-        if (build.ssr && entriesConfig.length !== 0) {
-            throw new Error('[Lavas] Multi Entries cannot use SSR mode. Try to set ssr to `false`');
-        }
+        let {build, globals} = this.config;
 
         // clear dist/ first
         Logger.info('build', `start clearing ${build.path}...`, true);

@@ -41,12 +41,12 @@ export function matchUrl(routes, url) {
  * @param {Object} options generate options
  * @return {Promise} resolve generated router, reject error
  */
-export function generateRoutes(baseDir, {globOptions, routerOption, enableEntry = false} = {}) {
+export function generateRoutes(baseDir, {globOptions, routerOption} = {}) {
     return getDirs(baseDir, '.vue', globOptions)
         .then(dirs => {
             let tree = mapDirsInfo(dirs, baseDir)
                 .reduce((tree, info) => appendToTree(tree, info.levels, info), []);
-            return treeToRouter(tree[0].children, {dir: basename(baseDir)}, routerOption, enableEntry);
+            return treeToRouter(tree[0].children, {dir: basename(baseDir)}, routerOption);
         });
 }
 
@@ -146,20 +146,16 @@ function appendToTree(tree, levels, info) {
     return tree;
 }
 
-function treeToRouter(tree, parent, {pathRule = 'kebabCase'} = {}, enableEntry) {
+function treeToRouter(tree, parent, {pathRule = 'kebabCase'} = {}) {
     let rr = tree.reduce((router, {info, children}) => {
         if (info.type === 'flat') {
-            return router.concat(treeToRouter(children, parent, {pathRule}, enableEntry));
+            return router.concat(treeToRouter(children, parent, {pathRule}));
         }
 
         let route = {
             path: generatePath(info, parent, pathRule),
             component: info.dir + '.vue'
         };
-
-        if (enableEntry && info.levels.length > 2) {
-            route.entryName = info.levels[1];
-        }
 
         if (!children || children.every(child => !/(\/index)+$/i.test(child.info.dir))) {
             route.name = generateName(info.dir);
