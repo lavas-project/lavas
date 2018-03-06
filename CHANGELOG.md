@@ -2,10 +2,11 @@
 
 =======
 
-## Lavas-core-vue [1.0.8] - N.A
+## Lavas-core-vue [1.1] - 2018-3-6
 
 ### Changed
 
+- [Info] Bump version to 1.1
 - [Feature] Support `spa.html.tmpl` and `ssr.html.tmpl`. ([#40][i40])
 - [Fix] remove `async` and `await` in `.lavas/build.js`
 
