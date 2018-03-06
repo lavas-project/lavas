@@ -11,8 +11,8 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
 import VueSSRClientPlugin from 'vue-server-renderer/client-plugin';
 
-import {TEMPLATE_HTML, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH, CONFIG_FILE,
-    LAVAS_DIRNAME_IN_DIST, CLIENT_MANIFEST, STORE_FILE} from '../constants';
+import {TEMPLATE_HTML, SPA_TEMPLATE_HTML, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH,
+    CONFIG_FILE, LAVAS_DIRNAME_IN_DIST, CLIENT_MANIFEST, STORE_FILE} from '../constants';
 import {assetsPath, resolveAliasPath, camelCaseToDash} from '../utils/path';
 import {enableHotReload} from '../utils/webpack';
 import * as JsonUtil from '../utils/json';
@@ -173,30 +173,29 @@ export default class BaseBuilder {
      *
      * @param {Object} spaConfig spaConfig
      * @param {string} baseUrl baseUrl from config/router
-     * @param {?string} entryName entry name in MPA, undefined in SPA
      * @return {string} resolvedTemplatePath html template's path
      */
-    async addHtmlPlugin(spaConfig, baseUrl = '/', entryName) {
+    async addHtmlPlugin(spaConfig, baseUrl = '/') {
         // allow user to provide a custom HTML template
         let rootDir = this.config.globals.rootDir;
         let htmlFilename;
         let templatePath;
         let tempTemplatePath;
 
-        if (entryName) {
-            htmlFilename = `${entryName}/${entryName}.html`;
-            templatePath = join(rootDir, `entries/${entryName}/${TEMPLATE_HTML}`);
-            tempTemplatePath = `${entryName}/${TEMPLATE_HTML}`;
-        }
-        else {
-            htmlFilename = `${DEFAULT_ENTRY_NAME}.html`;
+        htmlFilename = `${DEFAULT_ENTRY_NAME}.html`;
+
+        // find core/spa.html.tmpl
+        templatePath = join(rootDir, `core/${SPA_TEMPLATE_HTML}`);
+        if (!await pathExists(templatePath)) {
+            // find core/index.html.tmpl
             templatePath = join(rootDir, `core/${TEMPLATE_HTML}`);
-            tempTemplatePath = TEMPLATE_HTML;
         }
 
         if (!await pathExists(templatePath)) {
-            throw new Error(`${TEMPLATE_HTML} required for entry: ${entryName || DEFAULT_ENTRY_NAME}`);
+            throw new Error(`${SPA_TEMPLATE_HTML} or ${TEMPLATE_HTML} required`);
         }
+
+        tempTemplatePath = basename(templatePath);
 
         // write HTML template used by html-webpack-plugin which doesn't support template STRING
         let resolvedTemplatePath = await this.writeFileToLavasDir(
@@ -217,11 +216,11 @@ export default class BaseBuilder {
             favicon: assetsPath('img/icons/favicon.ico'),
             chunksSortMode: 'dependency',
             cache: false,
-            chunks: ['manifest', 'vue', 'vendor', entryName || DEFAULT_ENTRY_NAME],
+            chunks: ['manifest', 'vue', 'vendor', DEFAULT_ENTRY_NAME],
             config: this.config // use config in template
         }]);
 
-        return resolvedTemplatePath;
+        return {resolvedTemplatePath, tempTemplatePath};
     }
 
     /**
@@ -353,7 +352,11 @@ export default class BaseBuilder {
                         .entry(DEFAULT_ENTRY_NAME).add('./core/entry-client.js');
 
                     // add html-webpack-plugin
-                    let customTemplatePath = await this.addHtmlPlugin(clientConfig, router.base);
+                    let {
+                        resolvedTemplatePath: customTemplatePath,
+                        tempTemplatePath
+                    } = await this.addHtmlPlugin(clientConfig, router.base);
+                    // let customTemplatePath = await this.addHtmlPlugin(clientConfig, router.base);
 
                     // add vue-skeleton-webpack-plugin
                     if (skeleton && skeleton.enable) {
@@ -365,7 +368,7 @@ export default class BaseBuilder {
                         // watch html
                         this.addWatcher(customTemplatePath, 'change', async () => {
                             await this.writeFileToLavasDir(
-                                TEMPLATE_HTML,
+                                tempTemplatePath,
                                 templateUtil.client(await readFile(customTemplatePath, 'utf8'), router.base)
                             );
                         });
