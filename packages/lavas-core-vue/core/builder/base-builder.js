@@ -138,21 +138,6 @@ export default class BaseBuilder {
         );
     }
 
-    async writeLavasLink() {
-        let lavasLinkTemplate = await readFile(this.templatesPath('LavasLink.js.tmpl'), 'utf8');
-        await this.writeFileToLavasDir('LavasLink.js', template(lavasLinkTemplate)({
-            entryConfig: JsonUtil.stringify(this.config.entries.map(entry => {
-                // only select necessary keys
-                return {
-                    name: entry.name,
-                    urlReg: entry.urlReg
-                };
-            })),
-            base: this.config.router.base,
-            mode: this.config.router.mode
-        }));
-    }
-
     /**
      * write an entry file for skeleton components
      *

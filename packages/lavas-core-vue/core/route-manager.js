@@ -224,57 +224,23 @@ export default class RouteManager {
      */
     async writeRoutesSourceFile() {
         let writeFile = this.isDev ? writeFileInDev : outputFile;
+        let {mode, base, pageTransition, scrollBehavior} = this.processRouterConfig(this.config.router);
+        // add errorRoute to the end
+        this.routes.push(this.errorRoute);
+        let routesFilePath = join(this.lavasDir, 'router.js');
+        let routesContent = this.generateRoutesContent(this.routes);
 
-        if (this.config.entries.length === 0) {
-            let {mode, base, pageTransition, scrollBehavior} = this.processRouterConfig(this.config.router);
-            // add errorRoute to the end
-            this.routes.push(this.errorRoute);
-            let routesFilePath = join(this.lavasDir, 'router.js');
-            let routesContent = this.generateRoutesContent(this.routes);
-
-            let routesFileContent = template(await readFile(routerTemplate, 'utf8'))({
-                router: {
-                    mode,
-                    base,
-                    routes: this.flatRoutes,
-                    scrollBehavior,
-                    pageTransition
-                },
-                routesContent
-            });
-            await writeFile(routesFilePath, routesFileContent);
-            return;
-        }
-
-        this.config.entries.forEach(async entry => {
-            let entryName = entry.name;
-            let {mode, base, pageTransition, scrollBehavior} = this.processRouterConfig(this.config.router);
-            let routesFilePath = join(this.lavasDir, `${entryName}/router.js`);
-
-            // filter entry routes and flatRoutes
-            let entryRoutes = this.routes.filter(route => route.entryName === entryName);
-            entryRoutes.push(this.errorRoute);
-            let entryFlatRoutes = new Set();
-            this.flatRoutes.forEach(route => {
-                if (route.entryName === entryName) {
-                    entryFlatRoutes.add(route);
-                }
-            });
-            entryFlatRoutes.add(this.errorRoute);
-
-            let routesContent = this.generateRoutesContent(entryRoutes);
-            let routesFileContent = template(await readFile(routerTemplate, 'utf8'))({
-                router: {
-                    mode,
-                    base,
-                    routes: entryFlatRoutes,
-                    scrollBehavior,
-                    pageTransition
-                },
-                routesContent
-            });
-            await writeFile(routesFilePath, routesFileContent);
+        let routesFileContent = template(await readFile(routerTemplate, 'utf8'))({
+            router: {
+                mode,
+                base,
+                routes: this.flatRoutes,
+                scrollBehavior,
+                pageTransition
+            },
+            routesContent
         });
+        await writeFile(routesFilePath, routesFileContent);
     }
 
     async writeRoutesJsonFile() {
@@ -287,10 +253,6 @@ export default class RouteManager {
 
             if (route.alias) {
                 tmpRoute.alias = route.alias;
-            }
-
-            if (route.entryName && this.config.entries.length !== 0) {
-                tmpRoute.entryName = route.entryName;
             }
 
             if (route.children) {
@@ -311,10 +273,6 @@ export default class RouteManager {
 
         this.routes.forEach(route => routesJson.routes.push(generateRoutesJson(route)));
 
-        if (this.config.entries.length !== 0) {
-            routesJson.routes.push(generateRoutesJson(this.errorRoute));
-        }
-
         await outputFile(
             distLavasPath(this.config.build.path, 'routes.json'),
             JSON.stringify(routesJson, null, 4)
@@ -333,8 +291,7 @@ export default class RouteManager {
         this.routes = await generateRoutes(
             join(this.lavasDir, '../pages'),
             {
-                routerOption: {pathRule},
-                enableEntry: this.config.entries.length !== 0
+                routerOption: {pathRule}
             }
         );
 

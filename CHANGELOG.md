@@ -2,10 +2,19 @@
 
 =======
 
-## Lavas-core-vue [1.0.8] - N.A
+## Lavas-core-vue [1.1.2] - 2018-3-7
 
 ### Changed
 
+- [Fix] Fix 'supportHistory is undefined' when ssr = false and pageTransition = fade (by default)
+- [Fix] Support page name contains `_` (`about_us.vue`)
+- [Fix] Resume reference to `sw-register.js` in `dist/index.html` when ssr = false
+
+## Lavas-core-vue [1.1.1] - 2018-3-6
+
+### Changed
+
+- [Info] Bump version to 1.1
 - [Feature] Support `spa.html.tmpl` and `ssr.html.tmpl`. ([#40][i40])
 - [Fix] remove `async` and `await` in `.lavas/build.js`
 
