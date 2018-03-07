@@ -42,7 +42,7 @@ export default class Renderer {
             return templateName;
         }
 
-        return basename(getTemplatePath());
+        return basename(this.getTemplatePath());
     }
 
     /**
