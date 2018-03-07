@@ -150,11 +150,6 @@ export default class DevBuilder extends BaseBuilder {
         let serverCompiler; // compiler for server in ssr
         let clientMFS;
         let ssrEnabled = this.config.build.ssr;
-        let entriesConfig = this.config.entries;
-
-        if (ssrEnabled && entriesConfig.length !== 0) {
-            throw new Error('[Lavas] Multi Entries cannot use SSR mode. Try to set ssr to `false`');
-        }
 
         Logger.info('build', 'start compiling routes...', true);
         await this.routeManager.buildRoutes();
@@ -169,14 +164,8 @@ export default class DevBuilder extends BaseBuilder {
         Logger.info('build', 'writing files to /.lavas completed', true);
 
         // write middleware.js & store.js
-        if (entriesConfig.length === 0) {
-            await this.writeMiddleware();
-            await this.writeStore();
-        }
-        else {
-            await this.writeLavasLink();
-            await Promise.all(entriesConfig.map(entry => this.writeStore()));
-        }
+        await this.writeMiddleware();
+        await this.writeStore();
 
         // SSR build process
         if (ssrEnabled) {
@@ -271,19 +260,6 @@ export default class DevBuilder extends BaseBuilder {
                 // verbose: true,
                 index: `${this.config.build.publicPath}${DEFAULT_ENTRY_NAME}.html`
             };
-
-            if (entriesConfig.length !== 0) {
-                let rewrites = [];
-
-                entriesConfig.forEach(entry => {
-                    rewrites.push({
-                        from: entry.urlReg,
-                        to: `${this.config.build.publicPath}${entry.name}/${entry.name}.html`
-                    });
-                });
-
-                historyConfig.rewrites = rewrites;
-            }
 
             this.core.middlewareComposer.add(historyMiddleware(historyConfig));
         }

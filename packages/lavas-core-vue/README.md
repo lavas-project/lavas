@@ -97,9 +97,9 @@ process.on('unhandledRejection', err => {
 如果开发者启动过开发环境，可以参考 `.lavas/build.js`。
 
 ```javascript
-var LavasCore = require('lavas-core-vue');
+const LavasCore = require('lavas-core-vue');
 // TODO: The only parameter indicates root path of Lavas project
-var core = new LavasCore(__dirname);
+let core = new LavasCore(__dirname);
 
 process.env.NODE_ENV = 'production';
 
