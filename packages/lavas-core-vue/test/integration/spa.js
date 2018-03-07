@@ -40,11 +40,12 @@ test.serial('it should run in development mode correctly', async t => {
     server = app.listen(port);
 
     // serve main.html
-    let skeletonContent = `<div data-server-rendered=true>`;
     res = await request(app)
         .get('/index.html');
     t.is(200, res.status);
+
     // include skeleton
+    let skeletonContent = '<div data-server-rendered=true>';
     t.true(res.text.indexOf(skeletonContent) > -1);
 });
 
@@ -59,8 +60,13 @@ test.serial('it should run in production mode correctly', async t => {
 
     await core.build();
 
-    let skeletonContent = `<div data-server-rendered=true>`;
     let htmlContent = readFileSync(join(__dirname, '../fixtures/simple/dist/index.html'), 'utf8');
+
     // include skeleton
+    let skeletonContent = '<div data-server-rendered=true>';
     t.true(htmlContent.indexOf(skeletonContent) > -1);
+
+    // include sw-register
+    let swRegisterContent = '/sw-register.js?v=';
+    t.true(htmlContent.indexOf(swRegisterContent) > -1);
 });

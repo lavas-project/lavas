@@ -300,7 +300,7 @@ export default class WebpackConfig {
             clientConfig.plugin('sw-register').use(SWRegisterWebpackPlugin, [{
                 filePath: resolve(__dirname, 'templates/sw-register.js'),
                 prefix: (serviceWorker && serviceWorker.swPath) || publicPath
-            }]);
+            }]).after('html');
         }
         clientConfig.plugin('copy').use(CopyWebpackPlugin, [copyList]);
 
