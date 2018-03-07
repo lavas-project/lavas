@@ -35,9 +35,18 @@ export default class Renderer {
     /**
      * get template name
      *
+     * @param {boolean} fromDist from dist dir
      * @return {string} template path
      */
-    getTemplateName() {
+    getTemplateName(fromDist) {
+        if (fromDist) {
+            if (pathExistsSync(join(this.rootDir, 'lavas', SSR_TEMPLATE_HTML))) {
+                return SSR_TEMPLATE_HTML;
+            }
+
+            return TEMPLATE_HTML;
+        }
+
         if (templateName) {
             return templateName;
         }
@@ -89,7 +98,7 @@ export default class Renderer {
     async createWithBundle() {
         this.serverBundle = await readJson(distLavasPath(this.cwd, SERVER_BUNDLE));
 
-        let templatePath = distLavasPath(this.cwd, this.getTemplateName());
+        let templatePath = distLavasPath(this.cwd, this.getTemplateName(true));
         let manifestPath = distLavasPath(this.cwd, CLIENT_MANIFEST);
         if (this.config.build.ssr) {
             this.template = await readFile(templatePath, 'utf-8');
