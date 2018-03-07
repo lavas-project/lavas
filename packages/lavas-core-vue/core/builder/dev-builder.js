@@ -295,7 +295,9 @@ export default class DevBuilder extends BaseBuilder {
                         break;
                     }
                 }
-                entriesConfig.push(indexObject);
+                if (indexObject) {
+                    entriesConfig.push(indexObject);
+                }
 
                 // generate rewrites
                 entriesConfig.forEach(entry => {
