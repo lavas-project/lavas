@@ -174,7 +174,7 @@ function treeToRouter(tree, parent, {pathRule = 'kebabCase'} = {}) {
 
 function generatePath(info, parent, rule) {
     let path = info.dir.slice(parent.dir.length)
-        .replace(/_/g, ':')
+        .replace(/(^|\/)_/, ':')
         .replace(/((^|\/)index)+$/i, '');
 
     switch (rule) {
@@ -212,7 +212,7 @@ function generateName(dir) {
         .replace(/((^|\/)index)+$/i, '')
         .split('/').slice(1)
         .map((name, i) => {
-            name = name.replace(/_/g, '');
+            name = name.replace(/(^|\/)_/, '');
 
             if (i === 0) {
                 return name.replace(/^[A-Z]+/, w => w.toLowerCase());
