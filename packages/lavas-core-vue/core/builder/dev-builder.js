@@ -306,7 +306,7 @@ export default class DevBuilder extends BaseBuilder {
                         from = /^\//;
                     }
                     else {
-                        from = new RegExp(`^/(${entry.pages.join('|')})/`)
+                        from = new RegExp(`^/(${entry.pages.join('|')})`)
                     }
 
                     rewrites.push({
