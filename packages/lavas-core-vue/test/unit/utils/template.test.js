@@ -78,7 +78,7 @@ test('it should generate client side template', async t => {
                 <% } %>
                 <% for (var cssFilePath of htmlWebpackPlugin.files.css) { %>
                     <% if (htmlWebpackPlugin.options.config.enableAsyncCSS) { %>
-                        <link rel="preload" href="<%= cssFilePath %>" as="style" onload="this.onload=null;this.rel='stylesheet';window.STYLE_READY=1;">
+                        <link rel="preload" href="<%= cssFilePath %>" as="style" onload="this.onload=null;this.rel='stylesheet';window.STYLE_READY=1;window.mountLavas&&window.mountLavas();">
                     <% }else { %>
                         <link rel="preload" href="<%= cssFilePath %>" as="style">
                     <% } %>
@@ -125,7 +125,7 @@ test('it should generate normal client template html', async t => {
                 <% } %>
                 <% for (var cssFilePath of htmlWebpackPlugin.files.css) { %>
                     <% if (htmlWebpackPlugin.options.config.enableAsyncCSS) { %>
-                        <link rel="preload" href="<%= cssFilePath %>" as="style" onload="this.onload=null;this.rel='stylesheet';window.STYLE_READY=1;">
+                        <link rel="preload" href="<%= cssFilePath %>" as="style" onload="this.onload=null;this.rel='stylesheet';window.STYLE_READY=1;window.mountLavas&&window.mountLavas();">
                     <% }else { %>
                         <link rel="preload" href="<%= cssFilePath %>" as="style">
                     <% } %>
@@ -177,7 +177,7 @@ test('it should generate client customized template html', async t => {
                 <% } %>
                 <% for (var cssFilePath of htmlWebpackPlugin.files.css) { %>
                     <% if (htmlWebpackPlugin.options.config.enableAsyncCSS) { %>
-                        <link rel="preload" href="<%= cssFilePath %>" as="style" onload="this.onload=null;this.rel='stylesheet';window.STYLE_READY=1;">
+                        <link rel="preload" href="<%= cssFilePath %>" as="style" onload="this.onload=null;this.rel='stylesheet';window.STYLE_READY=1;window.mountLavas&&window.mountLavas();">
                     <% } else { %>
                         <link rel="preload" href="<%= cssFilePath %>" as="style">
                     <% } %>

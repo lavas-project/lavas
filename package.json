@@ -37,6 +37,7 @@
   "ava": {
     "serial": false,
     "failFast": true,
+    "concurrency": 10,
     "files": [
       "packages/lavas-core-vue/test/unit/**/*.test.js",
       "packages/lavas-core-vue/test/spec/**/*.js",
