@@ -334,6 +334,10 @@ export default class WebpackConfig {
         // call extend function if provided
         if (typeof extend === 'function') {
             extend.call(this, webpackConfigObject, {
+                type: 'base',
+                env: this.env
+            });
+            extend.call(this, webpackConfigObject, {
                 type: 'client',
                 env: this.env
             });
@@ -426,6 +430,10 @@ export default class WebpackConfig {
 
         // call extend function if provided
         if (typeof extend === 'function') {
+            extend.call(this, webpackConfigObject, {
+                type: 'base',
+                env: this.env
+            });
             extend.call(this, webpackConfigObject, {
                 type: 'server',
                 env: this.env
