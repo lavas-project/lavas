@@ -12,8 +12,8 @@ import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
 import VueSSRClientPlugin from 'vue-server-renderer/client-plugin';
 import OmmitCSSPlugin from '../plugins/ommit-css-webpack-plugin';
 
-import {TEMPLATE_HTML, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH, CONFIG_FILE,
-    LAVAS_DIRNAME_IN_DIST, CLIENT_MANIFEST, STORE_FILE} from '../constants';
+import {TEMPLATE_HTML, SPA_TEMPLATE_HTML, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH,
+    CONFIG_FILE, LAVAS_DIRNAME_IN_DIST, CLIENT_MANIFEST, STORE_FILE} from '../constants';
 import {assetsPath, resolveAliasPath, camelCaseToDash} from '../utils/path';
 import {enableHotReload} from '../utils/webpack';
 import * as JsonUtil from '../utils/json';
@@ -140,21 +140,6 @@ export default class BaseBuilder {
         );
     }
 
-    async writeLavasLink() {
-        let lavasLinkTemplate = await readFile(this.templatesPath('LavasLink.js.tmpl'), 'utf8');
-        await this.writeFileToLavasDir('LavasLink.js', template(lavasLinkTemplate)({
-            entryConfig: JsonUtil.stringify(this.config.entries.map(entry => {
-                // only select necessary keys
-                return {
-                    name: entry.name,
-                    urlReg: entry.urlReg
-                };
-            })),
-            base: this.config.router.base,
-            mode: this.config.router.mode
-        }));
-    }
-
     /**
      * write an entry file for skeleton components
      *
@@ -179,18 +164,25 @@ export default class BaseBuilder {
      */
     async addHtmlPlugin(spaConfig, baseUrl = '/') {
         // allow user to provide a custom HTML template
-        let {globals: {rootDir}, skeleton: {enable: enableSkeleton}, build: {cssExtract}} = this.config;
+        let {globals: {rootDir}, skeleton: {enable: enableSkeleton, asyncCSS}, build: {cssExtract}} = this.config;
         let htmlFilename;
         let templatePath;
         let tempTemplatePath;
 
         htmlFilename = `${DEFAULT_ENTRY_NAME}.html`;
-        templatePath = join(rootDir, `core/${TEMPLATE_HTML}`);
-        tempTemplatePath = TEMPLATE_HTML;
+
+        // find core/spa.html.tmpl
+        templatePath = join(rootDir, `core/${SPA_TEMPLATE_HTML}`);
+        if (!await pathExists(templatePath)) {
+            // find core/index.html.tmpl
+            templatePath = join(rootDir, `core/${TEMPLATE_HTML}`);
+        }
 
         if (!await pathExists(templatePath)) {
-            throw new Error(`${TEMPLATE_HTML} required for entry: ${DEFAULT_ENTRY_NAME}`);
+            throw new Error(`${SPA_TEMPLATE_HTML} or ${TEMPLATE_HTML} required`);
         }
+
+        tempTemplatePath = basename(templatePath);
 
         // write HTML template used by html-webpack-plugin which doesn't support template STRING
         let resolvedTemplatePath = await this.writeFileToLavasDir(
@@ -205,13 +197,15 @@ export default class BaseBuilder {
          */
         let entryClientContent = await readFile(join(rootDir, 'core/entry-client.js'), 'utf8');
         let shouldUpdateLavasTemplate = entryClientContent.indexOf('window.mountLavas') === -1;
-        if (shouldUpdateLavasTemplate) {
-            Logger.warn('build', 'please update `entry-client.js`, you can refer to https://github.com/lavas-project/lavas/issues/73.');
-        }
-        let enableAsyncCSS = enableSkeleton && cssExtract && !shouldUpdateLavasTemplate;
-        this.config.enableAsyncCSS = enableAsyncCSS;
+        let enableAsyncCSS = asyncCSS && enableSkeleton && cssExtract;
+        this.config.enableAsyncCSS = enableAsyncCSS && !shouldUpdateLavasTemplate;
         if (enableAsyncCSS) {
-            spaConfig.plugin('ommit-css').use(OmmitCSSPlugin);
+            if (shouldUpdateLavasTemplate) {
+                Logger.warn('build', 'please update `entry-client.js` to render Skeleton faster, you can refer to https://github.com/lavas-project/lavas/issues/73.');
+            }
+            else {
+                spaConfig.plugin('ommit-css').use(OmmitCSSPlugin);
+            }
         }
 
         // add html webpack plugin
@@ -231,7 +225,7 @@ export default class BaseBuilder {
             config: this.config // use config in template
         }]);
 
-        return resolvedTemplatePath;
+        return {resolvedTemplatePath, tempTemplatePath};
     }
 
     /**
@@ -363,7 +357,11 @@ export default class BaseBuilder {
                         .entry(DEFAULT_ENTRY_NAME).add('./core/entry-client.js');
 
                     // add html-webpack-plugin
-                    let customTemplatePath = await this.addHtmlPlugin(clientConfig, router.base);
+                    let {
+                        resolvedTemplatePath: customTemplatePath,
+                        tempTemplatePath
+                    } = await this.addHtmlPlugin(clientConfig, router.base);
+                    // let customTemplatePath = await this.addHtmlPlugin(clientConfig, router.base);
 
                     // add vue-skeleton-webpack-plugin
                     if (skeleton && skeleton.enable) {
@@ -375,7 +373,7 @@ export default class BaseBuilder {
                         // watch html
                         this.addWatcher(customTemplatePath, 'change', async () => {
                             await this.writeFileToLavasDir(
-                                TEMPLATE_HTML,
+                                tempTemplatePath,
                                 templateUtil.client(await readFile(customTemplatePath, 'utf8'), router.base)
                             );
                         });

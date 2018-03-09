@@ -76,7 +76,8 @@ const DEFAULT_CONFIG = {
         }
     },
     skeleton: {
-        enable: true
+        enable: true,
+        asyncCSS: true
     },
     router: {},
     errorHandler: {
@@ -89,7 +90,6 @@ const DEFAULT_CONFIG = {
         server: [],
         client: []
     },
-    entries: [],
     serviceWorker: null,
     production: {
         build: {
@@ -124,14 +124,6 @@ export const RUMTIME_ITEMS = {
     errorHandler: true,
     serviceWorker: {
         swDest: true
-    },
-    entries: {
-        name: true,
-        router: true,
-        urlReg: true,
-        serviceWorker: {
-            swDest: true
-        }
     }
 };
 
@@ -234,27 +226,6 @@ export default class ConfigReader {
         this.mergeEnv(config);
 
         Logger.info('build', 'finish reading config.', true, true);
-
-        return this.processEntryConfig(config);
-    }
-
-    processEntryConfig(config) {
-        if (config.entries.length !== 0) {
-            config.entries = config.entries.map(entry => {
-                if (typeof entry === 'string') {
-                    entry = {name: entry};
-                }
-
-                let finalConfig = {};
-                let urlReg = entry.name === 'index' ? /^\// : new RegExp(`^/${entry.name}`);
-                merge(finalConfig, {
-                    serviceWorker: config.serviceWorker,
-                    urlReg
-                }, entry);
-
-                return finalConfig;
-            });
-        }
 
         return config;
     }

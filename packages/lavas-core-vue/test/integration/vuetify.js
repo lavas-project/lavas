@@ -4,30 +4,35 @@
  */
 
 import {join} from 'path';
-import {readFile} from 'fs-extra';
+import {readFile, writeFile, copy, remove} from 'fs-extra';
 import test from 'ava';
 import LavasCore from '../../core';
 
-import {syncConfig, isKoaSupport, request, createApp} from '../utils';
-
-let app;
-let server;
-let port = process.env.PORT || 3000;
-let core;
-let res;
+import {syncConfig, isKoaSupport, request, createApp, makeTempDir} from '../utils';
 
 test.beforeEach('init lavas-core & server', async t => {
-    core = new LavasCore(join(__dirname, '../fixtures/vuetify'));
-    app = createApp();
+    // copy fixture to temp dir
+    let tempDir = await makeTempDir();
+    await copy(join(__dirname, '../fixtures/vuetify'), tempDir);
+
+    t.context.tempDir = tempDir;
+    t.context.core = new LavasCore(tempDir);
+    t.context.app = createApp();
 });
 
-test.after('clean', async t => {
+test.afterEach.always('clean', async t => {
+    let {core, server, tempDir} = t.context;
+    // clean temp dir
+    await remove(tempDir);
+
     await core.close();
     server && server.close();
 });
 
-test.serial('it should run in development mode correctly', async t => {
-    let distPath = join(__dirname, '../fixtures/vuetify/dist');
+test('it should run in development mode correctly', async t => {
+    let {core, app, tempDir} = t.context;
+    let res;
+    let distPath = join(tempDir, 'dist');
 
     // build in production mode
     await core.init('production', true);
@@ -54,7 +59,7 @@ test.serial('it should run in development mode correctly', async t => {
 
     // set middlewares & start a server
     app.use(isKoaSupport ? core.koaMiddleware() : core.expressMiddleware());
-    server = app.listen(port);
+    t.context.server = app.listen();
 
     // serve /
     res = await request(app)

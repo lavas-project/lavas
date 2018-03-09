@@ -35,7 +35,7 @@
     "npm": ">= 3.0.0"
   },
   "ava": {
-    "concurrency": 1,
+    "serial": false,
     "failFast": true,
     "files": [
       "packages/lavas-core-vue/test/unit/**/*.test.js",
@@ -151,6 +151,7 @@
     "koa": "^2.5.0",
     "nyc": "^10.3.2",
     "semver": "^5.4.1",
+    "sinon": "^4.4.2",
     "superkoa": "^1.0.3",
     "supertest": "^3.0.0",
     "vuetify": "^0.17.6",
