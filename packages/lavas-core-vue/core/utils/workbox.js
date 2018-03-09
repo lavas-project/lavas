@@ -30,16 +30,10 @@ export function getWorkboxFiles(isProd) {
  * @param {Object} lavasConfig lavas config
  * @param {?Object} entryConfig entry config (undefined when SPA and SSR)
  */
-export function useWorkbox(webpackConfig, lavasConfig, entryConfig) {
+export function useWorkbox(webpackConfig, lavasConfig) {
     let {buildVersion, build: {publicPath, ssr}, globals, router: {base = '/'}} = lavasConfig;
     let workboxConfig = entryConfig ? entryConfig.serviceWorker : lavasConfig.serviceWorker;
     let {swSrc, appshellUrl, appshellUrls} = workboxConfig;
-
-    if (entryConfig) {
-        swSrc = getEntryConfigValue(swSrc, entryConfig.name);
-        workboxConfig.swDest = getEntryConfigValue(workboxConfig.swDest, entryConfig.name);
-        workboxConfig.swPath = getEntryConfigValue(workboxConfig.swPath, entryConfig.name);
-    }
 
     if (base !== '/' && !base.endsWith('/')) {
         base += '/';
@@ -103,16 +97,4 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig) {
 
     // use workbox-webpack-plugin@2.x
     webpackConfig.plugin('workbox').use(WorkboxWebpackPlugin, [workboxConfig]);
-}
-
-/**
- * replace [entryName] with real value
- * entries/[entryName]/service-worker.js => entries/index/service-worker.js
- *
- * @param {string} value sericeWorker config value
- * @param {string} entryName entry name
- * @return {string} real value
- */
-function getEntryConfigValue(value, entryName) {
-    return value ? value.replace(/\[entryName\]/g, entryName) : undefined;
 }
