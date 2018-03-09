@@ -28,11 +28,15 @@ export function getWorkboxFiles(isProd) {
  *
  * @param {Object} webpackConfig webpack config
  * @param {Object} lavasConfig lavas config
- * @param {?Object} entryConfig entry config (undefined when SPA and SSR)
  */
 export function useWorkbox(webpackConfig, lavasConfig) {
-    let {buildVersion, build: {publicPath, ssr}, globals, router: {base = '/'}} = lavasConfig;
-    let workboxConfig = entryConfig ? entryConfig.serviceWorker : lavasConfig.serviceWorker;
+    let {
+        buildVersion,
+        build: {publicPath, ssr},
+        globals,
+        router: {base = '/'},
+        serviceWorker: workboxConfig
+    } = lavasConfig;
     let {swSrc, appshellUrl, appshellUrls} = workboxConfig;
 
     if (base !== '/' && !base.endsWith('/')) {
@@ -73,8 +77,7 @@ export function useWorkbox(webpackConfig, lavasConfig) {
         }
     }
     else {
-        let entryHtml = entryConfig ? `${entryConfig.name}.html` : 'index.html';
-        registerNavigationClause = `workboxSW.router.registerNavigationRoute('${base}${entryHtml}');`;
+        registerNavigationClause = `workboxSW.router.registerNavigationRoute('${base}index.html');`;
     }
 
     if (!/workboxSW\.router\.registerNavigationRoute/.test(serviceWorkerContent)) {
@@ -89,9 +92,7 @@ export function useWorkbox(webpackConfig, lavasConfig) {
 
 
     // write new service worker in .lavas/sw.js
-    let tempSwSrc = entryConfig
-        ? join(globals.rootDir, './.lavas', entryConfig.name, 'sw-temp.js')
-        : join(globals.rootDir, './.lavas', 'sw-temp.js');
+    let tempSwSrc = join(globals.rootDir, './.lavas', 'sw-temp.js');
     writeFileSync(tempSwSrc, serviceWorkerContent, 'utf8');
     workboxConfig.swSrc = tempSwSrc;
 
