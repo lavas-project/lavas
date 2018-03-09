@@ -23,10 +23,9 @@ test.beforeEach('init lavas-core & server', async t => {
 
 test.afterEach.always('clean', async t => {
     let {core, tempDir} = t.context;
+    await core.close();
     // clean temp dir
     await remove(tempDir);
-
-    await core.close();
 });
 
 test('it should use another config when user has explictly set', async t => {

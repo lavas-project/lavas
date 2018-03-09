@@ -22,11 +22,12 @@ test.beforeEach('init lavas-core & server', async t => {
 
 test.afterEach.always('clean', async t => {
     let {core, server, tempDir} = t.context;
-    // clean temp dir
-    await remove(tempDir);
 
     await core.close();
     server && server.close();
+
+    // clean temp dir
+    await remove(tempDir);
 });
 
 test('it should run in development mode correctly', async t => {

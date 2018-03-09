@@ -22,11 +22,12 @@ test.beforeEach('init lavas-core & server', async t => {
 
 test.afterEach.always('clean', async t => {
     let {core, server, tempDir} = t.context;
-    // clean temp dir
-    await remove(tempDir);
 
     await core.close();
     server && server.close();
+
+    // clean temp dir
+    await remove(tempDir);
 });
 
 async function runCommonTestCases(t) {

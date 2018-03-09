@@ -29,10 +29,10 @@ test.beforeEach('init lavas-core & server', async t => {
 
 test.afterEach.always('clean', async t => {
     let {core, tempDir} = t.context;
-    // clean temp dir
-    await remove(tempDir);
 
     await core.close();
+    // clean temp dir
+    await remove(tempDir);
 });
 
 test('it should get workbox files', t => {
