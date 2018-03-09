@@ -16,12 +16,12 @@
 
 const assert = require('assert');
 const path = require('path');
-const {getManifest} = require('workbox-build');
+const { getManifest } = require('workbox-build');
 
 const convertStringToAsset = require('./lib/convert-string-to-asset');
 const getAssetHash = require('./lib/get-asset-hash');
 const getManifestEntriesFromCompilation =
-  require('./lib/get-manifest-entries-from-compilation');
+    require('./lib/get-manifest-entries-from-compilation');
 const getWorkboxSWImports = require('./lib/get-workbox-sw-imports');
 const readFileWrapper = require('./lib/read-file-wrapper');
 const sanitizeConfig = require('./lib/sanitize-config');
@@ -39,107 +39,111 @@ const stringifyManifest = require('./lib/stringify-manifest');
  * @module workbox-webpack-plugin
  */
 class InjectManifest {
-  /**
-   * Creates an instance of InjectManifest.
-   *
-   * @param {Object} [config] See the
-   * [configuration guide](https://developers.google.com/web/tools/workbox/modules/workbox-webpack-plugin#configuration)
-   * for all supported options and defaults.
-   */
-  constructor(config = {}) {
-    assert(typeof config.swSrc === 'string', `swSrc must be set to the path ` +
-      `to an existing service worker file.`);
+    /**
+     * Creates an instance of InjectManifest.
+     *
+     * @param {Object} [config] See the
+     * [configuration guide](https://developers.google.com/web/tools/workbox/modules/workbox-webpack-plugin#configuration)
+     * for all supported options and defaults.
+     */
+    constructor(config = {}) {
+        assert(typeof config.swSrc === 'string', `swSrc must be set to the path ` +
+            `to an existing service worker file.`);
 
-    this.config = Object.assign({}, {
-      chunks: [],
-      exclude: [
-        // Exclude source maps.
-        /\.map$/,
-        // Exclude anything starting with manifest and ending .js or .json.
-        /^manifest.*\.js(?:on)?$/,
-      ],
-      excludeChunks: [],
-      importScripts: [],
-      importWorkboxFrom: 'cdn',
-      swDest: path.basename(config.swSrc),
-    }, config);
-  }
-
-  /**
-   * @param {Object} compilation The webpack compilation.
-   * @param {Function} readFile The function to use when reading files,
-   * derived from compiler.inputFileSystem.
-   * @private
-   */
-  async handleEmit(compilation, readFile) {
-    if (this.config.importWorkboxFrom === 'local') {
-      throw new Error(`importWorkboxFrom can not be set to 'local' when using` +
-        ` InjectManifest. Please use 'cdn' or a chunk name instead.`);
+        this.config = Object.assign({}, {
+            chunks: [],
+            exclude: [
+                // Exclude source maps.
+                /\.map$/,
+                // Exclude anything starting with manifest and ending .js or .json.
+                /^manifest.*\.js(?:on)?$/,
+            ],
+            excludeChunks: [],
+            importScripts: [],
+            importWorkboxFrom: 'cdn',
+            swDest: path.basename(config.swSrc),
+        }, config);
     }
 
-    const workboxSWImports = await getWorkboxSWImports(
-      compilation, this.config);
-    let entries = getManifestEntriesFromCompilation(compilation, this.config);
+    /**
+     * @param {Object} compilation The webpack compilation.
+     * @param {Function} readFile The function to use when reading files,
+     * derived from compiler.inputFileSystem.
+     * @private
+     */
+    async handleEmit(compilation, readFile) {
+        if (this.config.importWorkboxFrom === 'local') {
+            throw new Error(`importWorkboxFrom can not be set to 'local' when using` +
+                ` InjectManifest. Please use 'cdn' or a chunk name instead.`);
+        }
 
-    const sanitizedConfig = sanitizeConfig.forGetManifest(this.config);
-    // If there are any "extra" config options remaining after we remove the
-    // ones that are used natively by the plugin, then assume that they should
-    // be passed on to workbox-build.getManifest() to generate extra entries.
-    if (Object.keys(sanitizedConfig).length > 0) {
-      // If globPatterns isn't explicitly set, then default to [], instead of
-      // the workbox-build.getManifest() default.
-      sanitizedConfig.globPatterns = sanitizedConfig.globPatterns || [];
-      const {manifestEntries} = await getManifest(sanitizedConfig);
-      entries = entries.concat(manifestEntries);
-    }
+        const workboxSWImports = await getWorkboxSWImports(
+            compilation, this.config);
+        let entries = getManifestEntriesFromCompilation(compilation, this.config);
 
-    const manifestString = stringifyManifest(entries);
-    const manifestAsset = convertStringToAsset(manifestString);
-    const manifestHash = getAssetHash(manifestAsset);
-    let manifestFilename = `precache-manifest.${manifestHash}.js`;
-    if (this.config.manifestFilename) {
-        manifestFilename = this.config.manifestFilename.replace('[manifest]', manifestFilename);
-    }
-    compilation.assets[manifestFilename] = manifestAsset;
-    this.config.importScripts.push(
-      (compilation.options.output.publicPath || '') + manifestFilename);
+        const sanitizedConfig = sanitizeConfig.forGetManifest(this.config);
+        // If there are any "extra" config options remaining after we remove the
+        // ones that are used natively by the plugin, then assume that they should
+        // be passed on to workbox-build.getManifest() to generate extra entries.
+        if (Object.keys(sanitizedConfig).length > 0) {
+            // If globPatterns isn't explicitly set, then default to [], instead of
+            // the workbox-build.getManifest() default.
+            sanitizedConfig.globPatterns = sanitizedConfig.globPatterns || [];
+            const { manifestEntries } = await getManifest(sanitizedConfig);
+            entries = entries.concat(manifestEntries);
+        }
 
-    // workboxSWImports might be null if importWorkboxFrom is 'disabled'.
-    if (workboxSWImports) {
-      // workboxSWImport is an array, so use concat() rather than push().
-      this.config.importScripts = this.config.importScripts.concat(
-        workboxSWImports);
-    }
+        const manifestString = stringifyManifest(entries);
+        const manifestAsset = convertStringToAsset(manifestString);
+        const manifestHash = getAssetHash(manifestAsset);
+        let manifestFilename = `precache-manifest.${manifestHash}.js`;
 
-    const originalSWString = await readFileWrapper(readFile, this.config.swSrc);
+        if (this.config.manifestFilename) {
+            manifestFilename = this.config.manifestFilename.replace('[manifest]', manifestFilename);
+        }
 
-    const importScriptsString = this.config.importScripts
-      .map(JSON.stringify)
-      .join(', ');
+        compilation.assets[manifestFilename] = manifestAsset;
+        compilation.assets['static/js/' + manifestFilename] = manifestAsset;
 
-    const postInjectionSWString = `importScripts(${importScriptsString});
+        this.config.importScripts.push(
+            (compilation.options.output.publicPath || '') + manifestFilename);
+
+        // workboxSWImports might be null if importWorkboxFrom is 'disabled'.
+        if (workboxSWImports) {
+            // workboxSWImport is an array, so use concat() rather than push().
+            this.config.importScripts = this.config.importScripts.concat(
+                workboxSWImports);
+        }
+
+        const originalSWString = await readFileWrapper(readFile, this.config.swSrc);
+
+        const importScriptsString = this.config.importScripts
+            .map(JSON.stringify)
+            .join(', ');
+
+        const postInjectionSWString = `importScripts(${importScriptsString});
 
 ${originalSWString}
 `;
 
-    compilation.assets[this.config.swDest] =
-      convertStringToAsset(postInjectionSWString);
-  }
+        compilation.assets[this.config.swDest] =
+            convertStringToAsset(postInjectionSWString);
+    }
 
-  /**
-   * @param {Object} [compiler] default compiler object passed from webpack
-   *
-   * @private
-   */
-  apply(compiler) {
-    compiler.plugin('emit', (compilation, callback) => {
+    /**
+     * @param {Object} [compiler] default compiler object passed from webpack
+     *
+     * @private
+     */
+    apply(compiler) {
+        compiler.plugin('emit', (compilation, callback) => {
 
 
-      this.handleEmit(compilation, compiler.inputFileSystem._readFile)
-        .then(callback)
-        .catch(callback);
-    });
-  }
+            this.handleEmit(compilation, compiler.inputFileSystem._readFile)
+                .then(callback)
+                .catch(callback);
+        });
+    }
 }
 
 module.exports = InjectManifest;
