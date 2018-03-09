@@ -2,6 +2,12 @@
 
 =======
 
+## Lavas-core-vue [1.1.4] - 2018-3-9
+
+### Changed
+
+- [Fix] Resume supporting `context.type === 'base'` in `extend` function in `lavas.config.js`
+
 ## Lavas-core-vue [1.1.3] - 2018-3-8
 
 ### Changed
