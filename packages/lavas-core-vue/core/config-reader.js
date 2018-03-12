@@ -237,6 +237,7 @@ export default class ConfigReader {
     async readConfigFile() {
         Logger.info('build', 'start reading config...', true);
         let parsedConfig = JsonUtil.parse(await readFile(distLavasPath(this.cwd, CONFIG_FILE), 'utf8'));
+        parsedConfig.globals = {rootDir: this.cwd};
         Logger.info('build', 'finish reading config.', true, true);
         return parsedConfig;
     }

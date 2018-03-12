@@ -49,7 +49,7 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig) {
     let serviceWorkerContent = readFileSync(swSrc);
 
     // import workbox-sw
-    let importWorkboxClause = `importScripts('${publicPath}static/js/workbox-sw.prod.v2.1.2.js');`;
+    let importWorkboxClause = `importScripts('${publicPath}static/js/${getWorkboxFiles(true)[0]}');`;
     serviceWorkerContent = importWorkboxClause + serviceWorkerContent;
 
     // register navigation in the end

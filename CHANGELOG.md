@@ -2,6 +2,20 @@
 
 =======
 
+## Lavas-core-vue [1.1.4] - 2018-3-9
+
+### Changed
+
+- [Fix] Resume supporting `context.type === 'base'` in `extend` function in `lavas.config.js`
+
+## Lavas-core-vue [1.1.3] - 2018-3-8
+
+### Changed
+
+- [Fix] Change `targets.node` from `current` to `"6.9"` in `.babelrc`
+- [Fix] Fix problems when executing `lavas start` and ssr = true
+- [Fix] Support workbox v2.1.3
+
 ## Lavas-core-vue [1.1.2] - 2018-3-7
 
 ### Changed
