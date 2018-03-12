@@ -2,7 +2,7 @@ const path = require('path');
 const LavasCore = require('lavas-core-vue');
 
 let core = new LavasCore(path.resolve(__dirname, '../'));
-let config = void 0;
+let config;
 
 // fix https://github.com/lavas-project/lavas/issues/50
 if (process.argv.length >= 3 && process.argv[2] !== 'build') {
