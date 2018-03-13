@@ -2,10 +2,10 @@
  * @file utils.workbox.js
  * @author lavas
  */
-import {basename, join} from 'path';
-import {readFileSync, writeFileSync} from 'fs-extra';
+import { basename, join } from 'path';
+import { readFileSync, writeFileSync } from 'fs-extra';
 // import WorkboxWebpackPlugin from 'workbox-webpack-plugin';
-import {InjectManifest} from '../plugins/workbox-webpack-plugin';
+import { InjectManifest } from '../plugins/workbox-webpack-plugin';
 
 export const WORKBOX_PATH = require.resolve('workbox-sw');
 
@@ -16,8 +16,8 @@ export const WORKBOX_PATH = require.resolve('workbox-sw');
  * @return {Array} files .js & .map
  */
 export function getWorkboxFiles(isProd) {
-    let filename = isProd
-        ? basename(WORKBOX_PATH) : basename(WORKBOX_PATH).replace('prod', 'dev');
+    let filename = isProd ?
+        basename(WORKBOX_PATH) : basename(WORKBOX_PATH).replace('prod', 'dev');
     return [
         filename,
         `${filename}.map`
@@ -32,9 +32,9 @@ export function getWorkboxFiles(isProd) {
  * @param {?Object} entryConfig entry config (undefined when SPA and SSR)
  */
 export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) {
-    let {buildVersion, build: {publicPath, ssr}, globals, router: {base = '/'}} = lavasConfig;
+    let { buildVersion, build: { publicPath, ssr }, globals, router: { base = '/' } } = lavasConfig;
     let workboxConfig = entryConfig ? entryConfig.serviceWorker : lavasConfig.serviceWorker;
-    let {swSrc, swDest = 'service-worker.js', appshellUrl, appshellUrls} = workboxConfig;
+    let { swSrc, swDest = 'service-worker.js', appshellUrl, appshellUrls } = workboxConfig;
 
     // workbox precache inject point
     const WORKBOX_PRECACHE_REG = /workbox\.precaching\.precacheAndRoute\(self\.__precacheManifest\);/;
@@ -58,8 +58,7 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) 
 
         // workboxConfig.swPath = getEntryConfigValue(workboxConfig.swPath, entryConfig.name);
         let manifestFilename = `${entryConfig.name}/[manifest]`;
-        swDest = `${entryConfig.name}/${swDest}`;
-       
+
         workboxConfig = Object.assign({}, workboxInjectManifestConfig, {
             manifestFilename,
             swDest,
@@ -67,8 +66,8 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) 
             exclude: [
                 ...workboxInjectManifestConfig.exclude,
                 ...entryNames
-                    .filter(n => n !== entryConfig.name)
-                    .map(n => new RegExp(`^${n}/`))
+                .filter(n => n !== entryConfig.name)
+                .map(n => new RegExp(`^${n}/`))
             ]
         });
     }
@@ -77,7 +76,7 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) 
 
         // in workbox@3.x swDest must be a relative path
         swDest = basename(swDest);
-        
+
         workboxConfig = Object.assign({}, workboxInjectManifestConfig, {
             swDest
         });
@@ -91,7 +90,7 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) 
     let serviceWorkerContent = readFileSync(swSrc);
 
     // import workbox-sw
-    let {version: workboxBuildVersion} = require('workbox-build/package.json');
+    let { version: workboxBuildVersion } = require('workbox-build/package.json');
     let importWorkboxClause = `
         importScripts('${publicPath}static/workbox-v${workboxBuildVersion}/workbox-sw.js');
 
@@ -126,8 +125,7 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) 
 
             registerNavigationClause = `workbox.routing.registerNavigationRoute('${appshellUrl}');`;
         }
-    }
-    else {
+    } else {
         let entryHtml = 'index.html';
         let whitelistClause = '';
         if (entryConfig) {
@@ -142,15 +140,14 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) 
     if (WORKBOX_PRECACHE_REG.test(serviceWorkerContent)) {
         serviceWorkerContent = serviceWorkerContent.replace(WORKBOX_PRECACHE_REG,
             `workbox.precaching.precacheAndRoute(self.__precacheManifest);\n${registerNavigationClause}\n`);
-    }
-    else {
+    } else {
         serviceWorkerContent += registerNavigationClause;
     }
 
     // write new service worker in .lavas/sw.js
-    let tempSwSrc = entryConfig
-        ? join(globals.rootDir, './.lavas', entryConfig.name, 'sw-temp.js')
-        : join(globals.rootDir, './.lavas', 'sw-temp.js');
+    let tempSwSrc = entryConfig ?
+        join(globals.rootDir, './.lavas', entryConfig.name, 'sw-temp.js') :
+        join(globals.rootDir, './.lavas', 'sw-temp.js');
     writeFileSync(tempSwSrc, serviceWorkerContent, 'utf8');
     workboxConfig.swSrc = tempSwSrc;
 
