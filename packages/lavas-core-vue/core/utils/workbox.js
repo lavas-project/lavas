@@ -53,14 +53,13 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) 
 
     // MPA
     if (entryConfig) {
-
         swSrc = getEntryConfigValue(swSrc, entryConfig.name);
         swDest = getEntryConfigValue(swDest, entryConfig.name);
 
         // workboxConfig.swPath = getEntryConfigValue(workboxConfig.swPath, entryConfig.name);
         let manifestFilename = `${entryConfig.name}/[manifest]`;
         swDest = `${entryConfig.name}/${swDest}`;
-
+       
         workboxConfig = Object.assign({}, workboxInjectManifestConfig, {
             manifestFilename,
             swDest,
@@ -78,7 +77,7 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) 
 
         // in workbox@3.x swDest must be a relative path
         swDest = basename(swDest);
-
+        
         workboxConfig = Object.assign({}, workboxInjectManifestConfig, {
             swDest
         });
