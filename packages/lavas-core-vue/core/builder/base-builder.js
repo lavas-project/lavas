@@ -10,6 +10,7 @@ import {join, basename, normalize} from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
 import VueSSRClientPlugin from 'vue-server-renderer/client-plugin';
+import OmmitCSSPlugin from '../plugins/ommit-css-webpack-plugin';
 
 import {TEMPLATE_HTML, SPA_TEMPLATE_HTML, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH,
     CONFIG_FILE, LAVAS_DIRNAME_IN_DIST, CLIENT_MANIFEST, STORE_FILE} from '../constants';
@@ -17,6 +18,7 @@ import {assetsPath, resolveAliasPath, camelCaseToDash} from '../utils/path';
 import {enableHotReload} from '../utils/webpack';
 import * as JsonUtil from '../utils/json';
 import templateUtil from '../utils/template';
+import Logger from '../utils/logger';
 
 import RouteManager from '../route-manager';
 import WebpackConfig from '../webpack';
@@ -162,7 +164,7 @@ export default class BaseBuilder {
      */
     async addHtmlPlugin(spaConfig, baseUrl = '/') {
         // allow user to provide a custom HTML template
-        let rootDir = this.config.globals.rootDir;
+        let {globals: {rootDir}, skeleton: {enable: enableSkeleton, asyncCSS}, build: {cssExtract}} = this.config;
         let htmlFilename;
         let templatePath;
         let tempTemplatePath;
@@ -187,6 +189,24 @@ export default class BaseBuilder {
             tempTemplatePath,
             templateUtil.client(await readFile(templatePath, 'utf8'), baseUrl)
         );
+
+        /**
+         * don't inject <link rel=stylesheet> in head,
+         * use <link rel=preload> to load CSS asynchronously instead
+         * https://github.com/lavas-project/lavas/issues/73
+         */
+        let entryClientContent = await readFile(join(rootDir, 'core/entry-client.js'), 'utf8');
+        let shouldUpdateLavasTemplate = entryClientContent.indexOf('window.mountLavas') === -1;
+        let enableAsyncCSS = asyncCSS && enableSkeleton && cssExtract;
+        this.config.enableAsyncCSS = enableAsyncCSS && !shouldUpdateLavasTemplate;
+        if (enableAsyncCSS) {
+            if (shouldUpdateLavasTemplate) {
+                Logger.warn('build', 'If you want to render Skeleton faster, please update `entry-client.js`. You can refer to https://github.com/lavas-project/lavas/issues/73.');
+            }
+            else {
+                spaConfig.plugin('ommit-css').use(OmmitCSSPlugin);
+            }
+        }
 
         // add html webpack plugin
         spaConfig.plugin('html').use(HtmlWebpackPlugin, [{

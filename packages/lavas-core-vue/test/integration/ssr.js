@@ -5,38 +5,44 @@
 
 import {join} from 'path';
 import test from 'ava';
+import {readFile, writeFile, copy, remove} from 'fs-extra';
 import LavasCore from '../../core';
 
-import {isKoaSupport, request, createApp} from '../utils';
-
-let app;
-let server;
-let port = process.env.PORT || 3000;
-let core;
+import {syncConfig, isKoaSupport, request, createApp, makeTempDir} from '../utils';
 
 test.beforeEach('init lavas-core & server', async t => {
-    core = new LavasCore(join(__dirname, '../fixtures/simple'));
-    app = createApp();
+    // copy fixture to temp dir
+    let tempDir = await makeTempDir();
+    await copy(join(__dirname, '../fixtures/simple'), tempDir);
+
+    t.context.tempDir = tempDir;
+    t.context.core = new LavasCore(tempDir);
+    t.context.app = createApp();
 });
 
-test.afterEach('clean', async t => {
+test.afterEach.always('clean', async t => {
+    let {core, server, tempDir} = t.context;
+
     await core.close();
     server && server.close();
+
+    // clean temp dir
+    await remove(tempDir);
 });
 
 async function runCommonTestCases(t) {
+    let {core, app} = t.context;
+    let res;
     // set middlewares & start a server
     app.use(isKoaSupport ? core.koaMiddleware() : core.expressMiddleware());
-    server = app.listen(port, () => {
-        console.log('server started at localhost:' + port);
-    });
+    t.context.server = app.listen();
 
     // server side render index
     let ssrContent = '<div id="app" data-server-rendered="true">';
     let indexPageTitle = '<title data-vue-meta="true">Home</title>';
     // config.build.defines: {base: {}}
     let webpackDefineContent = 'test-var</span>';
-    let res = await request(app)
+    res = await request(app)
         .get('/?a=1&b=2');
     t.is(200, res.status);
     t.true(res.text.indexOf(ssrContent) > -1);
@@ -60,7 +66,8 @@ async function runCommonTestCases(t) {
 `));
 }
 
-test.serial('it should run in development mode correctly', async t => {
+test('it should run in development mode correctly', async t => {
+    let core = t.context.core;
     // init, build and start a dev server
     await core.init('development', true);
     await core.build();
@@ -68,15 +75,24 @@ test.serial('it should run in development mode correctly', async t => {
     await runCommonTestCases(t);
 });
 
-test.serial('it should run in production mode correctly', async t => {
+test('it should run in production mode correctly', async t => {
+    let {core, tempDir} = t.context;
     // build in production mode
     await core.init('production', true);
+
+    // disable stats
+    core.config.build.stats = false;
+    syncConfig(core, core.config);
+
     await core.build();
 
     // start server in production mode
-    core = new LavasCore(join(__dirname, '../fixtures/simple/dist'));
+    core = new LavasCore(join(tempDir, 'dist'));
     await core.init('production');
     await core.runAfterBuild();
+
+    // update new core in context
+    t.context.core = core;
 
     await runCommonTestCases(t);
 });

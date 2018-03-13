@@ -10,7 +10,7 @@
     "build:lavas-core-vue": "babel packages/lavas-core-vue/core --out-dir packages/lavas-core-vue/dist --copy-files",
     "build:lavas-cli": "babel packages/lavas-cli/src --out-dir packages/lavas-cli/dist --copy-files",
     "lint": "fecs ./ --rule --type 'vue,js,css'",
-    "test": "nyc ava -v",
+    "test": "rimraf packages/lavas-core-vue/test/temp && nyc ava -v",
     "nyc:report": "nyc report --reporter=html",
     "publish:core": "lerna publish --scope=lavas-core-vue"
   },
@@ -35,8 +35,9 @@
     "npm": ">= 3.0.0"
   },
   "ava": {
-    "concurrency": 1,
+    "serial": false,
     "failFast": true,
+    "concurrency": 10,
     "files": [
       "packages/lavas-core-vue/test/unit/**/*.test.js",
       "packages/lavas-core-vue/test/spec/**/*.js",
@@ -150,7 +151,9 @@
     "fecs": "^1.4.0",
     "koa": "^2.5.0",
     "nyc": "^10.3.2",
+    "rimraf": "^2.6.2",
     "semver": "^5.4.1",
+    "sinon": "^4.4.2",
     "superkoa": "^1.0.3",
     "supertest": "^3.0.0",
     "vuetify": "^0.17.6",
