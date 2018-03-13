@@ -3,12 +3,12 @@
  * @author *__ author __*{% if: *__ email __* %}(*__ email __*){% /if %}
  */
 
-import {readFile, pathExists} from 'fs-extra';
-import {join} from 'path';
+import { readFile, pathExists } from 'fs-extra';
+import { join } from 'path';
 import glob from 'glob';
-import {merge, isArray} from 'lodash';
-import {CONFIG_FILE, LAVAS_CONFIG_FILE, ENTRY_DIRNAME} from './constants';
-import {distLavasPath} from './utils/path';
+import { merge, isArray } from 'lodash';
+import { CONFIG_FILE, LAVAS_CONFIG_FILE, ENTRY_DIRNAME } from './constants';
+import { distLavasPath } from './utils/path';
 import * as JsonUtil from './utils/json';
 
 function mergeArray(a, b) {
@@ -23,11 +23,11 @@ const DEFAULT_CONFIG = {
         ssr: true,
         publicPath: '/',
         filenames: {
-            entry: 'js/[name].[chunkhash:8].js',
-            vendor: 'js/vendor.[chunkhash:8].js',
-            vue: 'js/vue.[chunkhash:8].js',
-            chunk: 'js/[name].[chunkhash:8].js',
-            css: 'css/[name].[contenthash:8].css',
+            entry: 'js/[name]/[name].[chunkhash:8].js',
+            vendor: 'js/lib/vendor.[chunkhash:8].js',
+            vue: 'js/lib/vue.[chunkhash:8].js',
+            chunk: 'js/[name]/[name].[chunkhash:8].js',
+            css: 'css/[name]/[name].[contenthash:8].css',
             img: 'img/[name].[hash:8].[ext]',
             fonts: 'fonts/[name].[hash:8].[ext]'
         },
@@ -158,7 +158,8 @@ export default class ConfigReader {
             console.log(`[Lavas] use custom config: ${this.customConfigPath}`);
             delete require.cache[require.resolve(this.customConfigPath)];
 
-            let customConfig = await import(this.customConfigPath);
+            let customConfig = await
+            import (this.customConfigPath);
             this.mergeEnv(customConfig)
             merge(config, customConfig, mergeArray);
 
@@ -171,7 +172,8 @@ export default class ConfigReader {
             console.log('[Lavas] read lavas.config.js.');
             delete require.cache[require.resolve(singleConfigPath)];
 
-            let singleConfig = await import(singleConfigPath);
+            let singleConfig = await
+            import (singleConfigPath);
             this.mergeEnv(singleConfig);
             merge(config, singleConfig, mergeArray);
 
@@ -209,9 +211,10 @@ export default class ConfigReader {
             // load config, delete cache first
             let configPath = join(configDir, filepath);
             delete require.cache[require.resolve(configPath)];
-            let exportContent = await import(configPath);
-            cur[name] = typeof exportContent === 'object' && exportContent !== null
-                ? merge(cur[name], exportContent, mergeArray) : exportContent;
+            let exportContent = await
+            import (configPath);
+            cur[name] = typeof exportContent === 'object' && exportContent !== null ?
+                merge(cur[name], exportContent, mergeArray) : exportContent;
         }));
 
         this.mergeEnv(config);
@@ -244,8 +247,7 @@ export default class ConfigReader {
 
                 if (await pathExists(entryConfigPath)) {
                     entryConfig = require(entryConfigPath);
-                }
-                else {
+                } else {
                     entryConfig = {};
                 }
 
