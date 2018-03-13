@@ -23,11 +23,11 @@ const DEFAULT_CONFIG = {
         ssr: true,
         publicPath: '/',
         filenames: {
-            entry: 'js/[name].[chunkhash:8].js',
-            vendor: 'js/vendor.[chunkhash:8].js',
-            vue: 'js/vue.[chunkhash:8].js',
-            chunk: 'js/[name].[chunkhash:8].js',
-            css: 'css/[name].[contenthash:8].css',
+            entry: 'js/[name]/[name].[chunkhash:8].js',
+            vendor: 'js/lib/vendor.[chunkhash:8].js',
+            vue: 'js/lib/vue.[chunkhash:8].js',
+            chunk: 'js/[name]/[name].[chunkhash:8].js',
+            css: 'css/[name]/[name].[contenthash:8].css',
             img: 'img/[name].[hash:8].[ext]',
             fonts: 'fonts/[name].[hash:8].[ext]'
         },
@@ -264,7 +264,7 @@ export default class ConfigReader {
                     finalConfig.urlReg = /^\//;
                 }
                 else {
-                    finalConfig.urlReg = new RegExp(`^/(${finalConfig.pages.join('|')})/`)
+                    finalConfig.urlReg = new RegExp(`^/(${finalConfig.pages.join('|')})`)
                 }
 
                 return finalConfig;

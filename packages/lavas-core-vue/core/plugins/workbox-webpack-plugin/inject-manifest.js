@@ -100,7 +100,10 @@ class InjectManifest {
     if (this.config.manifestFilename) {
         manifestFilename = this.config.manifestFilename.replace('[manifest]', manifestFilename);
     }
+
     compilation.assets[manifestFilename] = manifestAsset;
+    compilation.assets['static/js/' + manifestFilename] = manifestAsset;
+
     this.config.importScripts.push(
       (compilation.options.output.publicPath || '') + manifestFilename);
 
