@@ -201,7 +201,7 @@ export default class BaseBuilder {
         this.config.enableAsyncCSS = enableAsyncCSS && !shouldUpdateLavasTemplate;
         if (enableAsyncCSS) {
             if (shouldUpdateLavasTemplate) {
-                Logger.warn('build', 'please update `entry-client.js` to render Skeleton faster, you can refer to https://github.com/lavas-project/lavas/issues/73.');
+                Logger.warn('build', 'If you want to render Skeleton faster, please update `entry-client.js`. You can refer to https://github.com/lavas-project/lavas/issues/73.');
             }
             else {
                 spaConfig.plugin('ommit-css').use(OmmitCSSPlugin);
