@@ -292,11 +292,20 @@ export default class BaseBuilder {
                         route.entryName = name;
                     });
 
+
                     // marked as supported at this time
                     this.skeletonEnabled = true;
 
+                    // delete duplicated componentPath
+                    let skeletons = [];
+                    skeleton.routes.forEach(skeleton => {
+                        if (!skeletons.find(tmp => tmp.componentPath === skeleton.componentPath)) {
+                            skeletons.push(skeleton);
+                        }
+                    });
+
                     // in MPA
-                    skeletonEntries[name] = [await this.writeSkeletonEntry(skeleton.routes, name)];
+                    skeletonEntries[name] = [await this.writeSkeletonEntry(skeletons, name)];
 
                     routes = routes.concat(skeleton.routes);
                 }

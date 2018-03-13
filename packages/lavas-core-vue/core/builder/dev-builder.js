@@ -286,11 +286,31 @@ export default class DevBuilder extends BaseBuilder {
 
             if (entriesConfig.length !== 0) {
                 let rewrites = [];
+                // move index to the last one
                 let indexObject;
+                for (let i = 0; i < entriesConfig.length; i++) {
+                    if (entriesConfig[i].pages.indexOf('index') !== -1) {
+                        indexObject = entriesConfig[i];
+                        entriesConfig.splice(i, 1);
+                        break;
+                    }
+                }
+                if (indexObject) {
+                    entriesConfig.push(indexObject);
+                }
 
+                // generate rewrites
                 entriesConfig.forEach(entry => {
+                    let from;
+                    if (entry.pages.indexOf('index') !== -1) {
+                        from = /^\//;
+                    }
+                    else {
+                        from = new RegExp(`^/(${entry.pages.join('|')})`)
+                    }
+
                     rewrites.push({
-                        from: entry.urlReg,
+                        from,
                         to: `${this.config.build.publicPath}${entry.name}/${entry.name}.html`
                     });
                 });
