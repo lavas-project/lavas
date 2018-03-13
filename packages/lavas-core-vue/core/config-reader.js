@@ -264,7 +264,7 @@ export default class ConfigReader {
                     finalConfig.urlReg = /^\//;
                 }
                 else {
-                    finalConfig.urlReg = new RegExp(`^/(${finalConfig.pages.join('|')})/`)
+                    finalConfig.urlReg = new RegExp(`^/(${finalConfig.pages.join('|')})`)
                 }
 
                 return finalConfig;
