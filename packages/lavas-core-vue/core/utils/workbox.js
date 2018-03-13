@@ -58,7 +58,6 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) 
 
         // workboxConfig.swPath = getEntryConfigValue(workboxConfig.swPath, entryConfig.name);
         let manifestFilename = `${entryConfig.name}/[manifest]`;
-        swDest = `${entryConfig.name}/${swDest}`;
 
         workboxConfig = Object.assign({}, workboxInjectManifestConfig, {
             manifestFilename,
