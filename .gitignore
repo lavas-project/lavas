@@ -13,3 +13,6 @@ package-lock.json
 packages/lavas-core-vue/test/fixtures/**/dist
 packages/lavas-core-vue/test/fixtures/**/.lavas
 packages/lavas-core-vue/test/temp
+packages/lavas-core-react/test/fixtures/**/dist
+packages/lavas-core-react/test/fixtures/**/.lavas
+packages/lavas-core-react/test/temp

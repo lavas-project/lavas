@@ -12,7 +12,9 @@
     "lint": "fecs ./ --rule --type 'vue,js,css'",
     "test": "rimraf packages/lavas-core-vue/test/temp && nyc ava -v",
     "nyc:report": "nyc report --reporter=html",
-    "publish:core": "lerna publish --scope=lavas-core-vue"
+    "publish:core": "lerna publish --scope=lavas-core-vue",
+    "build:lavas-core-react": "babel packages/lavas-core-react/src --out-dir packages/lavas-core-react/dist --copy-files",
+    "dev:react": "npm run build:lavas-core-react && node packages/lavas-core-react/test/fixtures/simple/server.dev.js"
   },
   "bin": {
     "lavas": "./packages/lavas-cli/bin/dev-lavas-cli.js",
@@ -100,6 +102,8 @@
     "path-to-regexp": "^2.1.0",
     "progress-bar-webpack-plugin": "^1.10.0",
     "querystring": "^0.2.0",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
     "request": "^2.83.0",
     "request-promise": "^4.2.1",
     "semver": "^5.4.1",
@@ -142,6 +146,7 @@
     "babel-plugin-transform-runtime": "^6.22.0",
     "babel-polyfill": "^6.23.0",
     "babel-preset-env": "^1.3.2",
+    "babel-preset-react-app": "^3.1.1",
     "babel-preset-stage-2": "^6.22.0",
     "babel-preset-vue-app": "^1.3.1",
     "babel-register": "^6.23.0",
@@ -154,6 +159,7 @@
     "rimraf": "^2.6.2",
     "semver": "^5.4.1",
     "sinon": "^4.4.2",
+    "stoppable": "^1.0.5",
     "superkoa": "^1.0.3",
     "supertest": "^3.0.0",
     "vuetify": "^0.17.6",

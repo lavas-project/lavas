@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh_CN">
+    <head>
+        <title></title>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <% if (renderManifestFlag) { %>
+        <!-- Add to home screen for Android and modern mobile browsers -->
+        <link rel="manifest" href="<%= '\<%= htmlWebpackPlugin.options.config.build.publicPath %\>static/manifest.json?v=\<%= htmlWebpackPlugin.options.config.buildVersion %\>' %>">
+        <!-- Add to home screen for Safari on iOS -->
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <% } %>
+
+        <%= "\<% for (var jsFilePath of htmlWebpackPlugin.files.js) { %\>" %>
+            <link rel="preload" href="<%= '\<%= jsFilePath %\>' %>" as="script">
+        <%= "\<% } %\>" %>
+        <%= "\<% for (var cssFilePath of htmlWebpackPlugin.files.css) { %\>" %>
+            <%= "\<% if (htmlWebpackPlugin.options.config.enableAsyncCSS) { %\>" %>
+                <link rel="preload" href="<%= '\<%= cssFilePath %\>' %>" as="style" onload="this.onload=null;this.rel='stylesheet';window.STYLE_READY=1;window.mountLavas&&window.mountLavas();">
+            <%= "\<% } else { %\>" %>
+                <link rel="preload" href="<%= '\<%= cssFilePath %\>' %>" as="style">
+            <%= "\<% } %\>" %>
+        <%= "\<% } %\>" %>
+
+        <!-- @CUSTOM_HEAD@ -->
+    </head>
+    <body>
+        <!-- @CUSTOM_BODY_BEFORE@ -->
+
+        <div id="app"></div>
+
+        <!-- @CUSTOM_BODY_AFTER@ -->
+    </body>
+</html>
