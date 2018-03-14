@@ -12,7 +12,7 @@ const log = require('../src/lib/utils/log');
 const app = express();
 
 const argv = parseArgs(process.argv.slice(2));
-const port = argv.p || argv.port || 3000;
+const port = argv.p || argv.port || 8000;
 
 async function staticServer(port) {
     log.info(locals.START_STATIC + '...');
