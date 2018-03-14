@@ -8,23 +8,38 @@
 import {join} from 'path';
 import test from 'ava';
 import LavasCore from '../../core';
-import {readFile} from 'fs-extra';
+import {readFile, copy, remove} from 'fs-extra';
 
-let core;
+import {syncConfig, makeTempDir} from '../utils';
 
-test.beforeEach('init', async t => {
-    core = new LavasCore(join(__dirname, '../fixtures/simple'));
-    await core.init('development', true);
+test.beforeEach('init lavas-core & server', async t => {
+    // copy fixture to temp dir
+    let tempDir = await makeTempDir();
+    await copy(join(__dirname, '../fixtures/simple'), tempDir);
+
+    t.context.tempDir = tempDir;
+    t.context.core = new LavasCore(tempDir);
+});
+
+test.afterEach.always('clean', async t => {
+    let {core, tempDir} = t.context;
+
+    await core.close();
+
+    // clean temp dir
+    await remove(tempDir);
 });
 
 /**
- * run the tests serially because they both modify .lavas/main/router.js
+ * generate .lavas/main/router.js
  *
  */
-test.serial('it should generate router.js in .lavas directory', async t => {
+test('it should generate router.js in .lavas directory', async t => {
+    let {core, tempDir} = t.context;
+    await core.init('development', true);
     await core.builder.routeManager.buildRoutes();
 
-    let content = await readFile(join(__dirname, '../fixtures/simple/.lavas/router.js'), 'utf8');
+    let content = await readFile(join(tempDir, '.lavas/router.js'), 'utf8');
 
     t.true(content.indexOf('"path": ":id"') > -1
         && content.indexOf('"name": "detailId"') > -1
@@ -37,8 +52,9 @@ test.serial('it should generate router.js in .lavas directory', async t => {
  * NOTE: routes.pattern apply to route.fullPath
  *       rewrite.from apply to route.path
  */
-test.serial('it should modify route objects based on router config', async t => {
-
+test('it should modify route objects based on router config', async t => {
+    let {core, tempDir} = t.context;
+    await core.init('development', true);
     Object.assign(core.builder.routeManager.config, {
         router: {
             rewrite: [
@@ -62,7 +78,7 @@ test.serial('it should modify route objects based on router config', async t => 
 
     await core.builder.routeManager.buildRoutes();
 
-    let content = await readFile(join(__dirname, '../fixtures/simple/.lavas/router.js'), 'utf8');
+    let content = await readFile(join(tempDir, '.lavas/router.js'), 'utf8');
 
     // Webpack code-splitting, merge Detail.vue & _id.vue into my-chunk
     t.true(content.indexOf('() => import(/* webpackChunkName: \"my-chunk\" */\'@/pages/Detail.vue\');') > -1);

@@ -76,7 +76,8 @@ const DEFAULT_CONFIG = {
         }
     },
     skeleton: {
-        enable: true
+        enable: true,
+        asyncCSS: true
     },
     router: {},
     errorHandler: {
@@ -109,7 +110,7 @@ const DEFAULT_CONFIG = {
 };
 
 /**
- * config items used in runtime
+ * config items used in runtime, which will be injected in .lavas/config.json
  */
 export const RUMTIME_ITEMS = {
     buildVersion: true,
@@ -123,7 +124,8 @@ export const RUMTIME_ITEMS = {
     errorHandler: true,
     serviceWorker: {
         swDest: true
-    }
+    },
+    skeleton: true
 };
 
 export default class ConfigReader {

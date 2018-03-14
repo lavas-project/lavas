@@ -5,27 +5,34 @@
 
 import {join} from 'path';
 import test from 'ava';
+import {readFile, writeFile, copy, remove} from 'fs-extra';
 import LavasCore from '../../core';
 
-import {syncConfig, isKoaSupport, request, createApp} from '../utils';
-
-let app;
-let server;
-let port = process.env.PORT || 3000;
-let core;
-let res;
+import {syncConfig, isKoaSupport, request, createApp, makeTempDir} from '../utils';
 
 test.beforeEach('init lavas-core & server', async t => {
-    core = new LavasCore(join(__dirname, '../fixtures/skeleton'));
-    app = createApp();
+    // copy fixture to temp dir
+    let tempDir = await makeTempDir();
+    await copy(join(__dirname, '../fixtures/skeleton'), tempDir);
+
+    t.context.tempDir = tempDir;
+    t.context.core = new LavasCore(tempDir);
+    t.context.app = createApp();
 });
 
-test.afterEach('clean', async t => {
+test.afterEach.always('clean', async t => {
+    let {core, server, tempDir} = t.context;
+
     await core.close();
     server && server.close();
+
+    // clean temp dir
+    await remove(tempDir);
 });
 
-test.serial('it should not generate skeleton when `skeleton.enable` is `false`.', async t => {
+test('it should not generate skeleton when `skeleton.enable` is `false`.', async t => {
+    let {core, app} = t.context;
+    let res;
     await core.init('development', true);
 
     // disable skeleton feature
@@ -38,7 +45,7 @@ test.serial('it should not generate skeleton when `skeleton.enable` is `false`.'
 
     // set middlewares & start a server
     app.use(isKoaSupport ? core.koaMiddleware() : core.expressMiddleware());
-    server = app.listen(port);
+    t.context.server = app.listen();
 
     // serve index.html
     let skeletonContent = `<div data-server-rendered=true class=skeleton-wrapper`;
@@ -49,7 +56,9 @@ test.serial('it should not generate skeleton when `skeleton.enable` is `false`.'
     t.true(res.text.indexOf(skeletonContent) === -1);
 });
 
-test.serial('it should generate a default skeleton correctly', async t => {
+test('it should generate a default skeleton correctly', async t => {
+    let {core, app} = t.context;
+    let res;
     await core.init('development', true);
 
     // enable skeleton and generate a default skeleton with `core/Skeleton.vue`
@@ -62,7 +71,7 @@ test.serial('it should generate a default skeleton correctly', async t => {
 
     // set middlewares & start a server
     app.use(isKoaSupport ? core.koaMiddleware() : core.expressMiddleware());
-    server = app.listen(port);
+    t.context.server = app.listen();
 
     // serve index.html
     let skeletonContent = `<div data-server-rendered=true><div id=skeleton class=skeleton-wrapper`;
@@ -79,7 +88,9 @@ test.serial('it should generate a default skeleton correctly', async t => {
     t.true(res.text.indexOf(skeletonStyle) > -1);
 });
 
-test.serial('it should generate multi skeletons correctly', async t => {
+test('it should generate multi skeletons correctly', async t => {
+    let {core, app} = t.context;
+    let res;
     await core.init('development', true);
 
     // enable skeleton and generate a default skeleton with `core/Skeleton.vue`
@@ -102,7 +113,7 @@ test.serial('it should generate multi skeletons correctly', async t => {
 
     // set middlewares & start a server
     app.use(isKoaSupport ? core.koaMiddleware() : core.expressMiddleware());
-    server = app.listen(port);
+    t.context.server = app.listen();
 
     // serve index.html
     let defaultSkeletonDOM = `<div id=skeleton class=skeleton-wrapper`;

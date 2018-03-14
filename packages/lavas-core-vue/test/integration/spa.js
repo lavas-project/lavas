@@ -5,28 +5,34 @@
 
 import {join} from 'path';
 import test from 'ava';
-import {readFileSync} from 'fs';
+import {readFile, writeFile, copy, remove} from 'fs-extra';
 import LavasCore from '../../core';
 
-import {syncConfig, isKoaSupport, request, createApp} from '../utils';
-
-let app;
-let server;
-let port = process.env.PORT || 3000;
-let core;
-let res;
+import {syncConfig, isKoaSupport, request, createApp, makeTempDir} from '../utils';
 
 test.beforeEach('init lavas-core & server', async t => {
-    core = new LavasCore(join(__dirname, '../fixtures/simple'));
-    app = createApp();
+    // copy fixture to temp dir
+    let tempDir = await makeTempDir();
+    await copy(join(__dirname, '../fixtures/simple'), tempDir);
+
+    t.context.tempDir = tempDir;
+    t.context.core = new LavasCore(tempDir);
+    t.context.app = createApp();
 });
 
-test.afterEach('clean', async t => {
+test.afterEach.always('clean', async t => {
+    let {core, server, tempDir} = t.context;
+
     await core.close();
     server && server.close();
+
+    // clean temp dir
+    await remove(tempDir);
 });
 
-test.serial('it should run in development mode correctly', async t => {
+test('it should run in development mode correctly', async t => {
+    let {core, app} = t.context;
+    let res;
     await core.init('development', true);
 
     // switch to SPA mode
@@ -37,7 +43,7 @@ test.serial('it should run in development mode correctly', async t => {
 
     // set middlewares & start a server
     app.use(isKoaSupport ? core.koaMiddleware() : core.expressMiddleware());
-    server = app.listen(port);
+    t.context.server = app.listen();
 
     // serve main.html
     res = await request(app)
@@ -49,7 +55,9 @@ test.serial('it should run in development mode correctly', async t => {
     t.true(res.text.indexOf(skeletonContent) > -1);
 });
 
-test.serial('it should run in production mode correctly', async t => {
+test('it should run in production mode correctly', async t => {
+    let {core, app, tempDir} = t.context;
+    let res;
     await core.init('production', true);
 
     // switch to SPA mode
@@ -60,7 +68,7 @@ test.serial('it should run in production mode correctly', async t => {
 
     await core.build();
 
-    let htmlContent = readFileSync(join(__dirname, '../fixtures/simple/dist/index.html'), 'utf8');
+    let htmlContent = await readFile(join(tempDir, 'dist/index.html'), 'utf8');
 
     // include skeleton
     let skeletonContent = '<div data-server-rendered=true>';
