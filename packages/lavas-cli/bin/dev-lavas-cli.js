@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-const spawn = require('cross-spawn');
 const pkg = require('../package.json');
 const log = require('../src/lib/utils/log');
 const locals = require('../src/locals')();
