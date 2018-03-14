@@ -259,12 +259,14 @@ export default class ConfigReader {
                     pages
                 }, entryConfig);
 
-                // set urlReg
-                if (finalConfig.pages.indexOf('index') !== -1) {
-                    finalConfig.urlReg = /^\//;
-                }
-                else {
-                    finalConfig.urlReg = new RegExp(`^/(${finalConfig.pages.join('|')})`)
+                if (!finalConfig.urlReg) {
+                    // set urlReg
+                    if (finalConfig.pages.indexOf('index') !== -1) {
+                        finalConfig.urlReg = /^\//;
+                    }
+                    else {
+                        finalConfig.urlReg = new RegExp(`^/(${finalConfig.pages.join('|')})`)
+                    }
                 }
 
                 return finalConfig;

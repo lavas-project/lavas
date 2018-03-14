@@ -301,20 +301,13 @@ export default class DevBuilder extends BaseBuilder {
 
                 // generate rewrites
                 entriesConfig.forEach(entry => {
-                    let from;
-                    if (entry.pages.indexOf('index') !== -1) {
-                        from = /^\//;
-                    }
-                    else {
-                        from = new RegExp(`^/(${entry.pages.join('|')})`)
-                    }
-
                     rewrites.push({
-                        from,
+                        from: entry.urlReg,
                         to: `${this.config.build.publicPath}${entry.name}/${entry.name}.html`
                     });
                 });
 
+                console.log(rewrites)
                 historyConfig.rewrites = rewrites;
             }
 
