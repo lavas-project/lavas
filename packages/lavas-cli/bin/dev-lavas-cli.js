@@ -33,7 +33,7 @@ if (commands.has(cmd)) {
 } else {
     args = process.argv.slice(2);
     if(args.length){
-        log.error('`lavas ' + args + '` ' + locals.NO_COMMAND);
+        log.error(['lavas`', ...args, '`', locals.NO_COMMAND].join(' '));
         process.exit(0);
         return 0;
     }else if(args === 'b'){
