@@ -29,7 +29,7 @@
     "vue"
   ],
   "author": "sfe-sy <sfe-sy@baidu.com>",
-  "license": "ISC",
+  "license": "MIT",
   "engines": {
     "node": ">= 4.0.0",
     "npm": ">= 3.0.0"
