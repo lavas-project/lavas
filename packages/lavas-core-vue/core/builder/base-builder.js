@@ -202,7 +202,7 @@ export default class BaseBuilder {
         }
 
         // fetch templateObject from entries/[entryName]/config.js
-        let templateObject = entryName
+        let templateObject = !isSPA
             ? this.config.entries.find(entry => entry.name === entryName).templateObject
             : {};
 
