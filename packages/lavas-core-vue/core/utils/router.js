@@ -157,8 +157,16 @@ function treeToRouter(tree, parent, {pathRule = 'kebabCase'} = {}, entryConfig) 
             component: info.dir + '.vue'
         };
 
-        if (entryConfig.length !== 0 && info.levels.length > 2) {
-            let matchedEntry = entryConfig.find(entry => entry.pages.indexOf(info.levels[1]) !== -1);
+        if (entryConfig.length !== 0 && info.levels.length >= 2) {
+            let matchedEntry = entryConfig.find(entry => {
+                for (let i = 0; i < entry.pages.length; i++) {
+                    if (entry.pages[i].toLowerCase() === info.levels[1].toLowerCase()) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+
             if (matchedEntry) {
                 route.entryName = matchedEntry.name;
             }
@@ -181,7 +189,7 @@ function treeToRouter(tree, parent, {pathRule = 'kebabCase'} = {}, entryConfig) 
 
 function generatePath(info, parent, rule) {
     let path = info.dir.slice(parent.dir.length)
-        .replace(/_/g, ':')
+        .replace(/(^|\/)_/g, '$1:')
         .replace(/((^|\/)index)+$/i, '');
 
     switch (rule) {
@@ -219,7 +227,7 @@ function generateName(dir) {
         .replace(/((^|\/)index)+$/i, '')
         .split('/').slice(1)
         .map((name, i) => {
-            name = name.replace(/_/g, '');
+            name = name.replace(/(^|\/)_/, '');
 
             if (i === 0) {
                 return name.replace(/^[A-Z]+/, w => w.toLowerCase());

@@ -11,7 +11,7 @@ import test from 'ava';
 test('it should generate routes according to the structure of directory', async t => {
     let routes = await generateRoutes(join(__dirname, '../../fixtures/simple/pages'));
 
-    t.true(routes.length === 6);
+    t.true(routes.length === 8);
 
     // dynamic param :id
     t.deepEqual(routes[0], {
@@ -69,16 +69,28 @@ test('it should generate routes according to the structure of directory', async 
         ]
     });
 
+    t.deepEqual(routes[4], {
+        component: 'pages/test/_id.vue',
+        name: 'testId',
+        path: '/test/:id'
+    });
+
     t.deepEqual(routes[5], {
+        component: 'pages/test/_nested/_deep.vue',
+        name: 'testNestedDeep',
+        path: '/test/:nested/:deep'
+    });
+
+    t.deepEqual(routes[6], {
         component: 'pages/test/Index.vue',
         name: 'test',
         path: '/test'
     });
 
-    t.deepEqual(routes[4], {
-        component: 'pages/test/_id.vue',
-        name: 'testId',
-        path: '/test/:id'
+    t.deepEqual(routes[7], {
+        component: 'pages/test/name_contains_underline.vue',
+        name: 'testName_contains_underline',
+        path: '/test/name_contains_underline'
     });
 });
 
