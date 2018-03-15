@@ -31,12 +31,13 @@
   "author": "sfe-sy <sfe-sy@baidu.com>",
   "license": "MIT",
   "engines": {
-    "node": ">= 4.0.0",
+    "node": ">= 6.9.0",
     "npm": ">= 3.0.0"
   },
   "ava": {
-    "concurrency": 1,
+    "serial": false,
     "failFast": true,
+    "concurrency": 10,
     "files": [
       "packages/lavas-core-vue/test/unit/**/*.test.js",
       "packages/lavas-core-vue/test/spec/**/*.js",
@@ -48,8 +49,7 @@
       "packages/lavas-core-vue/test/integration/*.js"
     ],
     "require": [
-      "babel-register",
-      "babel-polyfill"
+      "babel-register"
     ]
   },
   "nyc": {

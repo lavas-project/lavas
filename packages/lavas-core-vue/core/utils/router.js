@@ -169,7 +169,7 @@ function treeToRouter(tree, parent, {pathRule = 'kebabCase'} = {}, entryConfig) 
         }
 
         if (children) {
-            route.children = treeToRouter(children, info, {pathRule});
+            route.children = treeToRouter(children, info, {pathRule}, entryConfig);
         }
 
         router.push(route);

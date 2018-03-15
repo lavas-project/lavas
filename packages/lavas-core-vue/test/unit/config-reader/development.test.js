@@ -8,17 +8,31 @@
 import merge from 'webpack-merge';
 import {join} from 'path';
 import test from 'ava';
-import LavasCore from '../../../dist';
-import {syncConfig} from '../../utils';
+import {copy, remove} from 'fs-extra';
+import LavasCore from '../../../core';
 
-let core;
+import {syncConfig, makeTempDir} from '../../utils';
 
-test.beforeEach('init', async t => {
-    core = new LavasCore(join(__dirname, '../../fixtures/simple'));
-    await core.init('development', true);
+test.beforeEach('init lavas-core & server', async t => {
+    // copy fixture to temp dir
+    let tempDir = await makeTempDir();
+    await copy(join(__dirname, '../../fixtures/simple'), tempDir);
+
+    t.context.tempDir = tempDir;
+    t.context.core = new LavasCore(tempDir);
+});
+
+test.afterEach.always('clean', async t => {
+    let {core, tempDir} = t.context;
+
+    await core.close();
+    // clean temp dir
+    await remove(tempDir);
 });
 
 test('it should merge middlewares defined in lavas.config.js and defaults correctly', async t => {
+    let core = t.context.core;
+    await core.init('development', true);
     /**
      * default            all: []
      * lavas.config.js    all: ['both']
@@ -28,6 +42,8 @@ test('it should merge middlewares defined in lavas.config.js and defaults correc
 });
 
 test('it should add a new alias', async t => {
+    let core = t.context.core;
+    await core.init('development', true);
     let config = merge(core.config, {
         build: {
             alias: {
@@ -38,58 +54,64 @@ test('it should add a new alias', async t => {
         }
     });
     syncConfig(core, config);
-    let baseConfig = core.builder.webpackConfig.base();
-    t.is(baseConfig.resolve.alias['~~'], 'some-path');
+    let baseConfig = await core.builder.webpackConfig.base();
+    t.is(baseConfig.resolve.alias.get('~~'), 'some-path');
 });
 
-test('it should use a extend function to modify webpack base config directly', async t => {
-    let config = merge(core.config, {
-        build: {
-            extend(webpackConfig, {type}) {
-                if (type === 'base') {
-                    webpackConfig.plugins.push('NewCustomPlugin');
-                }
-            }
-        }
-    });
-
-    syncConfig(core, config);
-
-    let baseConfig = core.builder.webpackConfig.base();
-    t.is(baseConfig.plugins[baseConfig.plugins.length - 1], 'NewCustomPlugin');
-});
+class FirstNewPlugin {
+    constructor() {
+        this.name = 'FirstNewPlugin';
+    }
+}
+class SecondNewPlugin {
+    constructor() {
+        this.name = 'SecondNewPlugin';
+    }
+}
 
 test('it should use a extend function to modify webpack client config directly', async t => {
+    let core = t.context.core;
+    await core.init('development', true);
     let config = merge(core.config, {
         build: {
             extend(webpackConfig, {type}) {
                 if (type === 'client') {
-                    webpackConfig.plugins.push('NewClientCustomPlugin');
+                    webpackConfig.plugins.push(new SecondNewPlugin());
                 }
+            },
+            extendWithWebpackChain(config, {type}) {
+                config.plugin('first-new-plugin').use(FirstNewPlugin);
             }
         }
     });
 
     syncConfig(core, config);
 
-    let clientConfig = core.builder.webpackConfig.client();
-    t.is(clientConfig.plugins[clientConfig.plugins.length - 1], 'NewClientCustomPlugin');
+    let clientConfig = await core.builder.webpackConfig.client(config);
+    t.is(clientConfig.plugins[clientConfig.plugins.length - 1].name, 'SecondNewPlugin');
+    t.is(clientConfig.plugins[clientConfig.plugins.length - 2].name, 'FirstNewPlugin');
 });
 
 test('it should use a extend function to modify webpack server config directly', async t => {
+    let core = t.context.core;
+    await core.init('development', true);
     let config = merge(core.config, {
         build: {
             extend(webpackConfig, {type}) {
                 if (type === 'server') {
-                    webpackConfig.plugins.push('NewServerCustomPlugin');
+                    webpackConfig.plugins.push(new SecondNewPlugin());
                 }
+            },
+            extendWithWebpackChain(config, {type}) {
+                config.plugin('first-new-plugin').use(FirstNewPlugin);
             }
         }
     });
 
     syncConfig(core, config);
 
-    let serverConfig = core.builder.webpackConfig.server(config);
-    t.is(serverConfig.plugins[serverConfig.plugins.length - 1], 'NewServerCustomPlugin');
+    let serverConfig = await core.builder.webpackConfig.server(config);
+    t.is(serverConfig.plugins[serverConfig.plugins.length - 1].name, 'SecondNewPlugin');
+    t.is(serverConfig.plugins[serverConfig.plugins.length - 2].name, 'FirstNewPlugin');
 });
 /* eslint-enable fecs-use-standard-promise */
