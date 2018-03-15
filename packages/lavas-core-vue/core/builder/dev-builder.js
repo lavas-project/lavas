@@ -307,7 +307,6 @@ export default class DevBuilder extends BaseBuilder {
                     });
                 });
 
-                console.log(rewrites)
                 historyConfig.rewrites = rewrites;
             }
 

@@ -3,7 +3,7 @@
  * @author wangyisheng@baidu.com (wangyisheng)
  */
 
-import {vueLoaders, cssLoaders, styleLoaders} from '../../../dist/utils/loader';
+import {vueLoaders, cssLoaders, styleLoaders} from '../../../core/utils/loader';
 import test from 'ava';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 
@@ -208,12 +208,15 @@ test('it should generate styleLoaders', async t => {
     };
 
     t.deepEqual(loaders, [{
+        name: 'css',
         test: new RegExp(/\.css$/),
         use: ['vue-style-loader', expectedCssLoader]
     }, {
+        name: 'postcss',
         test: new RegExp(/\.postcss$/),
         use: ['vue-style-loader', expectedCssLoader]
     }, {
+        name: 'less',
         test: new RegExp(/\.less$/),
         use: ['vue-style-loader', expectedCssLoader, {
             loader: 'less-loader',
@@ -222,6 +225,7 @@ test('it should generate styleLoaders', async t => {
             }
         }]
     }, {
+        name: 'sass',
         test: new RegExp(/\.sass$/),
         use: ['vue-style-loader', expectedCssLoader, {
             loader: 'sass-loader',
@@ -231,6 +235,7 @@ test('it should generate styleLoaders', async t => {
             }
         }]
     }, {
+        name: 'scss',
         test: new RegExp(/\.scss$/),
         use: ['vue-style-loader', expectedCssLoader, {
             loader: 'sass-loader',
@@ -239,6 +244,7 @@ test('it should generate styleLoaders', async t => {
             }
         }]
     }, {
+        name: 'stylus',
         test: new RegExp(/\.stylus$/),
         use: ['vue-style-loader', expectedCssLoader, {
             loader: 'stylus-loader',
@@ -247,6 +253,7 @@ test('it should generate styleLoaders', async t => {
             }
         }]
     }, {
+        name: 'styl',
         test: new RegExp(/\.styl$/),
         use: ['vue-style-loader', expectedCssLoader, {
             loader: 'stylus-loader',

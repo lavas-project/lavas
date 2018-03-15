@@ -3,7 +3,14 @@
  * @author panyuqi (pyqiverson@gmail.com)
  */
 
-import {distLavasPath, assetsPath, resolveAliasPath, isFromCDN, removeTrailingSlash} from '../../../dist/utils/path';
+import {
+    distLavasPath,
+    assetsPath,
+    resolveAliasPath,
+    isFromCDN,
+    removeTrailingSlash,
+    camelCaseToDash
+} from '../../../core/utils/path';
 import {sep} from 'path';
 import test from 'ava';
 
@@ -36,8 +43,14 @@ test('it should test whether a path is from CDN', t => {
     t.true(isFromCDN(urlC));
 });
 
-// removeTrailingSlash
+// removeTrailingSlash()
 test('it should remove trailing slash correctly', t => {
     t.is('foo/bar', removeTrailingSlash('foo/bar/'));
     t.is('foo/bar', removeTrailingSlash('foo/bar'));
+});
+
+// camelCaseToDash()
+test('it should transfer from camel case to dash', t => {
+    t.is('camel-case-to-dash', camelCaseToDash('camelCaseToDash'));
+    t.is('already-camel-case', camelCaseToDash('already-camel-case'));
 });

@@ -21,7 +21,7 @@
   "author": "sfe-sy <sfe-sy@baidu.com>",
   "license": "ISC",
   "engines": {
-    "node": ">= 5.0.0",
+    "node": ">= 6.9.0",
     "npm": ">= 3.0.0"
   },
   "browserslist": [

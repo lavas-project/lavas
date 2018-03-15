@@ -3,7 +3,7 @@
  * @author wangyisheng@baidu.com (wangyisheng)
  */
 
-import {client, server} from '../../../dist/utils/template';
+import {client, server} from '../../../core/utils/template';
 import test from 'ava';
 import {resolve} from 'path';
 import {readFileSync} from 'fs-extra';
@@ -21,7 +21,7 @@ test('it should generate server side template', async t => {
             <head>
                 <meta charset="utf-8">
                 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
 
                 {{{ meta.title.text() }}}
                 {{{ meta.meta.text() }}}
@@ -65,7 +65,7 @@ test('it should generate client side template', async t => {
                 <title></title>
                 <meta charset="utf-8">
                 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
 
                 <!-- Add to home screen for Android and modern mobile browsers -->
                 <link rel="manifest" href="<%= htmlWebpackPlugin.options.config.build.publicPath %>static/manifest.json?v=<%= htmlWebpackPlugin.options.config.buildVersion %>">
@@ -93,7 +93,7 @@ test('it should generate normal client template html', async t => {
     let indexHtmlTmpl =
         `<html>
             <head>
-                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
                 <%= renderMeta() %>
                 <%= renderManifest() %>
             </head>
@@ -123,7 +123,7 @@ test('it should generate normal client template html', async t => {
                     <link rel="preload" href="<%= cssFilePath %>" as="style">
                 <% } %>
 
-                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
             </head>
             <body>
                 <div id="app"></div>
@@ -190,7 +190,7 @@ test('it should generate normal server template html', async t => {
     let indexHtmlTmpl =
         `<html>
             <head>
-                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
                 <%= renderMeta() %>
                 <%= renderManifest() %>
             </head>
@@ -223,7 +223,7 @@ test('it should generate normal server template html', async t => {
                 {{{ renderResourceHints() }}}
                 {{{ renderStyles() }}}
 
-                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
             </head>
             <body {{{ meta.bodyAttrs.text() }}}>
                 <!--vue-ssr-outlet-->
