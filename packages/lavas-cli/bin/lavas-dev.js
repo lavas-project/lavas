@@ -66,4 +66,4 @@ async function devServer(config, port) {
     fork(serverScriptPath, options);
 }
 
-devServer(conf, port)
+devServer(conf, port);

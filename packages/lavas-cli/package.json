@@ -27,7 +27,7 @@
   "author": "zoumiaojiang<zoumiaojiang@gmail.com>",
   "license": "ISC",
   "engines": {
-    "node": ">= 4.0.0",
+    "node": ">= 7.8.0",
     "npm": ">= 3.0.0"
   },
   "dependencies": {
