@@ -3,7 +3,7 @@
  * @author panyuqi (pyqiverson@gmail.com)
  */
 
-import {generateRoutes, routes2Reg, matchUrl} from '../../../dist/utils/router';
+import {generateRoutes, routes2Reg, matchUrl} from '../../../core/utils/router';
 import {join} from 'path';
 import test from 'ava';
 

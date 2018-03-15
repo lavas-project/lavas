@@ -1,10 +1,10 @@
 /**
  * @file client entry
- * @author *__ author __*{% if: *__ email __* %}(*__ email __*){% /if %}
+ * @author xiaoiver(pyqiverson@gmail.com)
  */
 
 import Vue from 'vue';
-import {getMiddlewares, execSeries, getClientContext} from '@/core/middleware';
+import {getMiddlewares, execSeries, getClientContext} from '@/.lavas/middleware';
 import lavasConfig from '@/.lavas/config';
 import {createApp} from './app';
 import ProgressBar from '@/components/ProgressBar';
@@ -14,7 +14,7 @@ import '@/assets/stylus/main.styl';
 
 let loading = Vue.prototype.$loading = new Vue(ProgressBar).$mount();
 let {App, router, store} = createApp();
-let {ssr, middleware: middConf = {}} = lavasConfig;
+let {build: {ssr, cssExtract}, middleware: middConf = {}, skeleton: {enable: enableSkeleton, asyncCSS}} = lavasConfig;
 let app;
 
 // Sync with server side state.
@@ -80,9 +80,23 @@ if (!usingAppshell && ssr) {
     });
 }
 else {
+    /**
+     * Use async CSS in SPA under following
+     * 1. `skeleton.enable`
+     * 2. `skeleton.asyncCSS`
+     * 3. `build.cssExtract`
+     */
+    let enableAsyncCSS = enableSkeleton && asyncCSS && cssExtract;
+    window.mountLavas = () => {
+        setTimeout(() => app.$mount('#app'), 0);
+    };
     // Fetch data in client side.
     handleAsyncData();
-    app = new App().$mount('#app');
+    app = new App();
+    if (!enableAsyncCSS
+        || (enableAsyncCSS && window.STYLE_READY)) {
+        window.mountLavas();
+    }
 }
 
 function handleMiddlewares() {

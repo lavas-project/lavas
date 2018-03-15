@@ -12,15 +12,16 @@
 export default {
     name: 'error',
     metaInfo: {
-        title: '服务器开小差了'
+        title: '出错啦'
     },
     computed: {
         message() {
-            return this.$route.params.error || '服务器开小差了 o(╥﹏╥)o';
+            return this.$route.params.error || '404 not found';
         }
     },
     created() {
         let query = this.$route.query;
+
         if (Object.keys(query).length !== 0) {
             this.$router.replace({
                 name: 'error',
