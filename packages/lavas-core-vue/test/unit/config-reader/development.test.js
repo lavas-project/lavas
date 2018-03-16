@@ -69,6 +69,27 @@ class SecondNewPlugin {
     }
 }
 
+test('it should add 2 plugins with plugins.base & plugins.client', async t => {
+    let core = t.context.core;
+    await core.init('development', true);
+    let config = merge(core.config, {
+        build: {
+            plugins: {
+                base: [new FirstNewPlugin()],
+                client: [new SecondNewPlugin()]
+            }
+        }
+    });
+    syncConfig(core, config);
+    let clientConfig = await core.builder.webpackConfig.client();
+
+    t.is(clientConfig.plugins[clientConfig.plugins.length - 1].name, 'SecondNewPlugin');
+    t.is(clientConfig.plugins[clientConfig.plugins.length - 2].name, 'FirstNewPlugin');
+
+    let serverConfig = await core.builder.webpackConfig.server();
+    t.is(serverConfig.plugins[serverConfig.plugins.length - 1].name, 'FirstNewPlugin');
+});
+
 test('it should use a extend function to modify webpack client config directly', async t => {
     let core = t.context.core;
     await core.init('development', true);
