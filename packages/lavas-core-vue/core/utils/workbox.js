@@ -2,7 +2,7 @@
  * @file utils.workbox.js
  * @author lavas
  */
-import {basename, join} from 'path';
+import {basename, join, isAbsolute, relative} from 'path';
 import {readFileSync, writeFileSync} from 'fs-extra';
 // import WorkboxWebpackPlugin from 'workbox-webpack-plugin';
 import {InjectManifest} from '../plugins/workbox-webpack-plugin';
@@ -32,7 +32,7 @@ export function getWorkboxFiles(isProd) {
  * @param {?Object} entryConfig entry config (undefined when SPA and SSR)
  */
 export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) {
-    let {buildVersion, build: {publicPath, ssr}, globals, router: {base = '/'}} = lavasConfig;
+    let {buildVersion, build: {publicPath, ssr, path: buildPath}, globals, router: {base = '/'}} = lavasConfig;
     let workboxConfig = entryConfig ? entryConfig.serviceWorker : lavasConfig.serviceWorker;
     let {swSrc, swDest = 'service-worker.js', appshellUrl, appshellUrls} = workboxConfig;
 
@@ -55,6 +55,10 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) 
     if (entryConfig) {
         swSrc = getEntryConfigValue(swSrc, entryConfig.name);
         swDest = getEntryConfigValue(swDest, entryConfig.name);
+        // transfer swDest to relative path
+        if (isAbsolute(swDest)) {
+            swDest = relative(buildPath, swDest);
+        }
 
         // workboxConfig.swPath = getEntryConfigValue(workboxConfig.swPath, entryConfig.name);
         let manifestFilename = `${entryConfig.name}/[manifest]`;
@@ -73,7 +77,6 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) 
     }
     // SPA & SSR
     else {
-
         // in workbox@3.x swDest must be a relative path
         swDest = basename(swDest);
 
