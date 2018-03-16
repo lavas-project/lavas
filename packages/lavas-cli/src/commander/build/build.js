@@ -40,7 +40,7 @@ module.exports = async function (config) {
     let rootDir = utils.getLavasProjectRoot();
     let buildScriptPath = path.resolve(rootDir, '.lavas/build.js');
 
-    // 存在.lavas/build.js 直接调用，避免引用全局 lavas-core-vue
+    // 不存在.lavas/build.js 时复制 build.js，避免调用全局 lavas-core-vue
     if (!await fs.pathExists(buildScriptPath)) {
         await fs.copy(path.resolve(__dirname, '../../templates/build.js'), buildScriptPath);
     }
@@ -52,16 +52,4 @@ module.exports = async function (config) {
     }
 
     fork(buildScriptPath, options);
-
-    // 通过 package.json 中的配置将 lavas-core 从命令行解耦
-    // 要求所有的 core 都提供相同的 API
-    // let lavasConf = require(path.resolve(rootDir, 'package.json')).lavas || {};
-
-    // let LavasCore = require(lavasConf.core || 'lavas-core-vue');
-    // let core = new LavasCore(rootDir);
-
-    // let configPath = await getConfigPath(config);
-
-    // await core.init(process.env.NODE_ENV || 'production', true, {config: configPath});
-    // await core.build();
 };
