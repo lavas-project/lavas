@@ -199,7 +199,7 @@ export default class WebpackConfig {
             jsSourceMap, bundleAnalyzerReport, extend, extendWithWebpackChain,
             defines: {client: clientDefines = {}},
             alias: {client: clientAlias = {}},
-            plugins: {client: clientPlugins = []}} = Object.assign({}, build, internalBuildConfig);
+            plugins: {base: basePlugins = [], client: clientPlugins = []}} = Object.assign({}, build, internalBuildConfig);
         /* eslint-enable fecs-one-var-per-line */
 
         let clientConfig = await this.base(internalBuildConfig);
@@ -327,6 +327,9 @@ export default class WebpackConfig {
         // convert webpackChain to plain webpack config object
         let webpackConfigObject = clientConfig.toConfig();
 
+        if (basePlugins && basePlugins.length) {
+            webpackConfigObject.plugins = [...webpackConfigObject.plugins, ...basePlugins];
+        }
         if (clientPlugins && clientPlugins.length) {
             webpackConfigObject.plugins = [...webpackConfigObject.plugins, ...clientPlugins];
         }
@@ -357,7 +360,7 @@ export default class WebpackConfig {
         let {extend, extendWithWebpackChain, nodeExternalsWhitelist = [],
             defines: {server: serverDefines = {}},
             alias: {server: serverAlias = {}},
-            plugins: {server: serverPlugins = []}
+            plugins: {base: basePlugins = [], server: serverPlugins = []}
         } = Object.assign({}, this.config.build, internalBuildConfig);
         /* eslint-enable fecs-one-var-per-line */
 
@@ -424,6 +427,9 @@ export default class WebpackConfig {
         let webpackConfigObject = serverConfig.toConfig();
 
         // add plugins from `plugins` option
+        if (basePlugins && basePlugins.length) {
+            webpackConfigObject.plugins = [...webpackConfigObject.plugins, ...basePlugins];
+        }
         if (serverPlugins && serverPlugins.length) {
             webpackConfigObject.plugins = [...webpackConfigObject.plugins, ...serverPlugins];
         }
