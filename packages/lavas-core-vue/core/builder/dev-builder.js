@@ -158,7 +158,7 @@ export default class DevBuilder extends BaseBuilder {
         }
 
         if (this.config.serviceWorker.enable !== false) {
-            await copyWorkboxLibraries(ASSETS_DIRNAME_IN_DIST);
+            await copyWorkboxLibraries(join(this.cwd, ASSETS_DIRNAME_IN_DIST));
         }
 
         await this.routeManager.buildRoutes();

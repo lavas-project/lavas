@@ -66,6 +66,8 @@ const DEFAULT_CONFIG = {
     },
     router: {},
     errorHandler: {
+        defaultErrorMessage: 'Internal Server Error',
+        showRealErrorMessage: false,
         errorPath: '/error'
     },
     middleware: {
@@ -282,6 +284,10 @@ export default class ConfigReader {
      * @return {Object} config
      */
     async readConfigFile() {
-        return JsonUtil.parse(await readFile(distLavasPath(this.cwd, CONFIG_FILE), 'utf8'));
+        console.log('start reading config...');
+        let parsedConfig = JsonUtil.parse(await readFile(distLavasPath(this.cwd, CONFIG_FILE), 'utf8'));
+        parsedConfig.globals = {rootDir: this.cwd};
+        console.log('finish reading config.');
+        return parsedConfig;
     }
 }

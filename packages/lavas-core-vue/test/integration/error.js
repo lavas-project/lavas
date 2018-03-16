@@ -46,7 +46,7 @@ test('it should show 404 page correctly.', async t => {
     t.true(res.text.indexOf('404 not found') > -1);
 });
 
-test('it should redirect to /error when an error throwed in entry-server.js.', async t => {
+test('it should redirect to /error when an error thrown in entry-server.js.', async t => {
     let {core, app, tempDir} = t.context;
     let res;
     // modify entry-server.js
@@ -70,7 +70,7 @@ test('it should redirect to /error when an error throwed in entry-server.js.', a
     t.is('/error?error=Internal%20Server%20Error', res.header.location);
 });
 
-test('it should redirect to /error when an error throwed in middlewares.', async t => {
+test('it should redirect to /error when an error thrown in middlewares.', async t => {
     let {core, app, tempDir} = t.context;
     let res;
     // modify middlewares/server-only.js

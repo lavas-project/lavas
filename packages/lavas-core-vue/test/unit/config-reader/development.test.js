@@ -10,7 +10,6 @@ import {join} from 'path';
 import test from 'ava';
 import {copy, remove} from 'fs-extra';
 import LavasCore from '../../../core';
-
 import {syncConfig, makeTempDir} from '../../utils';
 
 test.beforeEach('init lavas-core & server', async t => {
@@ -54,20 +53,28 @@ test('it should add a new alias', async t => {
         }
     });
     syncConfig(core, config);
-    let baseConfig = await core.builder.webpackConfig.base();
-    t.is(baseConfig.resolve.alias.get('~~'), 'some-path');
+    let baseConfig = core.builder.webpackConfig.base();
+    t.is(baseConfig.resolve.alias['~~'], 'some-path');
 });
 
-class FirstNewPlugin {
-    constructor() {
-        this.name = 'FirstNewPlugin';
-    }
-}
-class SecondNewPlugin {
-    constructor() {
-        this.name = 'SecondNewPlugin';
-    }
-}
+test('it should use a extend function to modify webpack base config directly', async t => {
+    let core = t.context.core;
+    await core.init('development', true);
+    let config = merge(core.config, {
+        build: {
+            extend(webpackConfig, {type}) {
+                if (type === 'base') {
+                    webpackConfig.plugins.push('NewCustomPlugin');
+                }
+            }
+        }
+    });
+
+    syncConfig(core, config);
+
+    let baseConfig = core.builder.webpackConfig.base();
+    t.is(baseConfig.plugins[baseConfig.plugins.length - 1], 'NewCustomPlugin');
+});
 
 test('it should use a extend function to modify webpack client config directly', async t => {
     let core = t.context.core;
@@ -76,20 +83,16 @@ test('it should use a extend function to modify webpack client config directly',
         build: {
             extend(webpackConfig, {type}) {
                 if (type === 'client') {
-                    webpackConfig.plugins.push(new SecondNewPlugin());
+                    webpackConfig.plugins.push('NewClientCustomPlugin');
                 }
-            },
-            extendWithWebpackChain(config, {type}) {
-                config.plugin('first-new-plugin').use(FirstNewPlugin);
             }
         }
     });
 
     syncConfig(core, config);
 
-    let clientConfig = await core.builder.webpackConfig.client(config);
-    t.is(clientConfig.plugins[clientConfig.plugins.length - 1].name, 'SecondNewPlugin');
-    t.is(clientConfig.plugins[clientConfig.plugins.length - 2].name, 'FirstNewPlugin');
+    let clientConfig = core.builder.webpackConfig.client();
+    t.is(clientConfig.plugins[clientConfig.plugins.length - 1], 'NewClientCustomPlugin');
 });
 
 test('it should use a extend function to modify webpack server config directly', async t => {
@@ -99,19 +102,15 @@ test('it should use a extend function to modify webpack server config directly',
         build: {
             extend(webpackConfig, {type}) {
                 if (type === 'server') {
-                    webpackConfig.plugins.push(new SecondNewPlugin());
+                    webpackConfig.plugins.push('NewServerCustomPlugin');
                 }
-            },
-            extendWithWebpackChain(config, {type}) {
-                config.plugin('first-new-plugin').use(FirstNewPlugin);
             }
         }
     });
 
     syncConfig(core, config);
 
-    let serverConfig = await core.builder.webpackConfig.server(config);
-    t.is(serverConfig.plugins[serverConfig.plugins.length - 1].name, 'SecondNewPlugin');
-    t.is(serverConfig.plugins[serverConfig.plugins.length - 2].name, 'FirstNewPlugin');
+    let serverConfig = core.builder.webpackConfig.server(config);
+    t.is(serverConfig.plugins[serverConfig.plugins.length - 1], 'NewServerCustomPlugin');
 });
 /* eslint-enable fecs-use-standard-promise */

@@ -119,7 +119,7 @@ export default class MiddlewareComposer {
 
         // handle errors
         if (selectedMiddlewares.includes(INTERNAL_MIDDLEWARE.ERROR)) {
-            this.add(koaErrorFactory(errorHandler.errorPath), true);
+            this.add(koaErrorFactory(errorHandler), true);
         }
 
         // Redirect without trailing slash.
@@ -272,7 +272,7 @@ export default class MiddlewareComposer {
 
         // Handle errors.
         if (selectedMiddlewares.includes(INTERNAL_MIDDLEWARE.ERROR)) {
-            this.add(expressErrorFactory(errorHandler.errorPath));
+            this.add(expressErrorFactory(errorHandler));
         }
 
         return compose(this.internalMiddlewares);

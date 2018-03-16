@@ -44,6 +44,7 @@ export function matchUrl(routes, url) {
 export function generateRoutes(baseDir, {globOptions, routerOption, entryConfig = []} = {}) {
     return getDirs(baseDir, '.vue', globOptions)
         .then(dirs => {
+            dirs.sort((a, b) => a.localeCompare(b));
             let tree = mapDirsInfo(dirs, baseDir)
                 .reduce((tree, info) => appendToTree(tree, info.levels, info), []);
             return treeToRouter(tree[0].children, {dir: basename(baseDir)}, routerOption, entryConfig);
