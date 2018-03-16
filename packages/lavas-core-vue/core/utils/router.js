@@ -57,8 +57,22 @@ function getDirs(baseDir, ext = '', options) {
                 reject(err);
             }
             else {
-                let set = dirs.reduce((set, dir) => set.add(dir).add(dirname(dir)), new Set());
-                res(Array.from(set));
+                // ['/pages/a/b/c'] => ['/pages/a', '/pages/a/b', '/pages/a/b/c'] when baseDir is /pages
+                let set = dirs.reduce((set, dir) => {
+                        let levels = dir.slice(baseDir.length + 1).split('/');
+                        let newDir = baseDir;
+
+                        for (let i = 0; i < levels.length; i++) {
+                            newDir += '/' + levels[i];
+                            set.add(newDir);
+                        }
+
+                        return set;
+                    },
+                    new Set()
+                );
+
+                res(Array.from(set).sort((a, b) => a.localeCompare(b)));
             }
         });
     });
@@ -66,6 +80,8 @@ function getDirs(baseDir, ext = '', options) {
 
 function mapDirsInfo(dirs, baseDir) {
     let baseFolder = basename(baseDir);
+    // remove useless baseDir
+    dirs = dirs.map(dir => baseFolder + dir.slice(baseDir.length));
 
     let infos = dirs.reduce((list, dir) => {
         let type;
@@ -87,7 +103,7 @@ function mapDirsInfo(dirs, baseDir) {
             type = 'flat';
         }
 
-        dir = baseFolder + dir.slice(baseDir.length).replace(/\.vue$/, '');
+        dir = dir.replace(/\.vue$/, '');
         let levels = dir.split('/');
 
         list.push({
