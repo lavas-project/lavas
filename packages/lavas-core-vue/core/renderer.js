@@ -35,7 +35,6 @@ export default class Renderer {
      * @return {string} template path
      */
     getTemplatePath() {
-        console.log('!!!', this.rootDir, this.config.templatePath)
         return join(this.rootDir, this.config.templatePath || `core/${TEMPLATE_HTML}`);
     }
 
