@@ -80,6 +80,8 @@ function getDirs(baseDir, ext = '', options) {
 
 function mapDirsInfo(dirs, baseDir) {
     let baseFolder = basename(baseDir);
+    // remove useless baseDir
+    dirs = dirs.map(dir => baseFolder + dir.slice(baseDir.length));
 
     let infos = dirs.reduce((list, dir) => {
         let type;
@@ -101,7 +103,7 @@ function mapDirsInfo(dirs, baseDir) {
             type = 'flat';
         }
 
-        dir = baseFolder + dir.slice(baseDir.length).replace(/\.vue$/, '');
+        dir = dir.replace(/\.vue$/, '');
         let levels = dir.split('/');
 
         list.push({
