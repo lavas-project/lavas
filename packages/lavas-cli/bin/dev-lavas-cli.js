@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+/**
+ * @file dev-lavas-cli.js
+ * @author <xietianxin> xietianxin@baidu.com
+ */
 
 const pkg = require('../package.json');
 const log = require('../src/lib/utils/log');
@@ -29,20 +33,22 @@ if (new Set(['--help', '-h']).has(cmd)) {
 
 if (commands.has(cmd)) {
     args = process.argv.slice(3);
-} else {
+}
+
+else {
     args = process.argv.slice(2);
-    if(args.length){
+    if (args.length) {
         log.error(['lavas`', ...args, '`', locals.NO_COMMAND].join(' '));
         process.exit(0);
         return 0;
-    }else if(args === 'b'){
+    }
+    else if (args === 'b') {
         cmd = 'build';
-    }else{
+    }
+    else {
         cmd = defaultCommand;
     }
 }
+const bin = path.join(__dirname, 'lavas-' + cmd);
 
-const bin = path.join(__dirname, 'lavas-' + cmd)
-
-require(bin)
-
+require(bin);

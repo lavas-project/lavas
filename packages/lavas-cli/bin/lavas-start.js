@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+/**
+ * @file dev-lavas-cli.js
+ * @author <xietianxin> xietianxin@baidu.com
+ */
 
 const parseArgs = require('minimist');
 const fs = require('fs-extra');

@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+/**
+ * @file dev-lavas-cli.js
+ * @author <xietianxin> xietianxin@baidu.com
+ */
 
 const parseArgs = require('minimist');
 const fs = require('fs-extra');
@@ -24,7 +28,8 @@ async function devServer(config, port) {
         if (!path.isAbsolute(config)) {
             configPath = path.resolve(process.cwd(), config);
         }
-    } else {
+    }
+    else {
         configPath = path.resolve(utils.getLavasProjectRoot(), DEFAULT_LAVAS_CONFIG);
     }
 
@@ -32,17 +37,15 @@ async function devServer(config, port) {
         log.warn(`${locals.START_NO_FILE} ${configPath}`);
         return;
     }
-
     // read appDir from config file
     let configJson;
     try {
         configJson = require(configPath);
-    } catch (e) {
+    }
+    catch (e) {
         log.warn(`${locals.INPUT_INVALID} ${configPath}`);
-        console.log(e)
         return;
     }
-
     let appDir = configJson.appDir || utils.getLavasProjectRoot();
     let serverScriptPath = path.resolve(appDir, DEFAULT_DEV_SERVER_SCRIPT);
 
@@ -51,18 +54,15 @@ async function devServer(config, port) {
         log.warn(`${locals.START_NO_FILE} ${serverScriptPath}`);
         return;
     }
-
     process.env.NODE_ENV = 'development';
 
     if (port) {
         process.env.PORT = Number(port);
     }
-
     let options = [];
     if (config) {
         options.push(configPath);
     }
-
     fork(serverScriptPath, options);
 }
 
