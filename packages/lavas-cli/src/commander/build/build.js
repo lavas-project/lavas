@@ -40,7 +40,7 @@ module.exports = async function (config) {
     let rootDir = utils.getLavasProjectRoot();
     let buildScriptPath = path.resolve(rootDir, '.lavas/build.js');
 
-    // 不存在.lavas/build.js 时复制 build.js，避免调用全局 lavas-core-vue
+    // 不存在.lavas/build.js 时创建 build.js，避免调用全局 lavas-core-vue
     if (!await fs.pathExists(buildScriptPath)) {
         await fs.copy(path.resolve(__dirname, '../../templates/build.js'), buildScriptPath);
     }
