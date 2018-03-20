@@ -31,19 +31,18 @@ if (new Set(['--help', '-h']).has(cmd)) {
     cmd = 'help';
 }
 
+if (new Set(['b']).has(cmd)) {
+    cmd = 'build';
+}
+
 if (commands.has(cmd)) {
     args = process.argv.slice(3);
 }
-
 else {
     args = process.argv.slice(2);
     if (args.length) {
-        log.error(['lavas`', ...args, '`', locals.NO_COMMAND].join(' '));
+        log.error(['`lavas', ...args, '`', locals.NO_COMMAND].join(' '));
         process.exit(0);
-        return 0;
-    }
-    else if (args === 'b') {
-        cmd = 'build';
     }
     else {
         cmd = defaultCommand;

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * @file dev-lavas-cli.js
+ * @file lavs-dev.js
  * @author <xietianxin> xietianxin@baidu.com
  */
 
