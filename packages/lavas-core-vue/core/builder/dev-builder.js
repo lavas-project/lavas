@@ -162,21 +162,22 @@ export default class DevBuilder extends BaseBuilder {
         }
 
         await this.routeManager.buildRoutes();
-        await this.writeRuntimeConfig();
-        await this.writeFileToLavasDir(
-            BUILD_SCRIPT,
-            readFileSync(join(__dirname, `../templates/${BUILD_SCRIPT}`))
-        );
 
-        // write middleware.js & store.js
-        if (entriesConfig.length === 0) {
-            await this.writeMiddleware();
-            await this.writeStore();
+        let writeTasks = [
+            this.writeRuntimeConfig(),
+            this.writeFileToLavasDir(
+                BUILD_SCRIPT,
+                readFileSync(join(__dirname, `../templates/${BUILD_SCRIPT}`))
+            ),
+            this.writeMiddleware(),
+            this.writeStore()
+        ];
+
+        if (entriesConfig.length !== 0) {
+            writeTasks.push(this.writeLavasLink());
         }
-        else {
-            await this.writeLavasLink();
-            await Promise.all(entriesConfig.map(entry => this.writeStore()));
-        }
+
+        await Promise.all(writeTasks);
 
         // SSR build process
         if (ssrEnabled) {
