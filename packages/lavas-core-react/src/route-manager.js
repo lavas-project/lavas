@@ -92,8 +92,6 @@ export default class RouteManager {
             // find error route
             if (route.fullPath === this.config.errorHandler.errorPath) {
                 this.errorRoute = route;
-                // add default error route alias
-                this.errorRoute.alias = '*';
                 errorIndex = index;
             }
 
@@ -144,43 +142,6 @@ export default class RouteManager {
         }
     }
 
-    /**
-     * generate routes content which will be injected into routes.js
-     * based on nested routes
-     *
-     * @param {Array} routes route list
-     * @return {string} content
-     */
-    generateRoutesContent(routes) {
-        const generate = routes => routes.map(cur => {
-            // Call `this.$router.replace({name: xxx})` when path of 'xxx' contains '*' will throw error
-            // see https://github.com/vuejs/vue-router/issues/724
-            // Solution: write a normal path and add alias with '*'
-            let route = {
-                path: cur.rewritePath,
-                component: `_${cur.hash}`,
-                meta: cur.meta || {}
-            };
-
-            if (cur.name) {
-                route.name = cur.name;
-            }
-
-            if (cur.alias) {
-                route.alias = cur.alias;
-            }
-
-            if (cur.children) {
-                route.children = generate(cur.children);
-            }
-
-            return route;
-        });
-
-        return JSON.stringify(generate(routes), undefined, 4)
-            .replace(/"component": "(_.+)"/mg, '"component": $1');
-    }
-
     processRouterConfig(routerConfig) {
         let {
             mode = 'history',
@@ -226,19 +187,20 @@ export default class RouteManager {
         let writeFile = this.isDev ? writeFileInDev : outputFile;
         let {mode, base, pageTransition, scrollBehavior} = this.processRouterConfig(this.config.router);
         // add errorRoute to the end
+        // NoMatch component doesn't need a path
+        delete this.errorRoute.rewritePath;
         this.routes.push(this.errorRoute);
         let routesFilePath = join(this.lavasDir, 'router.js');
-        let routesContent = this.generateRoutesContent(this.routes);
 
         let routesFileContent = template(await readFile(routerTemplate, 'utf8'))({
             router: {
                 mode,
                 base,
-                routes: this.flatRoutes,
+                routes: this.routes,
+                flatRoutes: this.flatRoutes,
                 scrollBehavior,
                 pageTransition
-            },
-            routesContent
+            }
         });
         await writeFile(routesFilePath, routesFileContent);
     }

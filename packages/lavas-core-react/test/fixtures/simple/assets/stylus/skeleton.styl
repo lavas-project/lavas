@@ -1,0 +1,38 @@
+@value app-header-height from '@/assets/css/variable.css'
+@value color-primary-blue from '@/assets/css/variable.css'
+
+.skeletonHeader
+    position fixed
+    top 0
+    width 100%
+    display flex
+    align-items center
+    justify-content space-between
+    height app-header-height
+    background color-primary-blue
+    box-shadow 0 2px 4px -1px rgba(0,0,0,.2), 0 4px 5px rgba(0,0,0,.14), 0 1px 10px rgba(0,0,0,.12)
+    color #fff
+    padding 0
+
+    div
+        display flex
+        align-items center
+
+.iconBlock
+    justify-content center
+    width 48px
+    height 48px
+
+.skeletonBody
+    position fixed
+    top app-header-height
+    bottom 0
+    left 0
+    right 0
+    display flex
+    align-items center
+    justify-content center
+    flex-direction column
+
+.placeholder
+    background #ccc

@@ -4,23 +4,16 @@
  */
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 
-export function vueLoaders(options = {}) {
-    return {
-        loaders: cssLoaders({
-            cssSourceMap: options.cssSourceMap,
-            cssMinimize: options.cssMinimize,
-            cssExtract: options.cssExtract
-        })
-    };
-}
-
 export function cssLoaders(options = {}) {
 
     let cssLoader = {
         loader: 'css-loader',
         options: {
             minimize: options.cssMinimize,
-            sourceMap: options.cssSourceMap
+            sourceMap: options.cssSourceMap,
+            modules: true,
+            importLoaders: 1
+            // localIdentName: '[path]___[name]__[local]___[hash:base64:5]'
         }
     };
 
@@ -42,14 +35,13 @@ export function cssLoaders(options = {}) {
         if (options.cssExtract) {
             return ExtractTextPlugin.extract({
                 use: loaders,
-                fallback: 'vue-style-loader'
+                fallback: 'style-loader'
             });
         }
 
-        return ['vue-style-loader', ...loaders];
+        return ['style-loader', ...loaders];
     }
 
-    // https://vue-loader.vuejs.org/en/configurations/extract-css.html
     return {
         css: generateLoaders(),
         postcss: generateLoaders(),
@@ -63,7 +55,7 @@ export function cssLoaders(options = {}) {
     };
 }
 
-// Generate loaders for standalone style files (outside of .vue)
+// Generate loaders for standalone style files (outside of .jsx|.js)
 export function styleLoaders(options) {
     let output = [];
     let loaders = cssLoaders(options);

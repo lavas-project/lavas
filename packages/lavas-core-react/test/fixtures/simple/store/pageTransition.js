@@ -1,21 +1,33 @@
-/**
- * @file pageTransition module
- * @author lavas
- */
 
-export const state = () => {
-    return {
-        enable: true,
-        type: 'none',
-        effect: 'none'
-    };
+const initialState = {
+    enable: true,
+    type: 'fade',
+    effect: 'fade'
 };
 
-export const mutations = {
-    setType(state, type) {
-        state.type = type;
-    },
-    setEffect(state, effect) {
-        state.effect = effect;
+export let actions = {
+    setType: typeInfo => ({
+        type: 'SET_TYPE',
+        typeInfo
+    }),
+
+    setEffect: effect => ({
+        type: 'SET_EFFECT',
+        effect
+    })
+};
+
+export function reducer(state = initialState, action) {
+    switch (action.type) {
+        case 'SET_TYPE':
+            return Object.assign({}, state, {
+                type: action.typeInfo
+            });
+        case 'SET_EFFECT':
+            return Object.assign({}, state, {
+                effect: action.effect
+            });
+        default:
+            return state;
     }
-};
+}

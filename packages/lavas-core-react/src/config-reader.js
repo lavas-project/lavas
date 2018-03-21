@@ -34,6 +34,7 @@ const DEFAULT_CONFIG = {
         },
         babel: {
             presets: ['react-app'],
+            plugins: ['transform-decorators-legacy'],
             babelrc: false
         },
         cssExtract: false,
@@ -187,48 +188,6 @@ export default class ConfigReader {
             Logger.info('build', 'reading config completed.', true);
             return config;
         }
-
-        // read from config/
-        Logger.warn('build', 'config directory is deprecated! Try to use lavas.config.js instead.');
-        let configDir = join(this.cwd, 'config');
-        let files = glob.sync(
-            '**/*.js', {
-                cwd: configDir
-            }
-        );
-
-        // require all files and assign them to config recursively
-        await Promise.all(files.map(async filepath => {
-            filepath = filepath.substring(0, filepath.length - 3);
-
-            let paths = filepath.split('/');
-
-            let name;
-            let cur = config;
-            for (let i = 0; i < paths.length - 1; i++) {
-                name = paths[i];
-                if (!cur[name]) {
-                    cur[name] = {};
-                }
-
-                cur = cur[name];
-            }
-
-            name = paths.pop();
-
-            // load config, delete cache first
-            let configPath = join(configDir, filepath);
-            delete require.cache[require.resolve(configPath)];
-            let exportContent = await import(configPath);
-            cur[name] = typeof exportContent === 'object' && exportContent !== null
-                ? merge(cur[name], exportContent, mergeArray) : exportContent;
-        }));
-
-        this.mergeEnv(config);
-
-        Logger.info('build', 'finish reading config.', true, true);
-
-        return config;
     }
 
     /**
@@ -240,7 +199,7 @@ export default class ConfigReader {
         Logger.info('build', 'start reading config...', true);
         let parsedConfig = JsonUtil.parse(await readFile(distLavasPath(this.cwd, CONFIG_FILE), 'utf8'));
         parsedConfig.globals = {rootDir: this.cwd};
-        Logger.info('build', 'finish reading config.', true, true);
+        Logger.info('build', 'reading config completed.', true, true);
         return parsedConfig;
     }
 }

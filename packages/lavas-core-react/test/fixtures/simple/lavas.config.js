@@ -21,7 +21,8 @@ module.exports = {
             base: {
                 'DEFINE_TEST_VAR': '"test-var"'
             }
-        }
+        },
+        cssExtract: true
     },
     router: {
         mode: 'history',

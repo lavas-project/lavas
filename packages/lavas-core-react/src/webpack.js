@@ -13,7 +13,6 @@ import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import FriendlyErrorsPlugin from 'friendly-errors-webpack-plugin';
 import OptimizeCSSPlugin from 'optimize-css-assets-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
-import VueSSRServerPlugin from 'vue-server-renderer/server-plugin';
 import {BundleAnalyzerPlugin} from 'webpack-bundle-analyzer';
 import SWRegisterWebpackPlugin from 'sw-register-webpack-plugin';
 import ProgressBarPlugin from 'progress-bar-webpack-plugin';
@@ -100,7 +99,7 @@ export default class WebpackConfig {
         baseConfig.module.noParse(/es6-promise\.js$/);
 
         baseConfig.module.rule('js')
-            .test(/\.js$/)
+            .test(/\.(js|jsx)$/)
             .use('babel')
                 .loader('babel-loader')
                 .options(babel)
@@ -217,7 +216,7 @@ export default class WebpackConfig {
         // modify vars in DefinePlugin
         clientConfig.plugin('define').init((Plugin, args) =>
             new Plugin(Object.assign(args[0], {
-                'process.env.VUE_ENV': '"client"',
+                'process.env.REACT_ENV': '"client"',
                 'process.env.NODE_ENV': `"${this.env}"`
             }, clientDefines)));
 
@@ -373,27 +372,22 @@ export default class WebpackConfig {
         this.addStyleRules(serverConfig, {
             cssSourceMap: false,
             cssMinimize: false,
-            cssExtract: false
+            cssExtract: true
         });
 
         // https://webpack.js.org/configuration/externals/#externals
         // https://github.com/liady/webpack-node-externals
         serverConfig.externals(nodeExternals({
             // do not externalize CSS files in case we need to import it from a dep
-            whitelist: [...nodeExternalsWhitelist, /\.(css|vue)$/]
+            whitelist: [...nodeExternalsWhitelist, /\.css$/]
         }));
 
         // modify vars in DefinePlugin
         serverConfig.plugin('define').init((Plugin, args) =>
             new Plugin(Object.assign(args[0], {
-                'process.env.VUE_ENV': '"server"',
+                'process.env.REACT_ENV': '"server"',
                 'process.env.NODE_ENV': `"${this.env}"`
             }, serverDefines)));
-
-        // add vue-ssr-server-plugin
-        serverConfig.plugin('ssr-server').use(VueSSRServerPlugin, [{
-            filename: join(LAVAS_DIRNAME_IN_DIST, SERVER_BUNDLE)
-        }]);
 
         // call extendWithWebpackChain function if provided
         let extendWithWebpackChainArray = [

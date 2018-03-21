@@ -8,8 +8,7 @@ import {readFile, pathExists} from 'fs-extra';
 import {join, basename, normalize} from 'path';
 
 import HtmlWebpackPlugin from 'html-webpack-plugin';
-import SkeletonWebpackPlugin from 'vue-skeleton-webpack-plugin';
-import VueSSRClientPlugin from 'vue-server-renderer/client-plugin';
+import SkeletonWebpackPlugin from 'react-skeleton-webpack-plugin';
 import OmmitCSSPlugin from '../plugins/ommit-css-webpack-plugin';
 
 import {TEMPLATE_HTML, SPA_TEMPLATE_HTML, DEFAULT_ENTRY_NAME, DEFAULT_SKELETON_PATH,
@@ -238,7 +237,7 @@ export default class BaseBuilder {
         // if skeleton provided, we need to create an entry
         let skeletonConfig;
 
-        // add default skeleton path `@/core/Skeleton.vue`
+        // add default skeleton path `@/core/Skeleton.jsx`
         if (!skeleton.routes || !skeleton.routes.length) {
             skeleton.routes = [{
                 path: '*',
@@ -254,7 +253,7 @@ export default class BaseBuilder {
         else {
             // generate skeletonId based on componentPath
             skeleton.routes.forEach(route => {
-                route.componentName = basename(route.componentPath, '.vue');
+                route.componentName = basename(route.componentPath, '.jsx');
                 route.componentNameInDash = camelCaseToDash(route.componentName);
                 route.skeletonId = route.skeletonId || route.componentNameInDash;
             });
@@ -406,12 +405,6 @@ export default class BaseBuilder {
                     clientConfig
                         .context(this.config.globals.rootDir)
                         .entry(DEFAULT_ENTRY_NAME).add('./core/entry-client.js');
-
-                    // add vue-ssr-client-plugin
-                    clientConfig.plugin('ssr-client')
-                        .use(VueSSRClientPlugin, [{
-                            filename: join(LAVAS_DIRNAME_IN_DIST, CLIENT_MANIFEST)
-                        }]);
 
                     if (this.isDev) {
                         // enable hot-reload

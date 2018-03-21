@@ -1,19 +1,17 @@
-import Vue from 'vue';
+import React from 'react';
+import ReactDOMServer from 'react-dom/server';
 <% skeletons.forEach(function(skeleton) { %>
 import <%- skeleton.componentName %> from '<%- skeleton.componentPath %>';
 <% }); %>
 
-export default new Vue({
-    components: {
+const html = ReactDOMServer.renderToStaticMarkup((
+    <React.Fragment>
         <% skeletons.forEach(function(skeleton) { %>
-        <%- skeleton.componentName %>,
-        <% }); %>
-    },
-    template: `
-        <div>
-            <% skeletons.forEach(function(skeleton) { %>
-            <<%- skeleton.componentNameInDash %> id="<%= skeleton.skeletonId %>" style="display:none"/>
-            <% }); %>
+        <div id='<%= skeleton.skeletonId %>' style={{display: 'none'}}>
+            <<%- skeleton.componentName %> />
         </div>
-    `
-});
+        <% }); %>
+    </React.Fragment>
+));
+
+export default html;

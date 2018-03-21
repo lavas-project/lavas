@@ -1,0 +1,85 @@
+@value app-header-height from '@/assets/css/variable.css'
+
+.app
+    font-family 'Avenir', Helvetica, Arial, sans-serif
+    -webkit-font-smoothing antialiased
+    -moz-osx-font-smoothing grayscale
+    text-align center
+    color #2c3e50
+    min-height 100vh
+    max-width 100%
+    position relative
+
+    .app-view
+        position absolute
+        top 0
+        right 0
+        bottom 0
+        left 0
+        overflow-x hidden
+        overflow-y auto
+        background #fff
+
+        &::-webkit-scrollbar
+            width 0
+            background transparent
+
+        &.app-view-with-header
+            // top app-header-height
+            padding-top app-header-height
+
+        /*
+        &.transition-slide
+            transition transform 20s cubic-bezier(.55, 0, .1, 1)
+        */
+
+        &.transition-fade
+            // opacity 1
+            transition opacity 1s ease
+        
+
+/* slide transition */
+:global(.slide-right-enter)
+    transform translate3d(-100%, 0, 0)
+
+:global(.slide-right-enter-active)
+    transition transform 1s cubic-bezier(.55, 0, .1, 1)
+    transform translate3d(0, 0, 0)
+
+:global(.slide-right-exit)
+    transform translate3d(0, 0, 0)
+
+:global(.slide-right-exit.slide-right-exit-active)
+    transition transform 1s cubic-bezier(.55, 0, .1, 1)
+    transform translate3d(100%, 0, 0)
+// 强行矫正，react-transition-group 有时候会整出以下搭配，暂时没找到原因
+:global(.slide-right-exit.slide-left-exit-active)
+    transition transform 1s cubic-bezier(.55, 0, .1, 1)
+    transform translate3d(100%, 0, 0)
+
+:global(.slide-left-enter)
+    transform translate3d(100%, 0, 0)
+
+:global(.slide-left-enter-active)
+    transition transform 1s cubic-bezier(.55, 0, .1, 1)
+    transform translate3d(0, 0, 0)
+
+:global(.slide-left-exit)
+    transform translate3d(0, 0, 0)
+
+:global(.slide-left-exit.slide-left-exit-active)
+    transition transform 1s cubic-bezier(.55, 0, .1, 1)
+    transform translate3d(-100%, 0, 0)
+// 强行矫正，react-transition-group 有时候会整出以下搭配，暂时没找到原因
+:global(.slide-left-exit.slide-right-exit-active)
+    transition transform 1s cubic-bezier(.55, 0, .1, 1)
+    transform translate3d(-100%, 0, 0)
+
+/* fade transition */
+:global(.fade-exit)
+    opacity 1
+
+:global(.fade-exit-active)
+    opacity 0
+    transition opacity 1s ease
+

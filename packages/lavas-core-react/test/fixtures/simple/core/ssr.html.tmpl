@@ -1,38 +1,26 @@
 <!DOCTYPE html>
-
-<< meta = meta.inject() >>
-<html lang="zh_CN" data-vue-meta-server-rendered {{{ meta.htmlAttrs.text() }}}>
+<html lang="zh_CN" ${helmet.htmlAttributes.toString()}>
     <head>
+        ${helmet.title.toString()}
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
-
-        {{{ meta.title.text() }}}
-        {{{ meta.meta.text() }}}
-        {{{ meta.link.text() }}}
-        {{{ meta.style.text() }}}
-        {{{ meta.script.text() }}}
-        {{{ meta.noscript.text() }}}
-
-        <!-- Add to home screen for Android and modern mobile browsers -->
-        <link rel="manifest" href="{{ config.build.publicPath }}static/manifest.json?v={{ config.buildVersion }}">
         <!-- Add to home screen for Safari on iOS -->
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        ${helmet.meta.toString()}
+        ${helmet.style.toString()}
+        ${helmet.link.toString()}
+        ${helmet.script.toString()}
+        ${helmet.noscript.toString()}
     </head>
-    <body {{{ meta.bodyAttrs.text() }}}>
-        <!--vue-ssr-outlet-->
-        << if (isProd) { >>
+    <body ${helmet.bodyAttributes.toString()}>
+        <div id="app">${content}</div>
         <script>
-            window.onload = function () {
-                var script = document.createElement('script');
-                var firstScript = document.getElementsByTagName('script')[0];
-                script.type = 'text/javascript';
-                script.async = true;
-                script.src = '{{ config.build.publicPath }}sw-register.js?v=' + Date.now();
-                firstScript.parentNode.insertBefore(script, firstScript);
-            };
+          window.__INITIAL_STATE__ = ${JSON.stringify(data)};
         </script>
-        << } >>
+        <% for (let chunk in manifest) { %>
+          <script src="${config.build.publicPath.replace(/\/$/, '')}${manifest[chunk]}"></script>
+        <% } %>
     </body>
 </html>

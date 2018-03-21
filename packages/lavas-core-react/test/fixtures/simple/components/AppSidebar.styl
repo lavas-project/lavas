@@ -1,0 +1,104 @@
+@value color-primary-blue from '@/assets/css/variable.css'
+
+// 左侧触发滑动宽度
+$swipe-width = 20px
+
+$app-sidebar-left-icon-size = 20;
+$app-sidebar-nav-height = 45px;
+$app-sidebar-title-height = 75px;
+
+.app-sidebar-content
+    &.app-sidebar-content-right
+        box-shadow -3px 0 8px 1px rgba(0, 0, 0, 0.4)
+
+        &.app-sidebar-title,
+        &.app-sidebar-blocks
+            text-align right
+
+    .app-sidebar-title-left-icon,
+    .app-sidebar-block-left-icon
+        display inline-block
+        width ($app-sidebar-left-icon-size + 10)px
+        height 100%
+
+        img
+            vertical-align sub
+            width ($app-sidebar-left-icon-size)px
+            height ($app-sidebar-left-icon-size)px
+
+        :global(.material-icons)
+            font-size ($app-sidebar-left-icon-size)px !important
+            vertical-align sub
+
+    .app-sidebar-block-text
+        display inline-block
+        height 100%
+        vertical-align middle
+
+    .app-sidebar-title-right-logo,
+    .app-sidebar-block-right-logo
+        float right
+
+        img
+            width 20px
+            height 20px
+            margin-right 10px
+
+
+    .app-sidebar-title
+        color #fff
+        padding 0 10px
+        font-size 16px
+        font-weight bold
+        height $app-sidebar-title-height
+        line-height $app-sidebar-title-height
+        background: color-primary-blue
+        text-align left
+
+    .app-sidebar-user
+        padding 0 10px
+        font-size 16px
+        .user-avatar
+            margin 30px auto 0 auto
+            height 100px
+            width 100px
+            i
+                font-size 100px
+                line-height 100px
+                color #666
+        .user-info
+            padding 20px 0
+            text-align center
+            border-bottom 1px solid #e0e0e0
+            >div
+                margin 5px 0
+                i
+                    font-size 18px
+                    margin-right 5px
+
+    .app-sidebar-blocks
+        text-align left
+
+        .app-sidebar-block
+            padding 10px 0
+            border-bottom 1px solid #e0e0e0
+            color #333
+
+            .sub-list-title
+                height $app-sidebar-nav-height
+                line-height $app-sidebar-nav-height
+                text-indent ($app-sidebar-left-icon-size)px
+                font-weight bold
+                color #888
+
+            li
+                padding-left 15px
+                height $app-sidebar-nav-height
+                line-height $app-sidebar-nav-height
+
+
+                &:last-child
+                    border none
+
+            &:last-child
+                border-bottom none

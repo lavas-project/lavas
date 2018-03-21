@@ -1,0 +1,34 @@
+@value color-primary-blue from '@/assets/css/variable.css'
+@value app-header-height from '@/assets/css/variable.css'
+
+$btn-color = #fff
+
+.app-header-wrapper
+    display flex
+    justify-content space-between
+    align-items center
+    height app-header-height 
+    background color-primary-blue
+    color $btn-color
+    padding 0
+    box-shadow 0 2px 4px -1px rgba(0,0,0,.2), 0 4px 5px rgba(0,0,0,.14), 0 1px 10px rgba(0,0,0,.12)
+    transition transform 0.3s ease-out
+    position fixed
+    top 0
+    width 100%
+
+    & > div
+        display flex
+        align-items center
+
+.app-header-middle
+    flex 1
+    font-size 1.2em
+
+// 改变 icon 大小
+.app-header-icon
+    width 20px
+    height 20px
+
+    :global(.material-icons)
+        color $btn-color !important

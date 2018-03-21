@@ -1,9 +1,42 @@
-<% router.routes.forEach(function(route) { %>
-    <% if (route.lazyLoading) { %>
-let _<%- route.hash %> = () => import(<% if (route.chunkname) { %>/* webpackChunkName: "<%- route.chunkname %>" */<% } %>'@/<%- route.component %>');
+import Appshell from '@/core/Appshell';
+import Loadable from '@/components/Loadable';
+
+<% router.flatRoutes.forEach(function(route) { %>
+    <% if (route.lazy) { %>
+const _<%- route.hash %> = Loadable({
+    loader: () => import('@/<%- route.component %>')
+});
     <% } else { %>
 import _<%- route.hash %> from '@/<%- route.component %>';
     <% } %>
 <% }); %>
 
-let routes = <%= routesContent %>;
+<%
+const TAB = '\t\t';
+const recursiveRoutes = (routes, tab) => {
+    let res = '';
+
+    routes.forEach((route, i) => {
+        route._name = '_' + (route.hash);
+        res += tab + '{\n';
+        res += route.rewritePath ? (tab + '\tpath: ' + JSON.stringify(route.rewritePath) + ',\n') : '';
+        res += tab + '\tcomponent: ' + route._name  + ',\n';
+        res += tab + '\tasyncData: _' + route.hash  + '.asyncData || noop,\n';
+        res += tab + '\texact: ' + (route.path === '/' ? 'true' : 'false');
+        res += (route.children) ? ',\n\t' + tab + 'routes: [\n' + recursiveRoutes(route.children, tab + tab) + '\n\t' + tab + ']' : '';
+        res += '\n' + tab + '}' + (i + 1 === routes.length ? '' : ',\n');
+    });
+
+    return res;
+}
+
+const _routes = recursiveRoutes(router.routes, TAB);
+%>
+
+const noop = () => {};
+const routes = [{
+    component: Appshell,
+    routes: [<%= _routes %>]
+}];
+
+export default routes;

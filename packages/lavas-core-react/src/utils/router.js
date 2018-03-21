@@ -42,7 +42,7 @@ export function matchUrl(routes, url) {
  * @return {Promise} resolve generated router, reject error
  */
 export function generateRoutes(baseDir, {globOptions, routerOption} = {}) {
-    return getDirs(baseDir, '.vue', globOptions)
+    return getDirs(baseDir, '.jsx', globOptions)
         .then(dirs => {
             let tree = mapDirsInfo(dirs, baseDir)
                 .reduce((tree, info) => appendToTree(tree, info.levels, info), []);
@@ -57,8 +57,22 @@ function getDirs(baseDir, ext = '', options) {
                 reject(err);
             }
             else {
-                let set = dirs.reduce((set, dir) => set.add(dir).add(dirname(dir)), new Set());
-                res(Array.from(set));
+                // ['/pages/a/b/c'] => ['/pages/a', '/pages/a/b', '/pages/a/b/c'] when baseDir is /pages
+                let set = dirs.reduce((set, dir) => {
+                        let levels = dir.slice(baseDir.length + 1).split('/');
+                        let newDir = baseDir;
+
+                        for (let i = 0; i < levels.length; i++) {
+                            newDir += '/' + levels[i];
+                            set.add(newDir);
+                        }
+
+                        return set;
+                    },
+                    new Set()
+                );
+
+                res(Array.from(set).sort((a, b) => a.localeCompare(b)));
             }
         });
     });
@@ -66,11 +80,13 @@ function getDirs(baseDir, ext = '', options) {
 
 function mapDirsInfo(dirs, baseDir) {
     let baseFolder = basename(baseDir);
+    // remove useless baseDir
+    dirs = dirs.map(dir => baseFolder + dir.slice(baseDir.length));
 
     let infos = dirs.reduce((list, dir) => {
         let type;
 
-        if (extname(dir) === '.vue') {
+        if (extname(dir) === '.jsx') {
             let regex = new RegExp(`^${dir.slice(0, -4)}$`, 'i');
 
             if (dirs.some(d => regex.test(d))) {
@@ -78,7 +94,7 @@ function mapDirsInfo(dirs, baseDir) {
             }
         }
         else {
-            let regex = new RegExp(`^${dir}.vue$`, 'i');
+            let regex = new RegExp(`^${dir}.jsx$`, 'i');
 
             if (dirs.some(d => regex.test(d))) {
                 return list;
@@ -87,7 +103,7 @@ function mapDirsInfo(dirs, baseDir) {
             type = 'flat';
         }
 
-        dir = baseFolder + dir.slice(baseDir.length).replace(/\.vue$/, '');
+        dir = dir.replace(/\.jsx$/, '');
         let levels = dir.split('/');
 
         list.push({
@@ -154,7 +170,7 @@ function treeToRouter(tree, parent, {pathRule = 'kebabCase'} = {}) {
 
         let route = {
             path: generatePath(info, parent, pathRule),
-            component: info.dir + '.vue'
+            component: info.dir + '.jsx'
         };
 
         if (!children || children.every(child => !/(\/index)+$/i.test(child.info.dir))) {
@@ -173,7 +189,7 @@ function treeToRouter(tree, parent, {pathRule = 'kebabCase'} = {}) {
 }
 
 function generatePath(info, parent, rule) {
-    let path = info.dir.slice(parent.dir.length)
+    let path = ('/' + info.levels.slice(1).join('/'))
         .replace(/(^|\/)_/g, '$1:')
         .replace(/((^|\/)index)+$/i, '');
 
@@ -197,10 +213,7 @@ function generatePath(info, parent, rule) {
             );
     }
 
-    if (parent.type === 'nested') {
-        path = path.replace(/^\//, '');
-    }
-    else if (path === '') {
+    if (path === '') {
         path = '/';
     }
 
