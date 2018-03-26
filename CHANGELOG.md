@@ -2,6 +2,12 @@
 
 =======
 
+## Lavas-core-vue [1.1.7] - 2018-3-26
+
+- [Fix] Update vue-loader to 14.2.2. ([#114][i114])
+
+[i114]: https://github.com/lavas-project/lavas/issues/114
+
 ## Lavas-core-vue [1.1.6] - 2018-3-22
 
 - [Fix] Fix routing generation problems when recursive directories appeared in `/pages`
