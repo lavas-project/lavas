@@ -2,6 +2,12 @@
 
 =======
 
+## Lavas-core-vue [1.1.6] - 2018-3-26
+
+- [Fix] Update vue-loader to 14.2.2. ([#114][i114])
+
+[i114]: https://github.com/lavas-project/lavas/issues/114
+
 ## Lavas-core-vue [1.1.4] - 2018-3-9
 
 ### Changed
