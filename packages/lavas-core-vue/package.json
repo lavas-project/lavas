@@ -1,6 +1,6 @@
 {
   "name": "lavas-core-vue",
-  "version": "1.1.5",
+  "version": "1.1.6-rc.0",
   "description": "Lavas core implemented by Vue",
   "main": "dist/index.js",
   "files": [
@@ -72,7 +72,7 @@
     "uglifyjs-webpack-plugin": "^1.1.6",
     "url-loader": "^0.5.9",
     "vue": "^2.5.2",
-    "vue-loader": "13.0.2",
+    "vue-loader": "^14.2.2",
     "vue-meta": "^1.0.5",
     "vue-router": "^2.7.0",
     "vue-server-renderer": "^2.5.2",
