@@ -68,6 +68,10 @@ if (process.env.VUE_ENV === 'client') {
 
 }
 
+function getHistoryStateKey() {
+    return history.state ? history.state.key : '';
+}
+
 // 存储数据到本地
 function saveHistoryToLocal(key, data) {
     try {
@@ -95,13 +99,15 @@ function initHistoryStateStack() {
         }
     }
 
-    // 首次访问的页面也要加入列表中，但要注意如果当前页面访问过（刷新）则应该替换
-    if (HISTORY_STATE_STACK.length) {
-        HISTORY_STATE_STACK[HISTORY_STATE_STACK.length - 1] = history.state.key;
-    }
-    else {
-        HISTORY_STATE_STACK.push(history.state.key);
-    }
+    setTimeout(() => {
+        // 首次访问的页面也要加入列表中，但要注意如果当前页面访问过（刷新）则应该替换
+        if (HISTORY_STATE_STACK.length) {
+            HISTORY_STATE_STACK[HISTORY_STATE_STACK.length - 1] = getHistoryStateKey();
+        }
+        else {
+            HISTORY_STATE_STACK.push(getHistoryStateKey());
+        }
+    }, 300);
 
 }
 
@@ -163,7 +169,7 @@ function isForwardByHistory() {
 
     // 如果访问的页面state和之前访问过的页面相同，则属于返回
 
-    let index = HISTORY_STATE_STACK.indexOf(history.state.key);
+    let index = HISTORY_STATE_STACK.indexOf(getHistoryStateKey());
 
     if (index !== HISTORY_STATE_STACK.length - 1 && index !== -1) {
         HISTORY_STATE_STACK.length = index + 1;
@@ -192,7 +198,7 @@ function isForward(to, from) {
         setTimeout(() => {
 
             // 如果页面没访问过则把state加进来
-            let pageKey = history.state.key;
+            let pageKey = getHistoryStateKey();
             let index = HISTORY_STATE_STACK.indexOf(pageKey);
             if (res && index === -1) {
 
