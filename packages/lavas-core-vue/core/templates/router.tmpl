@@ -261,6 +261,10 @@ const scrollBehavior = (to, from, savedPosition) => {
 };
 <% } %>
 
+
+export const keepAlivePages = routes.filter(route => route.keepAlive || route.meta.keepAlive)
+                            .map(route => route.name);
+
 export function createRouter() {
     let router = new Router({
         mode: '<%- router.mode %>',
