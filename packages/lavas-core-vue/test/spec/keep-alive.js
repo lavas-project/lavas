@@ -65,6 +65,6 @@ test('it should run in development mode correctly', async t => {
         .get('/index.html');
     t.is(200, res.status);
 
-    let lavasRouterContent = await readFile(join(tempDir, '.lavas/router.js'), 'utf8'));
+    let lavasRouterContent = await readFile(join(tempDir, '.lavas/router.js'), 'utf8');
     t.true(lavasRouterContent.indexOf('keepAlivePages') > -1);
 });
