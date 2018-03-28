@@ -2,6 +2,12 @@
 
 =======
 
+## Lavas-core-vue [1.1.8] - 2018-3-27
+
+- [Fix] Fix a problem caused by `<transition>` & `<keep-alive>`. ([#112][i112])
+
+[i112]: https://github.com/lavas-project/lavas/issues/112
+
 ## Lavas-core-vue [1.1.7] - 2018-3-26
 
 - [Fix] Update vue-loader to 14.2.2. ([#114][i114])
