@@ -3,7 +3,7 @@
  * @author lavas
  */
 
-import {emptyDir, outputFile, copy, readFileSync} from 'fs-extra';
+import {emptyDir, outputFile, copy, remove, readFileSync} from 'fs-extra';
 import {join} from 'path';
 
 import {copyWorkboxLibraries} from 'workbox-build';
@@ -35,6 +35,12 @@ export default class ProdBuilder extends BaseBuilder {
         await emptyDir(build.path);
 
         if (serviceWorker.enable !== false) {
+            // empty previous version
+            let workboxDirs = glob.sync(join(this.cwd, ASSETS_DIRNAME_IN_DIST, 'workbox-v*'));
+            if (workboxDirs.length !== 0) {
+                await workboxDirs.map(dir => remove(dir))
+            }
+            // copy current version
             await copyWorkboxLibraries(join(this.cwd, ASSETS_DIRNAME_IN_DIST));
         }
 
