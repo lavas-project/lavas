@@ -7,6 +7,7 @@ import {emptyDir, outputFile, copy, remove, readFileSync} from 'fs-extra';
 import {join} from 'path';
 
 import {copyWorkboxLibraries} from 'workbox-build';
+import glob from 'glob';
 
 import {CONFIG_FILE, ASSETS_DIRNAME_IN_DIST} from '../constants';
 import {webpackCompile} from '../utils/webpack';
