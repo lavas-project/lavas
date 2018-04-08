@@ -49,13 +49,15 @@ exports.isNetworkConnect = function () {
     });
 };
 
-
 /**
  * 获取 Lavas 项目的根目录
  *
- * @return {string} 项目根目录
+ * @params {Object} options 选项
+ * @params {boolean} options.containsFound 结果包含是否是Lavas项目
+ *
+ * @return {string|Object} 项目根目录，当options.containsFound 为 true时，一并返回是否是Lavas项目
  */
-exports.getLavasProjectRoot = function () {
+exports.getLavasProjectRoot = function (options = {}) {
     let cwd = process.cwd();
     let pathList = cwd.split(path.sep);
 
@@ -68,12 +70,46 @@ exports.getLavasProjectRoot = function () {
             let packageJsonContent = fs.readFileSync(filePath, 'utf-8');
             let packageJson = JSON.parse(packageJsonContent);
 
-            if (packageJson.lavas) {
-                return pathList.join(path.sep);
+            try {
+                if (packageJson.lavas || packageJson.dependencies['lavas-core-vue']) {
+                    if (options.containsFound) {
+                        return {
+                            found: true,
+                            path: pathList.join(path.sep)
+                        };
+                    }
+
+                    return pathList.join(path.sep);
+                }
             }
+            catch (e) {}
         }
+
         pathList.pop();
+    }
+
+    if (options.containsFound) {
+        return {
+            found: false,
+            path: cwd
+        };
     }
 
     return cwd;
 };
+
+exports.getLavasCoreVersion = function () {
+    let lavasProject = exports.getLavasProjectRoot({containsFound: true})
+
+    if (!lavasProject.found) {
+        return;
+    }
+
+    let packageJsonPath = path.join(lavasProject.path, 'node_modules/lavas-core-vue/package.json');
+    if (!fs.pathExistsSync(packageJsonPath)) {
+        return;
+    }
+
+    let version = fs.readJsonSync(packageJsonPath).version;
+    return version;
+}

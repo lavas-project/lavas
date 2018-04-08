@@ -2,6 +2,20 @@
 
 =======
 
+## Lavas [2.2.7] - 2018-4-8
+
+- [Feature] Add lavas-core-vue version to `lavas -v` ([#126][i126])
+
+[i126]: https://github.com/lavas-project/lavas/issues/126
+
+## Lavas-core-vue [1.1.9] - 2018-4-8
+
+- [Fix] Update sw-register-webpack-plugin to 1.0.20 ([#9][i9])
+- [Fix] Fix a problem when using CDN ([#128][i128])
+
+[i9]: https://github.com/lavas-project/sw-register-webpack-plugin/issues/9
+[i128]: https://github.com/lavas-project/lavas/issues/128
+
 ## Lavas-core-vue [1.1.8] - 2018-3-27
 
 - [Fix] Fix a problem caused by `<transition>` & `<keep-alive>`. ([#112][i112])
