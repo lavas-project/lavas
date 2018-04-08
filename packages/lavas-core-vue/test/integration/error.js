@@ -4,30 +4,8 @@
  */
 
 import {join} from 'path';
-import test from 'ava';
-import {readFile, writeFile, copy, remove} from 'fs-extra';
-import LavasCore from '../../core';
-import {syncConfig, isKoaSupport, request, createApp, makeTempDir} from '../utils';
-
-test.beforeEach('init lavas-core & server', async t => {
-    // copy fixture to temp dir
-    let tempDir = await makeTempDir();
-    await copy(join(__dirname, '../fixtures/simple'), tempDir);
-
-    t.context.tempDir = tempDir;
-    t.context.core = new LavasCore(tempDir);
-    t.context.app = createApp();
-});
-
-test.afterEach.always('clean', async t => {
-    let {core, server, tempDir} = t.context;
-
-    await core.close();
-    server && server.close();
-
-    // clean temp dir
-    await remove(tempDir);
-});
+import {readFile, writeFile} from 'fs-extra';
+import {syncConfig, isKoaSupport, request, createApp, makeTempDir, test} from '../utils';
 
 test('it should show 404 page correctly.', async t => {
     let {core, app} = t.context;
