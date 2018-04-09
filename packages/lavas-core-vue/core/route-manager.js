@@ -170,6 +170,10 @@ export default class RouteManager {
                 route.alias = cur.alias;
             }
 
+            if (cur.redirect) {
+                route.redirect = cur.redirect;
+            }
+
             if (cur.children) {
                 route.children = generate(cur.children);
             }
