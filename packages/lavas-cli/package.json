@@ -1,6 +1,6 @@
 {
   "name": "lavas",
-  "version": "2.2.6",
+  "version": "2.2.7",
   "description": "Lavas solution cli tool",
   "main": "dist/index.js",
   "files": [
