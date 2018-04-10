@@ -77,7 +77,8 @@ export function useWorkbox(webpackConfig, lavasConfig) {
         }
     }
     else {
-        registerNavigationClause = `workboxSW.router.registerNavigationRoute('${base}index.html');`;
+        // https://github.com/lavas-project/lavas/issues/128
+        registerNavigationClause = `workboxSW.router.registerNavigationRoute('${publicPath}index.html');`;
     }
 
     if (!/workboxSW\.router\.registerNavigationRoute/.test(serviceWorkerContent)) {
