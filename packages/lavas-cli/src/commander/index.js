@@ -14,6 +14,7 @@ const initCommand = require('./scaffold');
 const buildCommand = require('./build');
 const serverCommand = require('./server');
 const locals = require('../locals')();
+const utils = require('../lib/utils');
 
 let version = process.env.VERSION || require('../../package.json').version;
 
@@ -27,7 +28,14 @@ checkUpdate().then(async () => {
         let argv = process.argv[2];
 
         if (argv === '-v' || argv === '--version') {
-            log.info('version: ', version);
+            // show lavas-cli version
+            log.info('lavas version: ', version);
+
+            // if lavas project, show lavas-core-vue version
+            let lavasCoreVersion = utils.getLavasCoreVersion();
+            if (lavasCoreVersion) {
+                log.info('lavas-core-vue version:', lavasCoreVersion);
+            }
         }
     }
 
