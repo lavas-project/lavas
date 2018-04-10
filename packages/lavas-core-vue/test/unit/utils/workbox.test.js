@@ -150,10 +150,8 @@ test('it should generate service-worker.js in SPA mode with baseUrl', async t =>
     let {core, tempDir} = t.context;
     let config = merge(core.config, {
         build: {
-            ssr: false
-        },
-        router: {
-            base: '/some-base/'
+            ssr: false,
+            publicPath: '//static.somecdn.com/'
         }
     });
     syncConfig(core, config);
@@ -161,7 +159,7 @@ test('it should generate service-worker.js in SPA mode with baseUrl', async t =>
 
     let swContent = await readFile(join(tempDir, 'dist/service-worker.js'), 'utf8');
 
-    t.true(swContent.indexOf('workboxSW.router.registerNavigationRoute(\'/some-base/index.html\');') !== -1);
+    t.true(swContent.indexOf('workboxSW.router.registerNavigationRoute(\'//static.somecdn.com/index.html\');') !== -1);
 });
 
 test('it should generate service-worker.js in SPA mode with invalid config', async t => {

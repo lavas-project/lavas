@@ -2,13 +2,13 @@
 
 =======
 
-## Lavas [2.2.7] - 2018-4-8
+## Lavas [2.2.7] - 2018-4-10
 
 - [Feature] Add lavas-core-vue version to `lavas -v` ([#126][i126])
 
 [i126]: https://github.com/lavas-project/lavas/issues/126
 
-## Lavas-core-vue [1.1.9] - 2018-4-8
+## Lavas-core-vue [1.1.9] - 2018-4-10
 
 - [Fix] Update sw-register-webpack-plugin to 1.0.20 ([#9][i9])
 - [Fix] Fix a problem when using CDN ([#128][i128])
