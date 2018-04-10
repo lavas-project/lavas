@@ -7,7 +7,7 @@
     "dist"
   ],
   "scripts": {
-    "build:lavas-core-vue": "babel packages/lavas-core-vue/core --out-dir packages/lavas-core-vue/dist --copy-files",
+    "build:tb-lavas-core": "babel packages/tb-lavas-core/core --out-dir packages/tb-lavas-core/dist --copy-files",
     "build:lavas-cli": "babel packages/lavas-cli/src --out-dir packages/lavas-cli/dist --copy-files",
     "lint": "fecs ./ --rule --type 'vue,js,css'",
     "test": "nyc ava",
@@ -39,12 +39,12 @@
     "failFast": true,
     "concurrency": 5,
     "files": [
-      "packages/lavas-core-vue/test/unit/**/*.test.js",
-      "packages/lavas-core-vue/test/integration/*.js"
+      "packages/tb-lavas-core/test/unit/**/*.test.js",
+      "packages/tb-lavas-core/test/integration/*.js"
     ],
     "backupFiles": [
-      "packages/lavas-core-vue/test/unit/**/*.test.js",
-      "packages/lavas-core-vue/test/integration/*.js"
+      "packages/tb-lavas-core/test/unit/**/*.test.js",
+      "packages/tb-lavas-core/test/integration/*.js"
     ],
     "require": [
       "babel-register"
@@ -52,7 +52,7 @@
   },
   "nyc": {
     "exclude": [
-      "packages/lavas-core-vue/test/**/*.js"
+      "packages/tb-lavas-core/test/**/*.js"
     ]
   },
   "dependencies": {
@@ -87,7 +87,6 @@
     "koa-mount": "^3.0.0",
     "koa-send": "^4.1.1",
     "koa-static": "^4.0.1",
-    "lavas-core-vue": "^1.0.1",
     "lerna": "^2.5.1",
     "lodash": "^4.17.4",
     "lodash.template": "^4.4.0",
