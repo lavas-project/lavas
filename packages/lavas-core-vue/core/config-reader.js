@@ -38,6 +38,7 @@ const DEFAULT_CONFIG = {
         cssExtract: false,
         cssMinimize: true,
         cssSourceMap: true,
+        jsMinimize: true,
         jsSourceMap: true,
         bundleAnalyzerReport: false,
         compress: false,

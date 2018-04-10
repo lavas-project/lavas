@@ -47,7 +47,7 @@ export default class WebpackConfig {
         let {globals, build, serviceWorker, entries} = this.config;
         /* eslint-disable fecs-one-var-per-line */
         let {path, publicPath, filenames, babel, cssSourceMap, cssMinimize,
-            cssExtract, jsSourceMap,
+            cssExtract, jsMinimize, jsSourceMap,
             alias: {base: baseAlias = {}},
             defines: {base: baseDefines = {}},
             extend,
@@ -110,12 +110,6 @@ export default class WebpackConfig {
         };
 
         let pluginsInProd = [
-            new webpack.optimize.UglifyJsPlugin({
-                compress: {
-                    warnings: false
-                },
-                sourceMap: jsSourceMap
-            }),
             new OptimizeCSSPlugin({
                 cssProcessorOptions: {
                     safe: true
@@ -127,6 +121,17 @@ export default class WebpackConfig {
                 entries
             })
         ];
+
+        if (jsMinimize) {
+            pluginsInProd.unshift(
+                new webpack.optimize.UglifyJsPlugin({
+                    compress: {
+                        warnings: false
+                    },
+                    sourceMap: jsSourceMap
+                })
+            );
+        }
 
         let pluginsInDev = [
             new FriendlyErrorsPlugin()

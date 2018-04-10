@@ -162,7 +162,7 @@ export default class DevBuilder extends BaseBuilder {
             // empty previous version
             let workboxDirs = glob.sync(join(this.cwd, ASSETS_DIRNAME_IN_DIST, 'workbox-v*'));
             if (workboxDirs.length !== 0) {
-                await workboxDirs.map(dir => remove(dir))
+                await Promise.all(workboxDirs.map(async dir => await remove(dir)));
             }
             // copy current version
             await copyWorkboxLibraries(join(this.cwd, ASSETS_DIRNAME_IN_DIST));
