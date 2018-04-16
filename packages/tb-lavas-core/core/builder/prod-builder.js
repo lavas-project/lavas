@@ -3,15 +3,14 @@
  * @author lavas
  */
 
-import {emptyDir, outputFile, copy, remove, readFileSync} from 'fs-extra';
+import {emptyDir, outputFile, copy, remove} from 'fs-extra';
 import {join} from 'path';
 
 import {copyWorkboxLibraries} from 'workbox-build';
 import glob from 'glob';
 
-import {CONFIG_FILE, ASSETS_DIRNAME_IN_DIST} from '../constants';
+import {ASSETS_DIRNAME_IN_DIST} from '../constants';
 import {webpackCompile} from '../utils/webpack';
-import {distLavasPath} from '../utils/path';
 
 import BaseBuilder from './base-builder';
 
@@ -59,53 +58,10 @@ export default class ProdBuilder extends BaseBuilder {
 
         await Promise.all(writeTasks);
 
-        // SSR build process
-        if (build.ssr) {
-            console.log('[Lavas] SSR build starting...');
-            // webpack client & server config
-            let clientConfig = this.webpackConfig.client();
-            let serverConfig = this.webpackConfig.server();
-
-            // build bundle renderer
-            await this.renderer.build(clientConfig, serverConfig);
-
-            /**
-             * when running online server, renderer needs to use template and
-             * replace some variables such as meta, config in it. so we need
-             * to store some props in config.json.
-             * NOTE: not all the props in config is needed. for now, only manifest
-             * & assetsDir are required. some props such as globalDir are useless.
-             */
-            await copy(
-                this.lavasPath(CONFIG_FILE),
-                distLavasPath(build.path, CONFIG_FILE)
-            );
-
-            /**
-             * Don't use copy-webpack-plugin to copy this kind of files,
-             * otherwise these files will be added in the compilation of webpack.
-             * It will let some plugins such as vue-ssr-client misuse them.
-             * So just use fs.copy in such senario.
-             */
-            if (build.ssrCopy) {
-                await Promise.all(build.ssrCopy.map(
-                    async ({src, dest = src, options = {}}) => {
-                        await copy(
-                            join(globals.rootDir, src),
-                            join(build.path, dest),
-                            options
-                        );
-                    }
-                ));
-            }
-            console.log('[Lavas] SSR build completed.');
-        }
         // SPA build process
-        else {
-            let mode = entriesConfig.length === 0 ? 'SPA' : 'MPA';
-            console.log(`[Lavas] ${mode} build starting...`);
-            await webpackCompile(await this.createSPAConfig(false, mode === 'SPA'));
-            console.log(`[Lavas] ${mode} build completed.`);
-        }
+        let mode = entriesConfig.length === 0 ? 'SPA' : 'MPA';
+        console.log(`[Lavas] ${mode} build starting...`);
+        await webpackCompile(await this.createSPAConfig(false, mode === 'SPA'));
+        console.log(`[Lavas] ${mode} build completed.`);
     }
 }

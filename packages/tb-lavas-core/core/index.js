@@ -3,11 +3,7 @@
  * @author lavas
  */
 
-import Renderer from './renderer';
 import ConfigReader from './config-reader';
-import ProdBuilder from './builder/prod-builder';
-import DevBuilder from './builder/dev-builder';
-import MiddlewareComposer from './middleware-composer';
 
 import ora from 'ora';
 import EventEmitter from 'events';
@@ -44,21 +40,20 @@ export default class LavasCore extends EventEmitter {
             this.config = await this.configReader.readConfigFile();
         }
 
-        this.middlewareComposer = new MiddlewareComposer(this);
-        this.renderer = new Renderer(this);
-        this.builder = this.isProd
-            ? new ProdBuilder(this) : new DevBuilder(this);
+        if (this.isProd) {
+            const ProdBuilder = import('./builder/prod-builder');
+            this.builder = new ProdBuilder(this);
+        }
+        else {
+            const DevBuilder = import('./builder/dev-builder');
+            this.builder = new DevBuilder(this);
 
-        // expose Koa & express middleware factory function
-        this.koaMiddleware = this.middlewareComposer.koa
-            .bind(this.middlewareComposer);
-        this.expressMiddleware = this.middlewareComposer.express
-            .bind(this.middlewareComposer);
+            const MiddlewareComposer = import('./middleware-composer');
+            this.middlewareComposer = new MiddlewareComposer(this);
+            // expose express middleware factory function
+            this.expressMiddleware = this.middlewareComposer.express
+                .bind(this.middlewareComposer);
 
-        // expose render function
-        this.render = this.renderer.render.bind(this.renderer);
-
-        if (!this.isProd) {
             // register rebuild listener
             this.on('start-rebuild', async () => {
                 // read config again
@@ -94,15 +89,6 @@ export default class LavasCore extends EventEmitter {
             throw(e);
         }
 
-    }
-
-    /**
-     * must run after build in prod mode
-     *
-     */
-    async runAfterBuild() {
-        // create with bundle & manifest
-        await this.renderer.createWithBundle();
     }
 
     /**

@@ -186,52 +186,20 @@ export default class DevBuilder extends BaseBuilder {
 
         await Promise.all(writeTasks);
 
-        // SSR build process
-        if (ssrEnabled) {
-            console.log('[Lavas] SSR build starting...');
-            clientConfig = this.webpackConfig.client();
-            serverConfig = this.webpackConfig.server();
-            let serverMFS = new MFS();
+        // SPA process
+        let mode = entriesConfig.length === 0 ? 'SPA' : 'MPA';
 
-            // pass addWatcher & reloadClient to renderer
-            this.renderer.addWatcher = this.addWatcher.bind(this);
-            this.renderer.reloadClient = this.reloadClient.bind(this);
-            await this.renderer.build(clientConfig, serverConfig);
-            this.renderer.serverMFS = serverMFS;
+        console.log(`[Lavas] ${mode} build starting...`);
+        // create spa config first
+        spaConfig = await this.createSPAConfig(true, mode === 'SPA');
 
-            serverCompiler = webpack(serverConfig);
-            serverCompiler.outputFileSystem = serverMFS;
+        // enable hotreload in every entry in dev mode
+        await enableHotReload(this.lavasPath(), spaConfig, true);
 
-            this.serverWatching = serverCompiler.watch({}, async (err, stats) => {
-                if (err) {
-                    throw err;
-                }
-                stats = stats.toJson();
-                if (stats.errors.length) {
-                    for (let error of stats.errors) {
-                        console.error(error);
-                    }
-                    return;
-                }
-                await this.renderer.refreshFiles();
-            });
-        }
-        // SPA build process
-        else {
-            let mode = entriesConfig.length === 0 ? 'SPA' : 'MPA';
-
-            console.log(`[Lavas] ${mode} build starting...`);
-            // create spa config first
-            spaConfig = await this.createSPAConfig(true, mode === 'SPA');
-
-            // enable hotreload in every entry in dev mode
-            await enableHotReload(this.lavasPath(), spaConfig, true);
-
-            // add skeleton routes
-            if (this.skeletonEnabled) {
-                // TODO: handle skeleton routes in dev mode
-                // this.addSkeletonRoutes(spaConfig);
-            }
+        // add skeleton routes
+        if (this.skeletonEnabled) {
+            // TODO: handle skeleton routes in dev mode
+            // this.addSkeletonRoutes(spaConfig);
         }
 
         // create a compiler based on spa config
@@ -249,9 +217,6 @@ export default class DevBuilder extends BaseBuilder {
         // set memory-fs used by devMiddleware
         clientMFS = this.devMiddleware.fileSystem;
         clientCompiler.outputFileSystem = clientMFS;
-        if (ssrEnabled) {
-            this.renderer.clientMFS = clientMFS;
-        }
 
         hotMiddleware = webpackHotMiddleware(clientCompiler, {
             heartbeat: 2500,
@@ -328,14 +293,8 @@ export default class DevBuilder extends BaseBuilder {
         // wait until webpack building finished
         await new Promise(resolve => {
             this.devMiddleware.waitUntilValid(async () => {
-                if (!ssrEnabled) {
-                    let mode = entriesConfig.length === 0 ? 'SPA' : 'MPA';
-                    console.log(`[Lavas] ${mode} build completed.`);
-                }
-                else {
-                    await this.renderer.refreshFiles();
-                    console.log('[Lavas] SSR build completed.');
-                }
+                let mode = entriesConfig.length === 0 ? 'SPA' : 'MPA';
+                console.log(`[Lavas] ${mode} build completed.`);
 
                 // publish reload event to old client
                 if (this.oldHotMiddleware) {

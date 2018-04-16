@@ -9,13 +9,10 @@ import {join, resolve, sep} from 'path';
 
 import nodeExternals from 'webpack-node-externals';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
-import FriendlyErrorsPlugin from 'friendly-errors-webpack-plugin';
 import OptimizeCSSPlugin from 'optimize-css-assets-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import VueSSRServerPlugin from 'vue-server-renderer/server-plugin';
-import {BundleAnalyzerPlugin} from 'webpack-bundle-analyzer';
 import SWRegisterWebpackPlugin from 'sw-register-webpack-plugin';
-import TimeFixWebpackPlugin from './plugins/timefix-webpack-plugin';
 
 import {vueLoaders, styleLoaders} from './utils/loader';
 import {assetsPath} from './utils/path';
@@ -109,36 +106,46 @@ export default class WebpackConfig {
             }
         };
 
-        let pluginsInProd = [
-            new OptimizeCSSPlugin({
-                cssProcessorOptions: {
-                    safe: true
-                }
-            }),
-            new SWRegisterWebpackPlugin({
-                filePath: resolve(__dirname, 'templates/sw-register.js'),
-                prefix: (serviceWorker && serviceWorker.swPath) || publicPath,
-                entries
-            })
-        ];
+        let plugins;
 
-        if (jsMinimize) {
-            pluginsInProd.unshift(
-                new webpack.optimize.UglifyJsPlugin({
-                    compress: {
-                        warnings: false
-                    },
-                    sourceMap: jsSourceMap
+        // In dev mode, fix watchpack time problem.
+        if (this.isDev) {
+            const FriendlyErrorsPlugin = import('friendly-errors-webpack-plugin');
+            const TimeFixWebpackPlugin = import('./plugins/timefix-webpack-plugin');
+
+            plugins = [
+                new TimeFixWebpackPlugin(),
+                new FriendlyErrorsPlugin()
+            ];
+        }
+        else {
+            plugins = [
+                new OptimizeCSSPlugin({
+                    cssProcessorOptions: {
+                        safe: true
+                    }
+                }),
+                new SWRegisterWebpackPlugin({
+                    filePath: resolve(__dirname, 'templates/sw-register.js'),
+                    prefix: (serviceWorker && serviceWorker.swPath) || publicPath,
+                    entries
                 })
-            );
+            ];
+
+            if (jsMinimize) {
+                plugins.unshift(
+                    new webpack.optimize.UglifyJsPlugin({
+                        compress: {
+                            warnings: false
+                        },
+                        sourceMap: jsSourceMap
+                    })
+                );
+            }
         }
 
-        let pluginsInDev = [
-            new FriendlyErrorsPlugin()
-        ];
-
         baseConfig.plugins = [
-            ...(this.isProd ? pluginsInProd : pluginsInDev),
+            ...plugins,
             new webpack.DefinePlugin(baseDefines),
             ...basePlugins
         ];
@@ -149,11 +156,6 @@ export default class WebpackConfig {
                     filename: assetsPath(filenames.css)
                 })
             );
-        }
-
-        // In dev mode, fix watchpack time problem.
-        if (this.isDev) {
-            baseConfig.plugins.unshift(new TimeFixWebpackPlugin());
         }
 
         if (typeof extend === 'function') {
@@ -269,24 +271,14 @@ export default class WebpackConfig {
                 });
             }
         }
-
-
-        // if (entries && entries.length) {
-        //     entries.forEach(({name}) => {
-        //
-        //         clientConfig.plugins.push(
-        //             new InjectManifest(Object.assign({}, workboxConfig, workboxInjectManifestConfig, {
-        //                 ))
-        //         );
-        //     });
-        // }
-        // else {
-        //     clientConfig.plugins.push(
-        //         new InjectManifest(Object.assign({}, workboxConfig, workboxInjectManifestConfig, {
-        //             swSrc: join(globals.rootDir, `core/service-worker.js`),
-        //             swDest: `service-worker.js`
-        //         })));
-        // }
+        else {
+            // Bundle analyzer.
+            if (bundleAnalyzerReport) {
+                const {BundleAnalyzerPlugin} = import('webpack-bundle-analyzer');
+                clientConfig.plugins.push(
+                    new BundleAnalyzerPlugin(Object.assign({}, bundleAnalyzerReport)));
+            }
+        }
 
         // Copy static files to /dist.
         let copyList = [{
@@ -296,11 +288,6 @@ export default class WebpackConfig {
         }];
         clientConfig.plugins.push(new CopyWebpackPlugin(copyList));
 
-        // Bundle analyzer.
-        if (bundleAnalyzerReport) {
-            clientConfig.plugins.push(
-                new BundleAnalyzerPlugin(Object.assign({}, bundleAnalyzerReport)));
-        }
 
         if (typeof extend === 'function') {
             extend.call(this, clientConfig, {
