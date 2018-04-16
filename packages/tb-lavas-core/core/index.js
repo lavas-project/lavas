@@ -4,8 +4,6 @@
  */
 
 import ConfigReader from './config-reader';
-
-import ora from 'ora';
 import EventEmitter from 'events';
 
 export default class LavasCore extends EventEmitter {
@@ -41,14 +39,14 @@ export default class LavasCore extends EventEmitter {
         }
 
         if (this.isProd) {
-            const ProdBuilder = require('./builder/prod-builder');
+            await ProdBuilder = import('./builder/prod-builder');
             this.builder = new ProdBuilder(this);
         }
         else {
-            const DevBuilder = require('./builder/dev-builder');
+            await DevBuilder = import('./builder/dev-builder');
             this.builder = new DevBuilder(this);
 
-            const MiddlewareComposer = require('./middleware-composer');
+            await MiddlewareComposer = import('./middleware-composer');
             this.middlewareComposer = new MiddlewareComposer(this);
             // expose express middleware factory function
             this.expressMiddleware = this.middlewareComposer.express
@@ -76,16 +74,20 @@ export default class LavasCore extends EventEmitter {
      *
      */
     async build() {
-        let spinner = ora();
-        spinner.start();
+        let spinner
+        if (!this.isProd) {
+            await ora = import('ora');
+            spinner = ora();
+            spinner.start();
+        }
 
         try {
             await this.builder.build();
-            spinner.succeed(`[Lavas] ${this.env} build completed.`);
+            spinner && spinner.succeed(`[Lavas] ${this.env} build completed.`);
         }
         catch (e) {
             console.error(e);
-            spinner.fail(`[Lavas] ${this.env} build failed.`);
+            spinner && spinner.fail(`[Lavas] ${this.env} build failed.`);
             throw(e);
         }
 
