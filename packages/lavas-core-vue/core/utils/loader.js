@@ -16,7 +16,7 @@ export function vueLoaders(options = {}) {
 
 export function cssLoaders(options = {}) {
 
-    let cssLoader = {
+    const cssLoader = {
         loader: 'css-loader',
         options: {
             minimize: options.cssMinimize,
@@ -24,9 +24,16 @@ export function cssLoaders(options = {}) {
         }
     };
 
+    const postcssLoader = {
+        loader: 'postcss-loader',
+        options: {
+            sourceMap: options.cssSourceMap
+        }
+    };
+
     // generate loader string to be used with extract text plugin
     function generateLoaders(loader, loaderOptions) {
-        let loaders = [cssLoader];
+        let loaders = [cssLoader, postcssLoader];
 
         if (loader) {
             loaders.push({
