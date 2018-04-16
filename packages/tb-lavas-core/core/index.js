@@ -39,14 +39,14 @@ export default class LavasCore extends EventEmitter {
         }
 
         if (this.isProd) {
-            await ProdBuilder = import('./builder/prod-builder');
+            const ProdBuilder = await import('./builder/prod-builder');
             this.builder = new ProdBuilder(this);
         }
         else {
-            await DevBuilder = import('./builder/dev-builder');
+            const DevBuilder = await import('./builder/dev-builder');
             this.builder = new DevBuilder(this);
 
-            await MiddlewareComposer = import('./middleware-composer');
+            const MiddlewareComposer = await import('./middleware-composer');
             this.middlewareComposer = new MiddlewareComposer(this);
             // expose express middleware factory function
             this.expressMiddleware = this.middlewareComposer.express
@@ -76,7 +76,7 @@ export default class LavasCore extends EventEmitter {
     async build() {
         let spinner
         if (!this.isProd) {
-            await ora = import('ora');
+            const ora = await import('ora');
             spinner = ora();
             spinner.start();
         }

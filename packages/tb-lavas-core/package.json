@@ -1,6 +1,6 @@
 {
   "name": "tb-lavas-core",
-  "version": "1.0.2-rc.2",
+  "version": "1.0.2-y.0",
   "description": "Lavas core implemented by Vue",
   "main": "dist/index.js",
   "files": [
