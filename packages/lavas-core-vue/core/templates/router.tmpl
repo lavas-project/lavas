@@ -1,5 +1,8 @@
 import Vue from 'vue';
 import Router from 'vue-router';
+
+Vue.use(Router);
+
 <% router.routes.forEach(function(route) { %>
     <% if (route.lazyLoading) { %>
 let _<%- route.hash %> = () => import(<% if (route.chunkname) { %>/* webpackChunkName: "<%- route.chunkname %>" */<% } %>'@/<%- route.component %>');
@@ -10,7 +13,7 @@ import _<%- route.hash %> from '@/<%- route.component %>';
 
 let routes = <%= routesContent %>;
 
-Vue.use(Router);
+export {routes};
 
 <% if (router.pageTransition.enable && router.pageTransition.type === 'slide') { %>
 /**
