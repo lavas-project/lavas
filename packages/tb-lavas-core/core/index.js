@@ -41,14 +41,14 @@ export default class LavasCore extends EventEmitter {
         }
 
         if (this.isProd) {
-            const ProdBuilder = import('./builder/prod-builder');
+            const ProdBuilder = require('./builder/prod-builder');
             this.builder = new ProdBuilder(this);
         }
         else {
-            const DevBuilder = import('./builder/dev-builder');
+            const DevBuilder = require('./builder/dev-builder');
             this.builder = new DevBuilder(this);
 
-            const MiddlewareComposer = import('./middleware-composer');
+            const MiddlewareComposer = require('./middleware-composer');
             this.middlewareComposer = new MiddlewareComposer(this);
             // expose express middleware factory function
             this.expressMiddleware = this.middlewareComposer.express

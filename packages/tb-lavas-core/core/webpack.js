@@ -110,8 +110,8 @@ export default class WebpackConfig {
 
         // In dev mode, fix watchpack time problem.
         if (this.isDev) {
-            const FriendlyErrorsPlugin = import('friendly-errors-webpack-plugin');
-            const TimeFixWebpackPlugin = import('./plugins/timefix-webpack-plugin');
+            const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin');
+            const TimeFixWebpackPlugin = require('./plugins/timefix-webpack-plugin');
 
             plugins = [
                 new TimeFixWebpackPlugin(),
@@ -274,7 +274,7 @@ export default class WebpackConfig {
         else {
             // Bundle analyzer.
             if (bundleAnalyzerReport) {
-                const {BundleAnalyzerPlugin} = import('webpack-bundle-analyzer');
+                const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer');
                 clientConfig.plugins.push(
                     new BundleAnalyzerPlugin(Object.assign({}, bundleAnalyzerReport)));
             }
