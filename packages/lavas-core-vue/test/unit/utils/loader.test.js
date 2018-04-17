@@ -21,35 +21,41 @@ test('it should generate cssLoaders with minimize and sourceMap', async t => {
             sourceMap: true
         }
     };
+    let expectedPostcssLoader = {
+        loader: 'postcss-loader',
+        options: {
+            sourceMap: true
+        }
+    };
 
-    t.deepEqual(loaders.css, ['vue-style-loader', expectedCssLoader]);
-    t.deepEqual(loaders.postcss, ['vue-style-loader', expectedCssLoader]);
-    t.deepEqual(loaders.less, ['vue-style-loader', expectedCssLoader, {
+    t.deepEqual(loaders.css, ['vue-style-loader', expectedCssLoader, expectedPostcssLoader]);
+    t.deepEqual(loaders.postcss, ['vue-style-loader', expectedCssLoader, expectedPostcssLoader]);
+    t.deepEqual(loaders.less, ['vue-style-loader', expectedCssLoader, expectedPostcssLoader, {
         loader: 'less-loader',
         options: {
             sourceMap: true
         }
     }]);
-    t.deepEqual(loaders.sass, ['vue-style-loader', expectedCssLoader, {
+    t.deepEqual(loaders.sass, ['vue-style-loader', expectedCssLoader, expectedPostcssLoader, {
         loader: 'sass-loader',
         options: {
             indentedSyntax: true,
             sourceMap: true
         }
     }]);
-    t.deepEqual(loaders.scss, ['vue-style-loader', expectedCssLoader, {
+    t.deepEqual(loaders.scss, ['vue-style-loader', expectedCssLoader, expectedPostcssLoader, {
         loader: 'sass-loader',
         options: {
             sourceMap: true
         }
     }]);
-    t.deepEqual(loaders.stylus, ['vue-style-loader', expectedCssLoader, {
+    t.deepEqual(loaders.stylus, ['vue-style-loader', expectedCssLoader, expectedPostcssLoader, {
         loader: 'stylus-loader',
         options: {
             sourceMap: true
         }
     }]);
-    t.deepEqual(loaders.styl, ['vue-style-loader', expectedCssLoader, {
+    t.deepEqual(loaders.styl, ['vue-style-loader', expectedCssLoader, expectedPostcssLoader, {
         loader: 'stylus-loader',
         options: {
             sourceMap: true
@@ -70,18 +76,25 @@ test('it should generate cssLoaders with extract', async t => {
             sourceMap: false
         }
     };
+    let expectedPostcssLoader = {
+        loader: 'postcss-loader',
+        options: {
+            sourceMap: false
+        }
+    };
 
     t.deepEqual(loaders.css, ExtractTextPlugin.extract({
-        use: [expectedCssLoader],
+        use: [expectedCssLoader, expectedPostcssLoader],
         fallback: 'vue-style-loader'
     }));
     t.deepEqual(loaders.postcss, ExtractTextPlugin.extract({
-        use: [expectedCssLoader],
+        use: [expectedCssLoader, expectedPostcssLoader],
         fallback: 'vue-style-loader'
     }));
     t.deepEqual(loaders.less, ExtractTextPlugin.extract({
         use: [
             expectedCssLoader,
+            expectedPostcssLoader,
             {
                 loader: 'less-loader',
                 options: {
@@ -94,6 +107,7 @@ test('it should generate cssLoaders with extract', async t => {
     t.deepEqual(loaders.sass, ExtractTextPlugin.extract({
         use: [
             expectedCssLoader,
+            expectedPostcssLoader,
             {
                 loader: 'sass-loader',
                 options: {
@@ -107,6 +121,7 @@ test('it should generate cssLoaders with extract', async t => {
     t.deepEqual(loaders.scss, ExtractTextPlugin.extract({
         use: [
             expectedCssLoader,
+            expectedPostcssLoader,
             {
                 loader: 'sass-loader',
                 options: {
@@ -119,6 +134,7 @@ test('it should generate cssLoaders with extract', async t => {
     t.deepEqual(loaders.stylus, ExtractTextPlugin.extract({
         use: [
             expectedCssLoader,
+            expectedPostcssLoader,
             {
                 loader: 'stylus-loader',
                 options: {
@@ -131,6 +147,7 @@ test('it should generate cssLoaders with extract', async t => {
     t.deepEqual(loaders.styl, ExtractTextPlugin.extract({
         use: [
             expectedCssLoader,
+            expectedPostcssLoader,
             {
                 loader: 'stylus-loader',
                 options: {
@@ -156,35 +173,41 @@ test('it should generate vueLoaders', async t => {
             sourceMap: true
         }
     };
+    let expectedPostcssLoader = {
+        loader: 'postcss-loader',
+        options: {
+            sourceMap: true
+        }
+    };
 
-    t.deepEqual(vueLoadersResult.loaders.css, ['vue-style-loader', expectedCssLoader]);
-    t.deepEqual(vueLoadersResult.loaders.postcss, ['vue-style-loader', expectedCssLoader]);
-    t.deepEqual(vueLoadersResult.loaders.less, ['vue-style-loader', expectedCssLoader, {
+    t.deepEqual(vueLoadersResult.loaders.css, ['vue-style-loader', expectedCssLoader, expectedPostcssLoader]);
+    t.deepEqual(vueLoadersResult.loaders.postcss, ['vue-style-loader', expectedCssLoader, expectedPostcssLoader]);
+    t.deepEqual(vueLoadersResult.loaders.less, ['vue-style-loader', expectedCssLoader, expectedPostcssLoader, {
         loader: 'less-loader',
         options: {
             sourceMap: true
         }
     }]);
-    t.deepEqual(vueLoadersResult.loaders.sass, ['vue-style-loader', expectedCssLoader, {
+    t.deepEqual(vueLoadersResult.loaders.sass, ['vue-style-loader', expectedCssLoader, expectedPostcssLoader, {
         loader: 'sass-loader',
         options: {
             indentedSyntax: true,
             sourceMap: true
         }
     }]);
-    t.deepEqual(vueLoadersResult.loaders.scss, ['vue-style-loader', expectedCssLoader, {
+    t.deepEqual(vueLoadersResult.loaders.scss, ['vue-style-loader', expectedCssLoader, expectedPostcssLoader, {
         loader: 'sass-loader',
         options: {
             sourceMap: true
         }
     }]);
-    t.deepEqual(vueLoadersResult.loaders.stylus, ['vue-style-loader', expectedCssLoader, {
+    t.deepEqual(vueLoadersResult.loaders.stylus, ['vue-style-loader', expectedCssLoader, expectedPostcssLoader, {
         loader: 'stylus-loader',
         options: {
             sourceMap: true
         }
     }]);
-    t.deepEqual(vueLoadersResult.loaders.styl, ['vue-style-loader', expectedCssLoader, {
+    t.deepEqual(vueLoadersResult.loaders.styl, ['vue-style-loader', expectedCssLoader, expectedPostcssLoader, {
         loader: 'stylus-loader',
         options: {
             sourceMap: true
@@ -206,19 +229,25 @@ test('it should generate styleLoaders', async t => {
             sourceMap: true
         }
     };
+    let expectedPostcssLoader = {
+        loader: 'postcss-loader',
+        options: {
+            sourceMap: true
+        }
+    };
 
     t.deepEqual(loaders, [{
         name: 'css',
         test: new RegExp(/\.css$/),
-        use: ['vue-style-loader', expectedCssLoader]
+        use: ['vue-style-loader', expectedCssLoader, expectedPostcssLoader]
     }, {
         name: 'postcss',
         test: new RegExp(/\.postcss$/),
-        use: ['vue-style-loader', expectedCssLoader]
+        use: ['vue-style-loader', expectedCssLoader, expectedPostcssLoader]
     }, {
         name: 'less',
         test: new RegExp(/\.less$/),
-        use: ['vue-style-loader', expectedCssLoader, {
+        use: ['vue-style-loader', expectedCssLoader, expectedPostcssLoader, {
             loader: 'less-loader',
             options: {
                 sourceMap: true
@@ -227,7 +256,7 @@ test('it should generate styleLoaders', async t => {
     }, {
         name: 'sass',
         test: new RegExp(/\.sass$/),
-        use: ['vue-style-loader', expectedCssLoader, {
+        use: ['vue-style-loader', expectedCssLoader, expectedPostcssLoader, {
             loader: 'sass-loader',
             options: {
                 indentedSyntax: true,
@@ -237,7 +266,7 @@ test('it should generate styleLoaders', async t => {
     }, {
         name: 'scss',
         test: new RegExp(/\.scss$/),
-        use: ['vue-style-loader', expectedCssLoader, {
+        use: ['vue-style-loader', expectedCssLoader, expectedPostcssLoader, {
             loader: 'sass-loader',
             options: {
                 sourceMap: true
@@ -246,7 +275,7 @@ test('it should generate styleLoaders', async t => {
     }, {
         name: 'stylus',
         test: new RegExp(/\.stylus$/),
-        use: ['vue-style-loader', expectedCssLoader, {
+        use: ['vue-style-loader', expectedCssLoader, expectedPostcssLoader, {
             loader: 'stylus-loader',
             options: {
                 sourceMap: true
@@ -255,7 +284,7 @@ test('it should generate styleLoaders', async t => {
     }, {
         name: 'styl',
         test: new RegExp(/\.styl$/),
-        use: ['vue-style-loader', expectedCssLoader, {
+        use: ['vue-style-loader', expectedCssLoader, expectedPostcssLoader, {
             loader: 'stylus-loader',
             options: {
                 sourceMap: true

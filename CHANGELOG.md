@@ -2,6 +2,13 @@
 
 =======
 
+## Lavas-core-vue [1.1.10] - 2018-4-13
+
+- [Fix] Add postcss-loader to all of CSS preprocessers' rules. ([#134][i134])
+- [Feature] Add `route.redirect` option in `lavas.config.js`.
+
+[i134]: https://github.com/lavas-project/lavas/issues/134
+
 ## Lavas [2.2.7] - 2018-4-10
 
 - [Feature] Add lavas-core-vue version to `lavas -v` ([#126][i126])
