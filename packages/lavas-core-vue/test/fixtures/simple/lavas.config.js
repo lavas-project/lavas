@@ -21,6 +21,9 @@ module.exports = {
             base: {
                 'DEFINE_TEST_VAR': '"test-var"'
             }
+        },
+        babel: {
+            babelrc: true
         }
     },
     router: {
