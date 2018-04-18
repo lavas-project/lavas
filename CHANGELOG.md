@@ -2,6 +2,10 @@
 
 =======
 
+## Lavas-core-vue [1.1.11] - 2018-4-18
+
+- [Fix] Remove `.babelrc` in templates. Use `build.babel` option in `lavas.config.js`.
+
 ## Lavas-core-vue [1.1.10] - 2018-4-13
 
 - [Fix] Add postcss-loader to all of CSS preprocessers' rules. ([#134][i134])
