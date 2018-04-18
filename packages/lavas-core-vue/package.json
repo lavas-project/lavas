@@ -1,6 +1,6 @@
 {
   "name": "lavas-core-vue",
-  "version": "1.1.11-rc.0",
+  "version": "1.1.11",
   "description": "Lavas core implemented by Vue",
   "main": "dist/index.js",
   "files": [
