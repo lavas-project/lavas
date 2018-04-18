@@ -33,7 +33,6 @@ const DEFAULT_CONFIG = {
             fonts: 'fonts/[name].[hash:8].[ext]'
         },
         babel: {
-            presets: ['vue-app'],
             babelrc: false
         },
         cssExtract: false,
