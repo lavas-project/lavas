@@ -60,6 +60,20 @@ export default class WebpackConfig {
         });
     }
 
+    generateBabelOptions(options, isClient) {
+        if (!options.babelrc && !options.presets) {
+            options.presets = [
+                [
+                    'vue-app',
+                    {
+                        targets: isClient ? {ie: 9, uglify: true} : {node: 'current'}
+                    }
+                ]
+            ]
+        }
+        return options;
+    }
+
     /**
      * generate webpack base config based on lavas config
      *
@@ -69,8 +83,8 @@ export default class WebpackConfig {
     async base(buildConfig = {}) {
         let {globals, build} = this.config;
         /* eslint-disable fecs-one-var-per-line */
-        let {path, publicPath, filenames, babel, cssSourceMap, cssMinimize,
-            cssExtract, jsSourceMap,
+        let {path, publicPath, filenames, cssSourceMap, cssMinimize,
+            cssExtract, jsSourceMap, babelOptions,
             alias: {base: baseAlias = {}},
             defines: {base: baseDefines = {}}
         } = Object.assign({}, build, buildConfig);
@@ -106,14 +120,15 @@ export default class WebpackConfig {
                 .options(vueLoaders({
                     cssSourceMap,
                     cssMinimize,
-                    cssExtract
+                    cssExtract,
+                    babelOptions
                 }));
 
         baseConfig.module.rule('js')
             .test(/\.js$/)
             .use('babel')
                 .loader('babel-loader')
-                .options(babel)
+                .options(babelOptions)
                 .end()
             .exclude.add(/node_modules/);
 
@@ -197,12 +212,15 @@ export default class WebpackConfig {
         /* eslint-disable fecs-one-var-per-line */
         let {publicPath, filenames, cssSourceMap, cssMinimize, cssExtract,
             jsSourceMap, bundleAnalyzerReport, extend, extendWithWebpackChain,
+            babel,
             defines: {client: clientDefines = {}},
             alias: {client: clientAlias = {}},
             plugins: {base: basePlugins = [], client: clientPlugins = []}} = Object.assign({}, build, internalBuildConfig);
         /* eslint-enable fecs-one-var-per-line */
 
-        let clientConfig = await this.base(internalBuildConfig);
+        let clientConfig = await this.base(Object.assign(internalBuildConfig, {
+            babelOptions: this.generateBabelOptions(babel, true)
+        }));
 
         // set output format
         clientConfig.output
@@ -358,13 +376,16 @@ export default class WebpackConfig {
     async server(internalBuildConfig = {}) {
         /* eslint-disable fecs-one-var-per-line */
         let {extend, extendWithWebpackChain, nodeExternalsWhitelist = [],
+            babel,
             defines: {server: serverDefines = {}},
             alias: {server: serverAlias = {}},
             plugins: {base: basePlugins = [], server: serverPlugins = []}
         } = Object.assign({}, this.config.build, internalBuildConfig);
         /* eslint-enable fecs-one-var-per-line */
 
-        let serverConfig = await this.base(internalBuildConfig);
+        let serverConfig = await this.base(Object.assign(internalBuildConfig, {
+            babelOptions: this.generateBabelOptions(babel, false)
+        }));
 
         // set target & output
         serverConfig
