@@ -59,11 +59,7 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) 
             swDest = relative(buildPath, swDest);
         }
 
-        // workboxConfig.swPath = getEntryConfigValue(workboxConfig.swPath, entryConfig.name);
-        let manifestFilename = `${entryConfig.name}/[manifest]`;
-
-        workboxConfig = Object.assign({}, workboxInjectManifestConfig, {
-            manifestFilename,
+        workboxConfig = Object.assign({}, workboxConfig, workboxInjectManifestConfig, {
             swDest,
             excludeChunks: entryNames.filter(n => n !== entryConfig.name),
             exclude: [
@@ -160,6 +156,10 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) 
     delete workboxConfig.swPath;
     delete workboxConfig.appshellUrls;
     delete workboxConfig.appshellUrl;
+    delete workboxConfig.pathPrefix;
+    delete workboxConfig.swName;
+    delete workboxConfig.swRegisterName;
+    delete workboxConfig.scope;
 
     // use workbox-webpack-plugin@3.x
     webpackConfig.plugins.push(new InjectManifest(workboxConfig));
