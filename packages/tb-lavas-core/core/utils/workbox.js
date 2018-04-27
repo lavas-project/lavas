@@ -5,7 +5,7 @@
 import {basename, join, isAbsolute, relative} from 'path';
 import {readFileSync, writeFileSync} from 'fs-extra';
 // import WorkboxWebpackPlugin from 'workbox-webpack-plugin';
-import {InjectManifest} from '../plugins/workbox-webpack-plugin';
+import {InjectManifest} from 'workbox-webpack-plugin';
 
 export const WORKBOX_PATH = require.resolve('workbox-sw');
 
@@ -72,7 +72,8 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) 
                 ...entryNames
                     .filter(n => n !== entryConfig.name)
                     .map(n => new RegExp(`^${n}/`))
-            ]
+            ],
+            ...workboxConfig
         });
     }
     // SPA & SSR
@@ -81,7 +82,8 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) 
         swDest = basename(swDest);
 
         workboxConfig = Object.assign({}, workboxInjectManifestConfig, {
-            swDest
+            swDest,
+            ...workboxConfig
         });
     }
 
