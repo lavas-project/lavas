@@ -4,30 +4,35 @@
  */
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 
-export function vueLoaders(options = {}) {
+export function vueLoaders({cssSourceMap, cssMinimize, cssExtract, babelOptions}) {
     return {
-        loaders: cssLoaders({
-            cssSourceMap: options.cssSourceMap,
-            cssMinimize: options.cssMinimize,
-            cssExtract: options.cssExtract
-        })
+        loaders: Object.assign({
+            js: {
+                loader: 'babel-loader',
+                options: babelOptions
+            }
+        }, cssLoaders({
+            cssSourceMap,
+            cssMinimize,
+            cssExtract
+        }))
     };
 }
 
-export function cssLoaders(options = {}) {
+export function cssLoaders({cssMinimize, cssSourceMap, cssExtract}) {
 
     const cssLoader = {
         loader: 'css-loader',
         options: {
-            minimize: options.cssMinimize,
-            sourceMap: options.cssSourceMap
+            minimize: cssMinimize,
+            sourceMap: cssSourceMap
         }
     };
 
     const postcssLoader = {
         loader: 'postcss-loader',
         options: {
-            sourceMap: options.cssSourceMap
+            sourceMap: cssSourceMap
         }
     };
 
@@ -39,14 +44,14 @@ export function cssLoaders(options = {}) {
             loaders.push({
                 loader: loader + '-loader',
                 options: Object.assign({}, loaderOptions, {
-                    sourceMap: options.cssSourceMap
+                    sourceMap: cssSourceMap
                 })
             });
         }
 
         // Extract CSS when that option is specified
         // (which is the case during production build)
-        if (options.cssExtract) {
+        if (cssExtract) {
             return ExtractTextPlugin.extract({
                 use: loaders,
                 fallback: 'vue-style-loader'
