@@ -2,6 +2,14 @@
 
 =======
 
+## Lavas-core-vue [1.1.12] - 2018-4-27
+
+- [Fix] Fix a problem causing rendering failure ([#147][i147])
+- [Fix] Fix a problem when using lavas-core-vue without lavas-cli ([#148][i148])
+
+[i147]: https://github.com/lavas-project/lavas/issues/147
+[i148]: https://github.com/lavas-project/lavas/issues/148
+
 ## Lavas-core-vue [1.1.11] - 2018-4-18
 
 - [Fix] Remove `.babelrc` in templates. Use `build.babel` option in `lavas.config.js`.
