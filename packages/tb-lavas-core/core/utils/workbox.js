@@ -34,7 +34,7 @@ export function getWorkboxFiles(isProd) {
 export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) {
     let {buildVersion, build: {publicPath, ssr, path: buildPath}, globals, router: {base = '/'}} = lavasConfig;
     let workboxConfig = entryConfig ? entryConfig.serviceWorker : lavasConfig.serviceWorker;
-    let {swSrc, swDest = 'service-worker.js', appshellUrl, appshellUrls} = workboxConfig;
+    let {swSrc, swDest = 'service-worker.js', appshellUrl, appshellUrls, exclude = []} = workboxConfig;
 
     // workbox precache inject point
     const WORKBOX_PRECACHE_REG = /workbox\.precaching\.precacheAndRoute\(self\.__precacheManifest\);/;
@@ -42,7 +42,6 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) 
     // default config for workbox.InjectManifest
     let workboxInjectManifestConfig = {
         importWorkboxFrom: 'disabled',
-        globDirectory: '.',
         exclude: [
             /\.map$/,
             /^manifest.*\.js(?:on)?$/,
@@ -68,12 +67,12 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) 
             swDest,
             excludeChunks: entryNames.filter(n => n !== entryConfig.name),
             exclude: [
+                ...exclude,
                 ...workboxInjectManifestConfig.exclude,
                 ...entryNames
                     .filter(n => n !== entryConfig.name)
                     .map(n => new RegExp(`^${n}/`))
-            ],
-            ...workboxConfig
+            ]
         });
     }
     // SPA & SSR
@@ -81,9 +80,8 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) 
         // in workbox@3.x swDest must be a relative path
         swDest = basename(swDest);
 
-        workboxConfig = Object.assign({}, workboxInjectManifestConfig, {
-            swDest,
-            ...workboxConfig
+        workboxConfig = Object.assign({}, workboxConfig, workboxInjectManifestConfig, {
+            swDest
         });
     }
 

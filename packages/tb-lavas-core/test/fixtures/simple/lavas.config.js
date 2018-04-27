@@ -34,15 +34,12 @@ module.exports = {
     serviceWorker: {
         swSrc: path.join(__dirname, 'core/service-worker.js'),
         swDest: path.join(BUILD_PATH, 'service-worker.js'),
-        globDirectory: BUILD_PATH,
-        globPatterns: [
-            '**/*.{html,js,css,eot,svg,ttf,woff}'
+        include: [
+            /\.(html|js|css|svg|ttf|woff|eot)$/
         ],
-        globIgnores: [
-            'sw-register.js',
-            '**/*.map'
+        exclude: [
+            'sw-register.js'
         ],
-        appshellUrl: '/appshell',
-        dontCacheBustUrlsMatching: /\.\w{8}\./
+        appshellUrl: '/appshell'
     }
 };
