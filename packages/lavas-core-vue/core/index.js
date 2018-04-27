@@ -30,6 +30,7 @@ export default class LavasCore extends EventEmitter {
         this.env = env;
         this.isProd = this.env === 'production';
         this.configReader = new ConfigReader(this.cwd, this.env, options.config);
+        process.env.NODE_ENV = env;
 
         /**
          * in a build process, we need to read config by scan a directory,
