@@ -34,7 +34,7 @@ export function getWorkboxFiles(isProd) {
 export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) {
     let {buildVersion, build: {publicPath, ssr, path: buildPath}, globals, router: {base = '/'}} = lavasConfig;
     let workboxConfig = entryConfig ? entryConfig.serviceWorker : lavasConfig.serviceWorker;
-    let {swSrc, swDest = 'service-worker.js', appshellUrl, appshellUrls, exclude = []} = workboxConfig;
+    let {swSrc, swDest = 'service-worker.js', appshellUrl, appshellUrls, exclude = [], disableGenerateNavigationRoute = false} = workboxConfig;
 
     // workbox precache inject point
     const WORKBOX_PRECACHE_REG = /workbox\.precaching\.precacheAndRoute\(self\.__precacheManifest\);/;
@@ -137,12 +137,14 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) 
         registerNavigationClause = `workbox.routing.registerNavigationRoute('${base}${entryHtml}'${whitelistClause});`;
     }
 
-    if (WORKBOX_PRECACHE_REG.test(serviceWorkerContent)) {
-        serviceWorkerContent = serviceWorkerContent.replace(WORKBOX_PRECACHE_REG,
-            `workbox.precaching.precacheAndRoute(self.__precacheManifest);\n${registerNavigationClause}\n`);
-    }
-    else {
-        serviceWorkerContent += registerNavigationClause;
+    if (!disableGenerateNavigationRoute) {
+        if (WORKBOX_PRECACHE_REG.test(serviceWorkerContent)) {
+            serviceWorkerContent = serviceWorkerContent.replace(WORKBOX_PRECACHE_REG,
+                `workbox.precaching.precacheAndRoute(self.__precacheManifest);\n${registerNavigationClause}\n`);
+        }
+        else {
+            serviceWorkerContent += registerNavigationClause;
+        }
     }
 
     // write new service worker in .lavas/sw.js
@@ -160,6 +162,7 @@ export function useWorkbox(webpackConfig, lavasConfig, entryConfig, entryNames) 
     delete workboxConfig.swName;
     delete workboxConfig.swRegisterName;
     delete workboxConfig.scope;
+    delete workboxConfig.disableGenerateNavigationRoute;
 
     // use workbox-webpack-plugin@3.x
     webpackConfig.plugins.push(new InjectManifest(workboxConfig));
