@@ -35,9 +35,11 @@ export default class ProdBuilder extends BaseBuilder {
         Logger.info('build', 'compiling routes completed.', true);
 
         Logger.info('build', 'start writing files to /.lavas...', true);
-        await this.writeRuntimeConfig();
-        await this.writeMiddleware();
-        await this.writeStore();
+        await Promise.all([
+            this.writeRuntimeConfig(),
+            this.writeMiddleware(),
+            this.writeStore()
+        ])
         Logger.info('build', 'writing files to /.lavas completed', true);
 
         // SSR build process
