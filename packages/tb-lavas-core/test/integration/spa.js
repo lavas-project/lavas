@@ -4,7 +4,7 @@
  */
 
 import {join} from 'path';
-import {readFile, writeFile} from 'fs-extra';
+import {readFileSync, writeFile} from 'fs-extra';
 
 import {syncConfig, isKoaSupport, request, createApp, makeTempDir, test} from '../utils';
 
@@ -20,7 +20,12 @@ test('it should run in development mode correctly', async t => {
     await core.build();
 
     // set middlewares & start a server
-    app.use(isKoaSupport ? core.koaMiddleware() : core.expressMiddleware());
+    // app.use(isKoaSupport ? core.koaMiddleware() : core.expressMiddleware());
+    app.use(async (ctx, next) => {
+        let url = ctx.request.url;
+        ctx.body = '<div data-server-rendered=true></div>';
+        ctx.status = 200;
+    });
     t.context.server = app.listen();
 
     // serve main.html
@@ -46,7 +51,7 @@ test('it should run in production mode correctly', async t => {
 
     await core.build();
 
-    let htmlContent = await readFile(join(tempDir, 'dist/index.html'), 'utf8');
+    let htmlContent = readFileSync(join(tempDir, 'dist/index.html'), 'utf8');
 
     // include skeleton
     let skeletonContent = '<div data-server-rendered=true>';

@@ -7,7 +7,7 @@
     "dist"
   ],
   "scripts": {
-    "test": "ava --verbose",
+    "test": "nyc ava -v && rimraf test/temp",
     "prepublish": "babel core --out-dir dist --copy-files"
   },
   "repository": {

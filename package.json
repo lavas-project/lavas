@@ -10,7 +10,7 @@
     "build:tb-lavas-core": "babel packages/tb-lavas-core/core --out-dir packages/tb-lavas-core/dist --copy-files",
     "build:lavas-cli": "babel packages/lavas-cli/src --out-dir packages/lavas-cli/dist --copy-files",
     "lint": "fecs ./ --rule --type 'vue,js,css'",
-    "test": "nyc ava",
+    "test": "nyc ava -v && rimraf packages/lavas-core-vue/test/temp",
     "nyc:report": "nyc report --reporter=html",
     "publish:core": "lerna publish --scope=tb-lavas-core"
   },
