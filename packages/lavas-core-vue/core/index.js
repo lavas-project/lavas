@@ -31,6 +31,10 @@ export default class LavasCore extends EventEmitter {
         this.isProd = this.env === 'production';
         this.configReader = new ConfigReader(this.cwd, this.env, options.config);
 
+        if (!process.env.NODE_ENV) {
+            process.env.NODE_ENV = env;
+        }
+
         /**
          * in a build process, we need to read config by scan a directory,
          * but for online server after build, we just read config.json directly

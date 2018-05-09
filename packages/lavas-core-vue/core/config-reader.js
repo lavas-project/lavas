@@ -116,7 +116,8 @@ export const RUMTIME_ITEMS = {
     build: {
         ssr: true,
         publicPath: true,
-        compress: true
+        compress: true,
+        cssExtract: true
     },
     middleware: true,
     router: true,

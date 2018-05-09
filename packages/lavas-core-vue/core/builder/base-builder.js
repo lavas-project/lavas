@@ -4,7 +4,7 @@
  */
 
 import template from 'lodash.template';
-import {readFile, pathExists} from 'fs-extra';
+import {readFile, pathExistsSync} from 'fs-extra';
 import {join, basename, normalize} from 'path';
 
 import HtmlWebpackPlugin from 'html-webpack-plugin';
@@ -118,7 +118,7 @@ export default class BaseBuilder {
 
     async writeMiddleware() {
         const middlewareTemplate = this.templatesPath('middleware.tmpl');
-        let isEmpty = !(await pathExists(join(this.config.globals.rootDir, 'middlewares')));
+        let isEmpty = !(pathExistsSync(join(this.config.globals.rootDir, 'middlewares')));
 
         await this.writeFileToLavasDir(
             'middleware.js',
@@ -130,7 +130,7 @@ export default class BaseBuilder {
 
     async writeStore() {
         const storeTemplate = this.templatesPath('store.tmpl');
-        let isEmpty = !(await pathExists(join(this.config.globals.rootDir, 'store')));
+        let isEmpty = !(pathExistsSync(join(this.config.globals.rootDir, 'store')));
 
         await this.writeFileToLavasDir(
             STORE_FILE,
@@ -173,12 +173,12 @@ export default class BaseBuilder {
 
         // find core/spa.html.tmpl
         templatePath = join(rootDir, `core/${SPA_TEMPLATE_HTML}`);
-        if (!await pathExists(templatePath)) {
+        if (!pathExistsSync(templatePath)) {
             // find core/index.html.tmpl
             templatePath = join(rootDir, `core/${TEMPLATE_HTML}`);
         }
 
-        if (!await pathExists(templatePath)) {
+        if (!pathExistsSync(templatePath)) {
             throw new Error(`${SPA_TEMPLATE_HTML} or ${TEMPLATE_HTML} required`);
         }
 
@@ -320,7 +320,7 @@ export default class BaseBuilder {
                 resolveAliasPath(alias, currentRoute.componentPath)
             ];
             for (let j = 0; j < resolvedPaths.length; j++) {
-                if (await pathExists(resolvedPaths[j])) {
+                if (pathExistsSync(resolvedPaths[j])) {
                     // in Windows, normalize will replace posix.sep`/` with win32.sep`\\`
                     currentRoute.componentPath = normalize(resolvedPaths[j])
                         .replace(/\\/g, '\\\\'); // escape backslash before writing to skeleton template
