@@ -27,7 +27,7 @@ test.afterEach.always('clean', async t => {
 
     await core.close();
     server && server.close();
-
+    
     // clean temp dir
     await remove(tempDir);
 });
