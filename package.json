@@ -12,7 +12,7 @@
     "lint": "fecs ./ --rule --type 'vue,js,css'",
     "test": "rimraf packages/lavas-core-vue/test/temp && nyc ava -v",
     "nyc:report": "nyc report --reporter=html",
-    "publish:core": "lerna publish --scope=lavas-core-vue"
+    "publish:lavas-core-vue": "lerna publish --scope=lavas-core-vue"
   },
   "bin": {
     "lavas": "./packages/lavas-cli/bin/dev-lavas-cli.js",

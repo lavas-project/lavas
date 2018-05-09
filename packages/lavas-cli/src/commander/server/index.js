@@ -83,24 +83,40 @@ module.exports = function (program) {
     // lavas start
     program
         .command('start')
-        .description(locals.START_PROD)
+        .description(locals.START)
         .option('-p, --port <port>', locals.START_PORT)
-        .action(async ({port}) => {
-            let serverScriptPath = path.resolve(utils.getLavasProjectRoot(), DEFAULT_PROD_SERVER_SCRIPT);
+        .action(({port}) => {
+            let serverScriptPath = path.resolve(process.cwd(), DEFAULT_PROD_SERVER_SCRIPT);
 
-            let isServerScriptExist = await fs.pathExists(serverScriptPath);
-            if (!isServerScriptExist) {
-                log.warn(`${locals.START_NO_FILE} ${serverScriptPath}`);
+            // Start SSR project
+            if (fs.pathExistsSync(serverScriptPath)) {
+                log.info(locals.START_SSR + '...');
+                process.env.NODE_ENV = 'production';
+
+                if (port) {
+                    process.env.PORT = Number(port);
+                }
+
+                fork(serverScriptPath);
                 return;
             }
 
-            process.env.NODE_ENV = 'production';
-
-            if (port) {
-                process.env.PORT = Number(port);
+            port = port || 8000;
+            let routesJsonPath = path.resolve(process.cwd(), 'lavas/routes.json');
+            let message;
+            // Start SPA project
+            if (fs.pathExistsSync(routesJsonPath)) {
+                startSPA(routesJsonPath);
+                message = locals.START_SPA + '...';
+            }
+            // Start a normal static server
+            else {
+                startStatic();
+                message = locals.START_STATIC + '...';
             }
 
-            fork(serverScriptPath);
+            app.listen(port, () => log.info(`${message} localhost:${port}`));
+
         });
 
     // lavas static
@@ -108,56 +124,67 @@ module.exports = function (program) {
         command('static')
         .description(locals.START_STATIC)
         .option('-p, --port <port>', locals.START_PORT)
-        .action(async ({port = 8000}) => {
+        .action(({port = 8000}) => {
             log.info(locals.START_STATIC + '...');
 
             let routesJsonPath = path.resolve(process.cwd(), 'lavas/routes.json');
+            let message;
 
             // start static server with lavas routes configured
-            if (await fs.pathExists(routesJsonPath)) {
-                try {
-                    let baseUrl = require(routesJsonPath).base;
-                    if (!baseUrl || baseUrl === '/') {
-                        // redirect all requests to '/index.html'
-                        app.use(historyMiddleware({
-                            htmlAcceptHeaders: ['text/html'],
-                            disableDotRule: false // ignore paths with dot inside
-                        }));
-
-                        app.use(express.static('.'));
-                    }
-                    else {
-                        // fix trailing '/'
-                        // @see https://lavas.baidu.com/guide/v2/advanced/multi-lavas#express-%E5%A4%84%E7%90%86-spa-%E8%B7%AF%E7%94%B1%E7%9A%84%E5%B0%8F%E9%97%AE%E9%A2%98-%E6%89%A9%E5%B1%95
-                        if (!baseUrl.endsWith('/')) {
-                            baseUrl += '/';
-                        }
-
-                        app.use('/', (req, res, next) => {
-                            let requestUrl = req.url.replace(/\?.+?$/, '');
-
-                            if (requestUrl === baseUrl.substring(0, baseUrl.length - 1)) {
-                                req.url = requestUrl + '/';
-                            }
-
-                            next();
-                        });
-
-                        app.use(baseUrl, historyMiddleware({
-                            htmlAcceptHeaders: ['text/html'],
-                            disableDotRule: false // ignore paths with dot inside
-                        }));
-
-                        app.use(baseUrl, express.static('.'));
-                    }
-                }
-                catch (e) {}
+            if (fs.pathExistsSync(routesJsonPath)) {
+                startSPA(routesJsonPath);
+                message = locals.START_SPA + '...';
             }
             // start a normal static server
             else {
-                app.use(express.static('.'));
+                startStatic();
+                message = locals.START_STATIC + '...';
             }
 
-            app.listen(port, () => log.info(`Static server start at localhost:${port}`));
+            app.listen(port, () => log.info(`${message} localhost:${port}`));
         });
 };
+
+function startSPA(routesJsonPath) {
+    try {
+        let baseUrl = require(routesJsonPath).base;
+        if (!baseUrl || baseUrl === '/') {
+            // redirect all requests to '/index.html'
+            app.use(historyMiddleware({
+                htmlAcceptHeaders: ['text/html'],
+                disableDotRule: false // ignore paths with dot inside
+            }));
+
+            app.use(express.static('.'));
+        }
+        else {
+            // fix trailing '/'
+            // @see https://lavas.baidu.com/guide/v2/advanced/multi-lavas#express-%E5%A4%84%E7%90%86-spa-%E8%B7%AF%E7%94%B1%E7%9A%84%E5%B0%8F%E9%97%AE%E9%A2%98-%E6%89%A9%E5%B1%95
+            if (!baseUrl.endsWith('/')) {
+                baseUrl += '/';
+            }
+
+            app.use('/', (req, res, next) => {
+                let requestUrl = req.url.replace(/\?.+?$/, '');
+
+                if (requestUrl === baseUrl.substring(0, baseUrl.length - 1)) {
+                    req.url = requestUrl + '/';
+                }
+
+                next();
+            });
+
+            app.use(baseUrl, historyMiddleware({
+                htmlAcceptHeaders: ['text/html'],
+                disableDotRule: false // ignore paths with dot inside
+            }));
+
+            app.use(baseUrl, express.static('.'));
+        }
+    }
+    catch (e) {}
+}
+
+function startStatic() {
+    app.use(express.static('.'));
+}
