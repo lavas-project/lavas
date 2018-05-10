@@ -4,7 +4,7 @@
  */
 
 import template from 'lodash.template';
-import {readFile, pathExistsSync, copySync} from 'fs-extra';
+import {readFileSync, pathExistsSync, copySync} from 'fs-extra';
 import {join, basename, normalize} from 'path';
 
 import HtmlWebpackPlugin from 'html-webpack-plugin';
@@ -97,47 +97,47 @@ export default class BaseBuilder {
      * @param {string} content content of file
      * @return {string} resolvedPath absolute path of file
      */
-    async writeFileToLavasDir(path, content) {
+    writeFileToLavasDir(path, content) {
         let resolvedPath = this.lavasPath(path);
-        await this.writeFile(resolvedPath, content);
+        this.writeFile(resolvedPath, content);
         return resolvedPath;
     }
 
     /**
      * write config used in runtime
      */
-    async writeRuntimeConfig() {
+    writeRuntimeConfig() {
         let filteredConfig = JsonUtil.deepPick(this.config, RUMTIME_ITEMS);
-        await this.writeFileToLavasDir(CONFIG_FILE, JsonUtil.stringify(filteredConfig, null, 4));
+        this.writeFileToLavasDir(CONFIG_FILE, JsonUtil.stringify(filteredConfig, null, 4));
     }
 
-    async writeMiddleware() {
+    writeMiddleware() {
         const middlewareTemplate = this.templatesPath('middleware.tmpl');
         let isEmpty = !(pathExistsSync(join(this.config.globals.rootDir, 'middlewares')));
 
-        await this.writeFileToLavasDir(
+        this.writeFileToLavasDir(
             'middleware.js',
-            template(await readFile(middlewareTemplate, 'utf8'))({
+            template(readFileSync(middlewareTemplate, 'utf8'))({
                 isEmpty
             })
         );
     }
 
-    async writeStore() {
+    writeStore() {
         const storeTemplate = this.templatesPath('store.tmpl');
         let isEmpty = !(pathExistsSync(join(this.config.globals.rootDir, 'store')));
 
-        await this.writeFileToLavasDir(
+        this.writeFileToLavasDir(
             STORE_FILE,
-            template(await readFile(storeTemplate, 'utf8'))({
+            template(readFileSync(storeTemplate, 'utf8'))({
                 isEmpty
             })
         );
     }
 
-    async writeLavasLink() {
-        let lavasLinkTemplate = await readFile(this.templatesPath('LavasLink.js.tmpl'), 'utf8');
-        await this.writeFileToLavasDir('LavasLink.js', template(lavasLinkTemplate)({
+    writeLavasLink() {
+        let lavasLinkTemplate = readFileSync(this.templatesPath('LavasLink.js.tmpl'), 'utf8');
+        this.writeFileToLavasDir('LavasLink.js', template(lavasLinkTemplate)({
             entryConfig: JsonUtil.stringify(this.config.entries.map(entry => {
                 // only select necessary keys
                 return {
@@ -156,11 +156,11 @@ export default class BaseBuilder {
      * @param {Array} skeleton routes
      * @return {string} entryPath
      */
-    async writeSkeletonEntry(skeletons, entryName) {
+    writeSkeletonEntry(skeletons, entryName) {
         const skeletonEntryTemplate = this.templatesPath('entry-skeleton.tmpl');
-        return await this.writeFileToLavasDir(
+        return this.writeFileToLavasDir(
             `${entryName}/skeleton.js`,
-            template(await readFile(skeletonEntryTemplate, 'utf8'))({skeletons})
+            template(readFileSync(skeletonEntryTemplate, 'utf8'))({skeletons})
         );
     }
 
@@ -181,7 +181,7 @@ export default class BaseBuilder {
      * @param {boolean} watcherEnabled enable watcher
      * @param {?string} entryName entry name in MPA, undefined in SPA
      */
-    async addHtmlPlugin(spaConfig, baseUrl = '/', watcherEnabled, isSPA, entryName) {
+    addHtmlPlugin(spaConfig, baseUrl = '/', watcherEnabled, isSPA, entryName) {
         let rootDir = this.config.globals.rootDir;
         let htmlFilename;
         let templatePath;
@@ -207,9 +207,9 @@ export default class BaseBuilder {
             : {};
 
         // write HTML template used by html-webpack-plugin which doesn't support template STRING
-        let resolvedTemplatePath = await this.writeFileToLavasDir(
+        let resolvedTemplatePath = this.writeFileToLavasDir(
             tempTemplatePath,
-            templateUtil.client(await readFile(templatePath, 'utf8'), baseUrl, templateObject)
+            templateUtil.client(readFileSync(templatePath, 'utf8'), baseUrl, templateObject)
         );
 
         // add html webpack plugin
@@ -231,10 +231,10 @@ export default class BaseBuilder {
 
         // watch template in development mode
         if (watcherEnabled) {
-            this.addWatcher(templatePath, 'change', async () => {
-                await this.writeFileToLavasDir(
+            this.addWatcher(templatePath, 'change', () => {
+                this.writeFileToLavasDir(
                     tempTemplatePath,
-                    templateUtil.client(await readFile(templatePath, 'utf8'), baseUrl, templateObject)
+                    templateUtil.client(readFileSync(templatePath, 'utf8'), baseUrl, templateObject)
                 );
             });
         }
@@ -246,7 +246,7 @@ export default class BaseBuilder {
      * @param {Object} spaConfig spaConfig
      * @param {?string} entryName entry name in MPA, undefined in SPA
      */
-    async addSkeletonPlugin(spaConfig, isSPA) {
+    addSkeletonPlugin(spaConfig, isSPA) {
         let {router, skeleton, entries} = this.config;
         // if skeleton provided, we need to create an entry
         let skeletonConfig;
@@ -278,7 +278,7 @@ export default class BaseBuilder {
                     }];
                 }
                 // check if all the componentPaths are existed first
-                let error = await this.validateSkeletonRoutes(skeleton.routes, spaConfig.resolve.alias);
+                let error = this.validateSkeletonRoutes(skeleton.routes, spaConfig.resolve.alias);
                 if (error && error.msg) {
                     console.error(error.msg);
                 }
@@ -305,7 +305,7 @@ export default class BaseBuilder {
                     });
 
                     // in MPA
-                    skeletonEntries[name] = [await this.writeSkeletonEntry(skeletons, name)];
+                    skeletonEntries[name] = [this.writeSkeletonEntry(skeletons, name)];
 
                     routes = routes.concat(skeleton.routes);
                 }
@@ -339,7 +339,7 @@ export default class BaseBuilder {
      * @param {Object} alias alias in webpack
      * @return {boolean|Object} error error
      */
-    async validateSkeletonRoutes(routes, alias) {
+    validateSkeletonRoutes(routes, alias) {
         let currentRoute;
         let resolvedPaths = [];
         let isComponentPathResolved;
@@ -417,11 +417,11 @@ export default class BaseBuilder {
             ];
 
             // 1. add html-webpack-plugin
-            await this.addHtmlPlugin(spaConfig, router.base, watcherEnabled, isSPA, entryName);
+            this.addHtmlPlugin(spaConfig, router.base, watcherEnabled, isSPA, entryName);
         }));
 
         // 2. add vue-skeleton-webpack-plugin
-        await this.addSkeletonPlugin(spaConfig, isSPA);
+        this.addSkeletonPlugin(spaConfig, isSPA);
 
         return spaConfig;
     }

@@ -18,6 +18,7 @@ test('it should merge middlewares defined in lavas.config.js and defaults correc
      * lavas.config.js    all: ['both']
      * merged             all: ['both']
      */
+    await core.build();
     t.deepEqual(core.config.middleware.all, ['both']);
 });
 
