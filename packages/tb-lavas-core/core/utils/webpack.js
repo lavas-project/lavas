@@ -4,7 +4,7 @@
  */
 import webpack from 'webpack';
 import {join} from 'path';
-import {utimes, outputFile, readFile} from 'fs-extra';
+import {utimesSync, outputFileSync, readFileSync} from 'fs-extra';
 import template from 'lodash.template';
 
 /**
@@ -48,15 +48,15 @@ export function webpackCompile(config) {
  * @param {string} path file path
  * @param {string} content file content
  */
-export async function writeFileInDev(path, content) {
-    await outputFile(path, content, 'utf8');
+export function writeFileInDev(path, content) {
+    outputFileSync(path, content, 'utf8');
 
     /**
      * hack for watchpack, solve the rebuilding problem in dev mode
      * https://github.com/webpack/watchpack/issues/25#issuecomment-287789288
      */
     let then = Date.now() / 1000 - 10;
-    await utimes(path, then, then);
+    utimesSync(path, then, then);
 }
 
 /**
@@ -66,18 +66,18 @@ export async function writeFileInDev(path, content) {
  * @param {Object} config webpack config
  * @param {boolean} subscribeReload whether subscribe reload action
  */
-export async function enableHotReload(dir, config, subscribeReload = false) {
+export function enableHotReload(dir, config, subscribeReload = false) {
     let {entry, plugins, name: compilerName} = config;
 
     let hotReloadEntryTemplate = join(__dirname, '../templates/entry-hot-reload.tmpl');
     let hotReloadEntryPath = join(dir, `${compilerName}-hot-reload.js`);
-    let templateContent = template(await readFile(hotReloadEntryTemplate, 'utf8'))({
+    let templateContent = template(readFileSync(hotReloadEntryTemplate, 'utf8'))({
         compilerName,
         subscribeReload
     });
 
     // generate .lavas/xxx-hot-reload.js
-    await writeFileInDev(hotReloadEntryPath, templateContent);
+    writeFileInDev(hotReloadEntryPath, templateContent);
 
     // add hot-reload entry in every entry
     Object.keys(entry).forEach(entryName => {

@@ -3,7 +3,7 @@
  * @author lavas
  */
 
-import {emptyDir, outputFile, copy, remove} from 'fs-extra';
+import {emptyDir, outputFileSync, copy, remove} from 'fs-extra';
 import {join} from 'path';
 
 import {copyWorkboxLibraries} from 'workbox-build';
@@ -17,7 +17,7 @@ import BaseBuilder from './base-builder';
 export default class ProdBuilder extends BaseBuilder {
     constructor(core) {
         super(core);
-        this.writeFile = outputFile;
+        this.writeFile = outputFileSync;
     }
 
     /**
