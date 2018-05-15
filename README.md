@@ -1,5 +1,6 @@
 lavas
 =========
+test
 
 [![npm (scoped with tag)](https://img.shields.io/npm/v/lavas.svg)](https://npmjs.com/package/lavas)
 [![Build Status](https://api.travis-ci.org/lavas-project/lavas.svg?branch=master)](https://travis-ci.org/lavas-project/lavas)
