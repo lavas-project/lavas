@@ -13,6 +13,7 @@ import OptimizeCSSPlugin from 'optimize-css-assets-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import VueSSRServerPlugin from 'vue-server-renderer/server-plugin';
 import SWRegisterWebpackPlugin from 'sw-register-webpack-plugin';
+import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 
 import {vueLoaders, styleLoaders} from './utils/loader';
 import {assetsPath} from './utils/path';
@@ -134,11 +135,11 @@ export default class WebpackConfig {
 
             if (jsMinimize) {
                 plugins.unshift(
-                    new webpack.optimize.UglifyJsPlugin({
-                        compress: {
-                            warnings: false
-                        },
-                        sourceMap: jsSourceMap
+                    new UglifyJsPlugin({
+                        uglifyOptions: {
+                            warnings: false,
+                            sourceMap: jsSourceMap
+                        }
                     })
                 );
             }
