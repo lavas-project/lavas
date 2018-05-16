@@ -98,13 +98,13 @@ export default class RouteManager {
             }
 
             // find route in config
-            let routeConfig = routesConfig.find(function ({pattern}) {
+            let routeConfigArr = routesConfig.filter(function ({pattern}) {
                 return pattern instanceof RegExp
                     ? pattern.test(route.fullPath) : pattern === route.fullPath;
             });
 
             // mixin with config, rewrites path, add lazyLoading, meta
-            if (routeConfig) {
+            routeConfigArr.forEach(routeConfig => {
                 let {
                     path: routePath,
                     lazyLoading,
@@ -115,7 +115,7 @@ export default class RouteManager {
                     rewritePath: routePath || route.rewritePath,
                     lazyLoading: lazyLoading || !!chunkname
                 });
-            }
+            });
 
             /**
              * generate hash for each route which will be used in routes.js template,
