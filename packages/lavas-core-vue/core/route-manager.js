@@ -104,7 +104,18 @@ export default class RouteManager {
             });
 
             // mixin with config, rewrites path, add lazyLoading, meta
-            routeConfigArr.forEach(routeConfig => {
+            let routeConfig;
+            if (routeConfigArr.length !== 0) {
+                if (routeConfigArr.length === 1) {
+                    routeConfig = routeConfigArr[0];
+                }
+                else {
+                    routeConfig = {};
+                    routeConfigArr.forEach(tmpRouteConfig => Object.assign(routeConfig, tmpRouteConfig));
+                }
+            }
+
+            if (routeConfig) {
                 let {
                     path: routePath,
                     lazyLoading,
@@ -115,7 +126,7 @@ export default class RouteManager {
                     rewritePath: routePath || route.rewritePath,
                     lazyLoading: lazyLoading || !!chunkname
                 });
-            });
+            }
 
             /**
              * generate hash for each route which will be used in routes.js template,
