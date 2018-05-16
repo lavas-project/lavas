@@ -124,12 +124,12 @@ export default class WebpackConfig {
                     cssProcessorOptions: {
                         safe: true
                     }
-                }),
-                new SWRegisterWebpackPlugin({
-                    filePath: resolve(__dirname, 'templates/sw-register.js'),
-                    prefix: (serviceWorker && serviceWorker.swPath) || publicPath,
-                    entries
                 })
+                //new SWRegisterWebpackPlugin({
+                //    filePath: resolve(__dirname, 'templates/sw-register.js'),
+                //    prefix: (serviceWorker && serviceWorker.swPath) || publicPath,
+                //    entries
+                //})
             ];
 
             if (jsMinimize) {
