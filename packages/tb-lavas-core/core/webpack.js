@@ -12,7 +12,6 @@ import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import OptimizeCSSPlugin from 'optimize-css-assets-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import VueSSRServerPlugin from 'vue-server-renderer/server-plugin';
-import SWRegisterWebpackPlugin from 'sw-register-webpack-plugin';
 import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 
 import {vueLoaders, styleLoaders} from './utils/loader';
@@ -125,12 +124,12 @@ export default class WebpackConfig {
                     cssProcessorOptions: {
                         safe: true
                     }
-                }),
-                new SWRegisterWebpackPlugin({
-                    filePath: resolve(__dirname, 'templates/sw-register.js'),
-                    prefix: (serviceWorker && serviceWorker.swPath) || publicPath,
-                    entries
                 })
+                //new SWRegisterWebpackPlugin({
+                //    filePath: resolve(__dirname, 'templates/sw-register.js'),
+                //    prefix: (serviceWorker && serviceWorker.swPath) || publicPath,
+                //    entries
+                //})
             ];
 
             if (jsMinimize) {
