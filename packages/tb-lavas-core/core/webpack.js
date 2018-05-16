@@ -138,6 +138,7 @@ export default class WebpackConfig {
                     new UglifyJsPlugin({
                         uglifyOptions: {
                             warnings: false,
+                            parallel: true,
                             sourceMap: jsSourceMap
                         }
                     })
