@@ -9,6 +9,8 @@
  * @param {string} option.errPath errPath
  * @return {Function} koa middleware
  */
+
+/* istanbul ignore next */
 export default function ({errorPath, defaultErrorMessage, showRealErrorMessage}) {
 
     return async (err, req, res, next) => {
