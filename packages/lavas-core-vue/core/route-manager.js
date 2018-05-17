@@ -98,12 +98,23 @@ export default class RouteManager {
             }
 
             // find route in config
-            let routeConfig = routesConfig.find(function ({pattern}) {
+            let routeConfigArr = routesConfig.filter(function ({pattern}) {
                 return pattern instanceof RegExp
                     ? pattern.test(route.fullPath) : pattern === route.fullPath;
             });
 
             // mixin with config, rewrites path, add lazyLoading, meta
+            let routeConfig;
+            if (routeConfigArr.length !== 0) {
+                if (routeConfigArr.length === 1) {
+                    routeConfig = routeConfigArr[0];
+                }
+                else {
+                    routeConfig = {};
+                    routeConfigArr.forEach(tmpRouteConfig => Object.assign(routeConfig, tmpRouteConfig));
+                }
+            }
+
             if (routeConfig) {
                 let {
                     path: routePath,
