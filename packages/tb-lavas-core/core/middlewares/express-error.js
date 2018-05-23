@@ -10,7 +10,6 @@
  * @return {Function} koa middleware
  */
 
-/* istanbul ignore next */
 export default function ({errorPath, defaultErrorMessage, showRealErrorMessage}) {
 
     return async (err, req, res, next) => {
@@ -23,12 +22,15 @@ export default function ({errorPath, defaultErrorMessage, showRealErrorMessage})
 
         if (errorPath === req.url.replace(/\?.+$/, '')) {
             // if already in error procedure, then end this request immediately, avoid infinite loop
+            res.statusCode = 404;
+            // throw new Error(err);
             res.end();
             return;
         }
 
         // redirect to the corresponding url
-        let target = `${errorPath}?error=${encodeURIComponent(showRealErrorMessage ? err.message : defaultErrorMessage)}`;
+        let target = `${errorPath}?error=${encodeURIComponent(showRealErrorMessage ? err.message : /* istanbul ignore next */defaultErrorMessage)}`;
+        /* istanbul ignore else */
         if (errorPath) {
             res.writeHead(302, {Location: target});
         }

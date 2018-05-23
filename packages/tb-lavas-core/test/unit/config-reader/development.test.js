@@ -13,6 +13,8 @@ import {syncConfig, makeTempDir, test} from '../../utils';
 test('it should merge middlewares defined in lavas.config.js and defaults correctly', async t => {
     let core = t.context.core;
     await core.init('development', true);
+    core.builder.reloadClient();
+    core.builder.startRebuild();
     /**
      * default            all: []
      * lavas.config.js    all: ['both']
