@@ -16,6 +16,7 @@ import template from 'lodash.template';
 export function webpackCompile(config) {
     return new Promise((resolve, reject) => {
         webpack(config, (err, stats) => {
+            /* istanbul ignore if */
             if (err) {
                 console.error(err.stack || err);
                 if (err.details) {
@@ -26,13 +27,13 @@ export function webpackCompile(config) {
             }
 
             const info = stats.toJson();
-
+            /* istanbul ignore if */
             if (stats.hasErrors()) {
                 info.errors.forEach(error => console.error(error));
                 reject(info.errors);
                 return;
             }
-
+            /* istanbul ignore if */
             if (stats.hasWarnings()) {
                 info.warnings.forEach(warning => console.warn(warning));
             }
@@ -82,6 +83,7 @@ export function enableHotReload(dir, config, subscribeReload = false) {
     // add hot-reload entry in every entry
     Object.keys(entry).forEach(entryName => {
         let currentEntry = entry[entryName];
+        /* istanbul ignore else */
         if (Array.isArray(currentEntry)) {
             entry[entryName] = [hotReloadEntryPath, ...currentEntry];
         }

@@ -74,13 +74,13 @@ export default class MiddlewareComposer {
         let expressRouter = Router;
         let {router: {base}, build: {ssr, publicPath, compress}, serviceWorker, errorHandler} = this.config;
         base = removeTrailingSlash(base || '/');
-        
+        /* istanbul ignore if */
         if (selectedMiddlewares.includes(INTERNAL_MIDDLEWARE.FAVICON)) {
             // serve favicon
             let faviconPath = posix.join(this.cwd, ASSETS_DIRNAME_IN_DIST, 'img/icons/favicon.ico');
             this.add(favicon(faviconPath));
         }
-
+        /* istanbul ignore if */
         if (selectedMiddlewares.includes(INTERNAL_MIDDLEWARE.TRAILING_SLASH)) {
             // Redirect without trailing slash.
             let rootRouter = expressRouter();
@@ -100,6 +100,7 @@ export default class MiddlewareComposer {
         }
 
         // Handle errors.
+        /* istanbul ignore if */
         if (selectedMiddlewares.includes(INTERNAL_MIDDLEWARE.ERROR)) {
             this.add(expressErrorFactory(errorHandler));
         }

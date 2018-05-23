@@ -7,7 +7,7 @@
     "dist"
   ],
   "scripts": {
-    "test": "nyc ava -v && rimraf test/temp",
+    "test": "NODE_ENV=test nyc ava -v && rimraf test/temp",
     "nyc:report": "nyc report --reporter=html",
     "prepublishOnly": "babel core --out-dir dist --copy-files"
   },

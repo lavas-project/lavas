@@ -22,4 +22,12 @@ test('Composer base function scope test case.', async t => {
     composer.reset({});
     t.is(composer.internalMiddlewares.length, 0);
     t.is(typeof composer.config.buildVersion, 'number');
+    let comTestBase = composer.reset({router:{base:''}});
+    let comNovar = composer.express();
+    t.is(composer.config.router.base, '');
+    try {
+       composer.add(1);
+    } catch(e) {
+        t.is(/Middleware/.test(e.message), true);
+    }
 });
