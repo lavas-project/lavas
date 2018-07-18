@@ -47,13 +47,13 @@ async function downloadFromGit(repo, targetPath, branchName) {
 
         // 如果当前文件系统有 download 的缓存，就不重新 clone 了，将代码直接 pull 下来就好了。
         if (fs.existsSync(targetPath) && fs.existsSync(path.resolve(targetPath, '.git'))) {
-            await exec(`${diskCommand}cd ${targetPath} && git checkout ${branchName} && git pull`);
+            await exec(`${diskCommand}cd "${targetPath}" && git checkout ${branchName} && git pull`);
         }
         else {
             fs.existsSync(targetPath) && fs.removeSync(targetPath);
             fs.mkdirsSync(targetPath);
-            await exec(`git clone ${repo} ${targetPath}`);
-            await exec(`${diskCommand}cd ${targetPath} && git checkout ${branchName}`);
+            await exec(`git clone ${repo} "${targetPath}"`);
+            await exec(`${diskCommand}cd "${targetPath}" && git checkout ${branchName}`);
         }
 
         return targetPath;
