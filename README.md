@@ -36,6 +36,7 @@ $ lavas dev
 - [官网](https://lavas.baidu.com) - lavas 的文档都可以在这里找到
 - [lavas 文档](https://lavas.baidu.com/guide) - lavas 开发使用文档
 - [PWA 文档](https://lavas.baidu.com/doc) - PWA 相关文档
+- [Workbox2 文档](https://developers.google.com/web/tools/workbox/reference-docs/v2.1.3/) - Service Worker 相关文档
 
 
 Enjoy it！
