@@ -126,7 +126,7 @@ export default class RouteManager {
                     rewritePath: routePath || route.rewritePath,
                     lazyLoading: lazyLoading || !!chunkname
                 });
-            });
+            }
 
             /**
              * generate hash for each route which will be used in routes.js template,
