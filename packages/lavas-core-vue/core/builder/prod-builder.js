@@ -3,10 +3,12 @@
  * @author lavas
  */
 
-import {emptyDir, outputFile, copy} from 'fs-extra';
+import {emptyDir, outputFile, copy, remove} from 'fs-extra';
 import {join} from 'path';
 
-import {CONFIG_FILE} from '../constants';
+import {copyWorkboxLibraries} from 'workbox-build';
+import glob from 'glob'
+import {CONFIG_FILE, ASSETS_DIRNAME_IN_DIST} from '../constants';
 import {webpackCompile} from '../utils/webpack';
 import {distLavasPath} from '../utils/path';
 import Logger from '../utils/logger';
@@ -23,7 +25,7 @@ export default class ProdBuilder extends BaseBuilder {
      * build in production mode
      */
     async build() {
-        let {build, globals} = this.config;
+        let {build, globals, serviceWorker} = this.config;
 
         // clear dist/ first
         Logger.info('build', `start clearing ${build.path}...`, true);
@@ -85,6 +87,11 @@ export default class ProdBuilder extends BaseBuilder {
         // SPA build process
         else {
             await webpackCompile(await this.createSPAConfig(), build.stats);
+        }
+
+        if (serviceWorker.enable !== false) {
+            // Copy workbox files to dist/static/workbox-v3.*.*/
+            await copyWorkboxLibraries(join(build.path, ASSETS_DIRNAME_IN_DIST));
         }
     }
 }

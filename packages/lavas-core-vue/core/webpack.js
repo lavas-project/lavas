@@ -22,7 +22,7 @@ import UglifyJSPlugin from 'uglifyjs-webpack-plugin';
 
 import {vueLoaders, styleLoaders} from './utils/loader';
 import {assetsPath} from './utils/path';
-import {WORKBOX_PATH, getWorkboxFiles, useWorkbox} from './utils/workbox';
+import {useWorkbox} from './utils/workbox';
 import {LAVAS_DIRNAME_IN_DIST, SERVER_BUNDLE, ASSETS_DIRNAME_IN_DIST} from './constants';
 
 import fs from 'fs';
@@ -298,20 +298,10 @@ export default class WebpackConfig {
             to: ASSETS_DIRNAME_IN_DIST,
             ignore: ['*.md']
         }];
+        clientConfig.plugin('copy').use(CopyWebpackPlugin, [copyList]);
 
-        if (this.isProd && serviceWorker) {
-            // Copy workbox.dev|prod.js from node_modules manually.
-            copyList = copyList.concat(
-                getWorkboxFiles(this.isProd)
-                    .map(f => {
-                        return {
-                            from: join(WORKBOX_PATH, `../${f}`),
-                            to: assetsPath(`js/${f}`)
-                        };
-                    })
-            );
-
-            // Use workbox@2.x in prod mode.
+        if (this.isProd && serviceWorker && serviceWorker.enable !== false) {
+            // Use workbox@3.x in prod mode.
             useWorkbox(clientConfig, this.config);
 
             // inject register code for service worker into HTML
@@ -320,7 +310,6 @@ export default class WebpackConfig {
                 prefix: (serviceWorker && serviceWorker.swPath) || publicPath
             }]).after('html');
         }
-        clientConfig.plugin('copy').use(CopyWebpackPlugin, [copyList]);
 
         // Bundle analyzer.
         if (bundleAnalyzerReport) {
