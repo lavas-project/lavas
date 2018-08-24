@@ -7,6 +7,7 @@
 import template from 'lodash.template';
 import fs from 'fs-extra';
 import path from 'path';
+import Logger from './logger'
 
 const serverTemplatePath = fs.readFileSync(path.resolve(__dirname, '../templates/server.html.tmpl'));
 const clientTemplatePath = fs.readFileSync(path.resolve(__dirname, '../templates/client.html.tmpl'));
@@ -18,8 +19,9 @@ function inner(customTemplate, ssr, baseUrl) {
         return template(customTemplate)({ssr}).replace(/<</g, '<%').replace(/>>/g, '%>');
     }
 
-    console.log('[Lavas] core/index.html.tmpl deprecated! '
-        + 'See https://lavas.baidu.com/guide/v2/advanced/core#indexhtmltmpl for more infomation');
+    Logger.warn('build', 'core/index.html.tmpl 已经过期')
+    Logger.warn('build', '您可以查看 https://lavas.baidu.com/guide/v2/advanced/core#indexhtmltmpl 获得更多信息\n');
+
     let templatePath = ssr ? serverTemplatePath : clientTemplatePath;
     let useCustomOnlyFlag = false;
     let renderMetaFlag = false;

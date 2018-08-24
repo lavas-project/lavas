@@ -26,23 +26,24 @@ export default class ProdBuilder extends BaseBuilder {
      */
     async build() {
         let {build, globals, serviceWorker} = this.config;
+        let serviceWorkerEnable = serviceWorker.enable
 
         // clear dist/ first
-        Logger.info('build', `start clearing ${build.path}...`, true);
+        Logger.info('build', `准备清理 ${build.path}...`, true);
         await emptyDir(build.path);
-        Logger.info('build', `${build.path} cleared.`, true);
+        Logger.info('build', `${build.path} 清理完成`, true);
 
-        Logger.info('build', 'start compiling routes...', true);
+        Logger.info('build', '自动生成路由规则...', true);
         await this.routeManager.buildRoutes();
-        Logger.info('build', 'compiling routes completed.', true);
+        Logger.info('build', '路由规则生成完成', true);
 
-        Logger.info('build', 'start writing files to /.lavas...', true);
+        Logger.info('build', '写入临时文件', true);
         await Promise.all([
             this.writeRuntimeConfig(),
             this.writeMiddleware(),
             this.writeStore()
-        ])
-        Logger.info('build', 'writing files to /.lavas completed', true);
+        ]);
+        Logger.info('build', '临时文件写入完成', true);
 
         // SSR build process
         if (build.ssr) {
@@ -53,6 +54,10 @@ export default class ProdBuilder extends BaseBuilder {
 
             // build bundle renderer
             await this.renderer.build(clientConfig, serverConfig);
+
+            if (serviceWorker.enable !== serviceWorkerEnable) {
+                await this.writeRuntimeConfig()
+            }
 
             /**
              * when running online server, renderer needs to use template and

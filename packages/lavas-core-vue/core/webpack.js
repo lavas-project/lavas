@@ -304,11 +304,14 @@ export default class WebpackConfig {
             // Use workbox@3.x in prod mode.
             useWorkbox(clientConfig, this.config);
 
-            // inject register code for service worker into HTML
-            clientConfig.plugin('sw-register').use(SWRegisterWebpackPlugin, [{
-                filePath: resolve(__dirname, 'templates/sw-register.js'),
-                prefix: (serviceWorker && serviceWorker.swPath) || publicPath
-            }]).after('html');
+            // After useWorkbox, serviceWorker.enable maybe changed
+            if (serviceWorker.enable !== false) {
+                // inject register code for service worker into HTML
+                clientConfig.plugin('sw-register').use(SWRegisterWebpackPlugin, [{
+                    filePath: resolve(__dirname, 'templates/sw-register.js'),
+                    prefix: (serviceWorker && serviceWorker.swPath) || publicPath
+                }]).after('html');
+            }
         }
 
         // Bundle analyzer.

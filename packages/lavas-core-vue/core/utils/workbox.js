@@ -57,8 +57,13 @@ export function useWorkbox(webpackConfig, lavasConfig) {
 
     // service-worker provided by user
     let serviceWorkerContent = readFileSync(swSrc);
-    if (serviceWorkerContent.indexOf('new workboxSW') !== -1) {
-        Logger.error('build', '检测到您还在使用 workbox 2.x 的模板语法，建议升级到 workbox3');
+    if (serviceWorkerContent.indexOf('new WorkboxSW') !== -1) {
+        Logger.warn('build', '检测到您还在使用 workbox 2.x 的模板语法')
+        Logger.warn('build', 'lavas-core-vue 从 1.2.0 版本开始已经升级为 workbox3')
+        Logger.warn('build', '为了防止编译错误，当前已经关闭了 Service Worker 功能。\n')
+        Logger.warn('build', '如果您想升级到 workbox3, 可以查阅 https://github.com/lavas-project/lavas/issues/188 获取升级指南')
+        Logger.warn('build', '如果您想继续使用 workbox2，可以将 lavas-core-vue 的版本固定在 1.1.13。\n');
+        lavasConfig.serviceWorker.enable = false
         return;
     }
 
@@ -120,6 +125,7 @@ export function useWorkbox(webpackConfig, lavasConfig) {
     workboxConfig.swSrc = tempSwSrc;
 
     // delete some custom props such as `swPath` and `appshellUrls`, otherwise workbox will throw an error
+    delete workboxConfig.enable;
     delete workboxConfig.swPath;
     delete workboxConfig.appshellUrls;
     delete workboxConfig.appshellUrl;
