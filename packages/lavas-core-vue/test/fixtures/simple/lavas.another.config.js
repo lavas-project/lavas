@@ -28,16 +28,8 @@ module.exports = {
         }
     },
     serviceWorker: {
+        enable: true,
         swSrc: path.join(__dirname, 'core/service-worker.js'),
-        swDest: path.join(BUILD_PATH, 'service-worker.js'),
-        globDirectory: BUILD_PATH,
-        globPatterns: [
-            '**/*.{html,js,css,eot,svg,ttf,woff}'
-        ],
-        globIgnores: [
-            'sw-register.js',
-            '**/*.map'
-        ],
-        dontCacheBustUrlsMatching: /\.\w{8}\./
+        swDest: path.join(BUILD_PATH, 'service-worker.js')
     }
 };
