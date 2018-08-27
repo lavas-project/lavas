@@ -55,6 +55,7 @@ export default class ProdBuilder extends BaseBuilder {
             // build bundle renderer
             await this.renderer.build(clientConfig, serverConfig);
 
+            // serviceWorker.enable maybe changed during setting webpack config
             if (serviceWorker.enable !== serviceWorkerEnable) {
                 await this.writeRuntimeConfig()
             }
