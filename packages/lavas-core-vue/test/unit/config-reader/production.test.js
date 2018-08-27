@@ -11,7 +11,6 @@ import {copy, remove} from 'fs-extra';
 import LavasCore from '../../../core';
 
 import {syncConfig, makeTempDir} from '../../utils';
-import { tmpdir } from 'os';
 
 test.beforeEach('init lavas-core & server', async t => {
     // copy fixture to temp dir
