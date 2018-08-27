@@ -12,6 +12,7 @@ __BREAK CHANGE__
     * 如果想继续使用 workbox 2.x，可以把 lavas-core-vue 的版本固定在 1.1.x (1.1.13 是最后一个版本)
 - [Feature] 增加 Service Worker 的启用/禁用功能，并且 __默认禁用__。需要在 `lavas.config.js` 的 `serviceWorker` 配置项增加 `enable: true` 来开启该功能
 - [Upgrade] 将命令行输出的日志提示修改为中文
+- [Fix] 将依赖的 workbox-chain 的版本号固定在 `4.8.0`，因为新版本会出现不稳定的错误
 
 ## Lavas-core-vue [1.1.12] - 2018-4-27
 

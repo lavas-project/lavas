@@ -15,7 +15,6 @@ import {syncConfig, makeTempDir} from '../../utils';
 test.beforeEach('init lavas-core & server', async t => {
     // copy fixture to temp dir
     let tempDir = await makeTempDir();
-    console.log(tempDir, 'created')
     await copy(join(__dirname, '../../fixtures/simple'), tempDir);
 
     t.context.tempDir = tempDir;
@@ -28,7 +27,6 @@ test.afterEach.always('clean', async t => {
     await core.close();
     // clean temp dir
     await remove(tempDir);
-    console.log(tempDir, 'deleted')
 });
 
 test('it should read from config.json after building', async t => {

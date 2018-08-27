@@ -39,7 +39,9 @@
     "failFast": true,
     "concurrency": 10,
     "files": [
-      "packages/lavas-core-vue/test/unit/**/*.test.js"
+      "packages/lavas-core-vue/test/unit/**/*.test.js",
+      "packages/lavas-core-vue/test/spec/**/*.js",
+      "packages/lavas-core-vue/test/integration/*.js"
     ],
     "backupFiles": [
       "packages/lavas-core-vue/test/unit/**/*.test.js",
