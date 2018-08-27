@@ -7,7 +7,6 @@ import test from 'ava';
 import {join} from 'path';
 import {readFile, writeFile, copy, remove} from 'fs-extra';
 import merge from 'webpack-merge';
-import {getWorkboxFiles} from '../../../core/utils/workbox';
 import {syncConfig, makeTempDir} from '../../utils';
 import LavasCore from '../../../core';
 
@@ -35,26 +34,14 @@ test.afterEach.always('clean', async t => {
     await remove(tempDir);
 });
 
-test('it should get workbox files', t => {
-    let devFiles = getWorkboxFiles(false);
-    t.true(devFiles.length === 2);
-    t.true(/^workbox-sw\.dev\.v[\d\.]+\.js$/.test(devFiles[0]));
-    t.true(/^workbox-sw\.dev\.v[\d\.]+\.js\.map$/.test(devFiles[1]));
-
-    let prodFiles = getWorkboxFiles(true);
-    t.true(prodFiles.length === 2);
-    t.true(/^workbox-sw\.prod\.v[\d\.]+\.js$/.test(prodFiles[0]));
-    t.true(/^workbox-sw\.prod\.v[\d\.]+\.js\.map$/.test(prodFiles[1]));
-});
-
 test('it should generate service-worker.js in SSR mode', async t => {
     let {core, tempDir} = t.context;
     await core.build();
 
     let swContent = await readFile(join(tempDir, 'dist/service-worker.js'), 'utf8');
 
-    t.true(swContent.indexOf('importScripts(\'/static/js/workbox-sw.prod') !== -1);
-    t.true(swContent.indexOf('workboxSW.router.registerNavigationRoute(\'/appshell\');') !== -1);
+    t.true(/importScripts\('\/static\/workbox-v(\d|\.)+\/workbox-sw\.js'\)/.test(swContent));
+    t.true(swContent.indexOf('workbox.routing.registerNavigationRoute(\'/appshell\');') !== -1);
 });
 
 test('it should generate service-worker.js in SSR mode with appshellUrls', async t => {
@@ -73,7 +60,7 @@ test('it should generate service-worker.js in SSR mode with appshellUrls', async
 
     let swContent = await readFile(join(tempDir, 'dist/service-worker.js'), 'utf8');
 
-    t.true(swContent.indexOf('workboxSW.router.registerNavigationRoute(\'/use-appshell-urls\');') !== -1);
+    t.true(swContent.indexOf('workbox.routing.registerNavigationRoute(\'/use-appshell-urls\');') !== -1);
 });
 
 test('it should generate service-worker.js in SSR mode with baseUrl', async t => {
@@ -95,7 +82,7 @@ test('it should generate service-worker.js in SSR mode with baseUrl', async t =>
 
     let swContent = await readFile(join(tempDir, 'dist/service-worker.js'), 'utf8');
 
-    t.true(swContent.indexOf('workboxSW.router.registerNavigationRoute(\'/some-base/appshell\');') !== -1);
+    t.true(swContent.indexOf('workbox.routing.registerNavigationRoute(\'/some-base/appshell\');') !== -1);
 });
 
 test('it should generate service-worker.js in SSR mode with invalid config', async t => {
@@ -117,7 +104,7 @@ test('it should generate service-worker.js in SSR mode with invalid config', asy
     let swContent = await readFile(join(tempDir, 'dist/service-worker.js'), 'utf8');
 
     t.true(swContent.indexOf(
-        'workboxSW.router.registerNavigationRoute(\'/base-without-slash/appshell-without-slash\');'
+        'workbox.routing.registerNavigationRoute(\'/base-without-slash/appshell-without-slash\');'
     ) !== -1);
 });
 
@@ -128,7 +115,7 @@ test('it should generate service-worker.js in SSR mode without appshellUrl', asy
 
     let swContent = await readFile(join(tempDir, 'dist/service-worker.js'), 'utf8');
 
-    t.true(swContent.indexOf('workboxSW.router.registerNavigationRoute') === -1);
+    t.true(swContent.indexOf('workbox.routing.registerNavigationRoute') === -1);
 });
 
 test('it should generate service-worker.js in SPA mode', async t => {
@@ -143,7 +130,7 @@ test('it should generate service-worker.js in SPA mode', async t => {
 
     let swContent = await readFile(join(tempDir, 'dist/service-worker.js'), 'utf8');
 
-    t.true(swContent.indexOf('workboxSW.router.registerNavigationRoute(\'/index.html\');') !== -1);
+    t.true(swContent.indexOf('workbox.routing.registerNavigationRoute(\'/index.html\');') !== -1);
 });
 
 test('it should generate service-worker.js in SPA mode with baseUrl', async t => {
@@ -159,5 +146,5 @@ test('it should generate service-worker.js in SPA mode with baseUrl', async t =>
 
     let swContent = await readFile(join(tempDir, 'dist/service-worker.js'), 'utf8');
 
-    t.true(swContent.indexOf('workboxSW.router.registerNavigationRoute(\'//static.somecdn.com/index.html\');') !== -1);
+    t.true(swContent.indexOf('workbox.routing.registerNavigationRoute(\'//static.somecdn.com/index.html\');') !== -1);
 });

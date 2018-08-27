@@ -2,6 +2,7 @@
  * @file staticMiddlewareFactory.js
  * @author lavas
  */
+/* istanbul ignore file */
 
 /**
  * remove publicPath in urls of static files
