@@ -6,61 +6,48 @@
 /* eslint-disable fecs-prefer-async-await */
 const fs = require('fs-extra');
 const path = require('path');
-const os = require('os');
 const glob = require('glob');
 const archiver = require('archiver');
 const etpl = require('etpl');
 const Ajv = require('ajv');
-const exec = require('mz/child_process').exec;
+const axios = require('axios');
+const compressing = require('compressing');
 
 const conf = require('./config');
 const getMeta = require('./getMeta');
 const store = require('./store');
 const schema = require('./schema');
-const utils = require('../utils');
 const locals = require('../../locals')();
 
 /**
- * 从 git 上 download 代码下来
+ * 通过指定框架名和模版名从服务器上拉取模版（要求在模版 relase 的时候注意上传的 CDN 路径）
  *
- * @param  {string} repo       git repo
- * @param  {string} targetPath 存储的目标目录
- * @param  {string} branchName 分支名
- * @return {Promise}           promise 对象
+ * @param {string} framework 框架名称
+ * @param {string} template 模版名称
+ * @param {string} targetPath 模版下载后存放路径
  */
-async function downloadFromGit(repo, targetPath, branchName) {
+async function downloadTemplateFromCloud(framework, template, targetPath) {
+    const outputFilename = path.resolve(targetPath, 'template.tar.gz');
+    fs.existsSync(targetPath) && fs.removeSync(targetPath);
+    fs.mkdirsSync(targetPath);
 
-    if (!utils.hasCommand('git')) {
-        throw new Error(locals.NO_GIT_COMMAND + ',' + locals.NO_GIT_COMMAND_DESC);
-    }
+    framework = (framework || 'vue').toLowerCase();
+    template = (template || 'basic').toLowerCase();
 
-    try {
-        // Fixed: windows 下跨盘 cd 命令，必须先要指定盘名
-        let diskCommand = '';
-
-        if (os.platform() === 'win32') {
-            let diskName = targetPath.split(':')[0];
-            if (diskName) {
-                diskCommand = diskName + ': &&';
-            }
+    let result = await axios.request({
+        responseType: 'arraybuffer',
+        url: `${conf.TAR_GZ_ENDPOINT}${framework}/${template}/templates.tar.gz`,
+        method: 'get',
+        headers: {
+            'Content-Type': 'application/x-gzip'
         }
+    });
 
-        // 如果当前文件系统有 download 的缓存，就不重新 clone 了，将代码直接 pull 下来就好了。
-        if (fs.existsSync(targetPath) && fs.existsSync(path.resolve(targetPath, '.git'))) {
-            await exec(`${diskCommand}cd "${targetPath}" && git checkout ${branchName} && git pull`);
-        }
-        else {
-            fs.existsSync(targetPath) && fs.removeSync(targetPath);
-            fs.mkdirsSync(targetPath);
-            await exec(`git clone ${repo} "${targetPath}"`);
-            await exec(`${diskCommand}cd "${targetPath}" && git checkout ${branchName}`);
-        }
+    fs.writeFileSync(outputFilename, result.data);
 
-        return targetPath;
-    }
-    catch (e) {
-        throw new Error(locals.DOWNLOAD_TEMPLATE_ERROR);
-    }
+    // 解压缩是反响过程，接口都统一为 uncompress
+    await compressing.tgz.uncompress(outputFilename, targetPath);
+    fs.removeSync(outputFilename);
 }
 
 /**
@@ -212,12 +199,10 @@ async function getTemplateInfo(metaParam) {
  */
 exports.download = async function (metaParams = {}) {
     let {framework, template, version} = await getTemplateInfo(metaParams);
-    let gitRepo = template.git;
     let storeDir = path.resolve(
         conf.LOCAL_TEMPLATES_DIR,
         framework.value, template.value + '_' + version
     );
-    let branchName = template.branch || 'master';
     let ajv = new Ajv({allErrors: true});
     let metaJsonSchema = store.get('metaJsonSchema') || await schema.getMetaJsonSchema();
     let validate = ajv.compile(metaJsonSchema);
@@ -227,7 +212,7 @@ exports.download = async function (metaParams = {}) {
         throw new Error(JSON.stringify(validate.errors));
     }
 
-    await downloadFromGit(gitRepo, storeDir, branchName);
+    await downloadTemplateFromCloud(framework.value, template.value, storeDir);
     store.set('storeDir', storeDir);
 
     let templateConfigContent = fs.readFileSync(path.resolve(storeDir, 'meta.json'), 'utf-8');
