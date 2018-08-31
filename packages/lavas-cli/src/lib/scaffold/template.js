@@ -34,20 +34,25 @@ async function downloadTemplateFromCloud(framework, template, targetPath) {
     framework = (framework || 'vue').toLowerCase();
     template = (template || 'basic').toLowerCase();
 
-    let result = await axios.request({
-        responseType: 'arraybuffer',
-        url: `${conf.TAR_GZ_ENDPOINT}${framework}/${template}/templates.tar.gz`,
-        method: 'get',
-        headers: {
-            'Content-Type': 'application/x-gzip'
-        }
-    });
+    try {
+        let result = await axios.request({
+            responseType: 'arraybuffer',
+            url: `${conf.TAR_GZ_ENDPOINT}${framework}/${template}/templates.tar.gz`,
+            method: 'get',
+            headers: {
+                'Content-Type': 'application/x-gzip'
+            }
+        });
 
-    fs.writeFileSync(outputFilename, result.data);
+        fs.writeFileSync(outputFilename, result.data);
 
-    // 解压缩是反响过程，接口都统一为 uncompress
-    await compressing.tgz.uncompress(outputFilename, targetPath);
-    fs.removeSync(outputFilename);
+        // 解压缩是反响过程，接口都统一为 uncompress
+        await compressing.tgz.uncompress(outputFilename, targetPath);
+        fs.removeSync(outputFilename);
+    }
+    catch (e) {
+        throw new Error(locals.DOWNLOAD_TEMPLATE_ERROR);
+    }
 }
 
 /**
