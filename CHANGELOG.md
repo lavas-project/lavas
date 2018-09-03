@@ -2,6 +2,10 @@
 
 =======
 
+## Lavas-core-vue [1.2.1] - 2018-9-3
+
+- [Fix] 将依赖的 webpack-hot-middleware 的版本号固定在 `~2.22.0`，因为新发布的 `2.23.0` 会导致运行异常无法启动
+
 ## Lavas-core-vue [1.2.0] - 2018-8-27
 
 __BREAK CHANGE__
