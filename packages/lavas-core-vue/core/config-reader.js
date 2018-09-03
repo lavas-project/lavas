@@ -89,7 +89,9 @@ const DEFAULT_CONFIG = {
         server: [],
         client: []
     },
-    serviceWorker: null,
+    serviceWorker: {
+        enable: false
+    },
     production: {
         build: {
             cssExtract: true,
@@ -123,6 +125,7 @@ export const RUMTIME_ITEMS = {
     router: true,
     errorHandler: true,
     serviceWorker: {
+        enable: true,
         swDest: true
     },
     skeleton: true
@@ -164,7 +167,7 @@ export default class ConfigReader {
 
         // read from custom config
         if (this.customConfigPath) {
-            Logger.info('build', `read custom config: ${this.customConfigPath}...`, true);
+            Logger.info('build', `读取自定义配置： ${this.customConfigPath}...`, true);
             delete require.cache[require.resolve(this.customConfigPath)];
 
             let customConfig = await import(this.customConfigPath);
@@ -177,19 +180,19 @@ export default class ConfigReader {
         // read from lavas.config.js
         let singleConfigPath = join(this.cwd, LAVAS_CONFIG_FILE);
         if (await pathExists(singleConfigPath)) {
-            Logger.info('build', 'read lavas.config.js...', true);
+            Logger.info('build', '读取 lavas.config.js...', true);
             delete require.cache[require.resolve(singleConfigPath)];
 
             let singleConfig = await import(singleConfigPath);
             this.mergeEnv(singleConfig);
             merge(config, singleConfig, mergeArray);
 
-            Logger.info('build', 'reading config completed.', true);
+            Logger.info('build', '读取配置完成', true);
             return config;
         }
 
         // read from config/
-        Logger.warn('build', 'config directory is deprecated! Try to use lavas.config.js instead.');
+        Logger.warn('build', '从 config 目录读取配置已经过时，请尝试把配置写到 lavas.config.js 中');
         let configDir = join(this.cwd, 'config');
         let files = glob.sync(
             '**/*.js', {
@@ -237,10 +240,10 @@ export default class ConfigReader {
      * @return {Object} config
      */
     async readConfigFile() {
-        Logger.info('build', 'start reading config...', true);
+        Logger.info('build', '开始读取配置...', true);
         let parsedConfig = JsonUtil.parse(await readFile(distLavasPath(this.cwd, CONFIG_FILE), 'utf8'));
         parsedConfig.globals = {rootDir: this.cwd};
-        Logger.info('build', 'finish reading config.', true, true);
+        Logger.info('build', '配置读取完成', true, true);
         return parsedConfig;
     }
 }

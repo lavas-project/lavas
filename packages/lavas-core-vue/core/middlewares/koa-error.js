@@ -2,6 +2,7 @@
  * @file koaError.js, error handler middleware for koa
  * @author lavas
  */
+/* istanbul ignore file */
 
 /**
  * generate error middleware
