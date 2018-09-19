@@ -61,12 +61,6 @@ module.exports = async function (conf) {
         return;
     }
 
-    if (!shelljs.which('git')) {
-        log.info(locals.NO_GIT_COMMAND);
-        log.info(locals.NO_GIT_COMMAND_SUG);
-        return;
-    }
-
     log.info(locals.WELECOME);
     log.info(locals.GREETING_GUIDE + '\n');
 
