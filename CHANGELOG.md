@@ -2,6 +2,10 @@
 
 =======
 
+## Lavas-core-vue [1.2.2] - 2018-10-18
+
+- [Fix] 修复使用 Koa 服务器时，precache-manifest.xxx.js (workbox 3 新增的预缓存文件) 无法加载的问题。[ISSUE #210](https://github.com/lavas-project/lavas/issues/210) [PR](https://github.com/lavas-project/lavas/pull/211)
+
 ## Lavas-core-vue [1.2.1] - 2018-9-3
 
 - [Fix] 将依赖的 webpack-hot-middleware 的版本号固定在 `~2.22.0`，因为新发布的 `2.23.0` 会导致运行异常无法启动
