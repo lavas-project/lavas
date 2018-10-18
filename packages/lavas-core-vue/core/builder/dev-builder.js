@@ -151,17 +151,17 @@ export default class DevBuilder extends BaseBuilder {
         let clientMFS;
         let ssrEnabled = this.config.build.ssr;
 
-        Logger.info('build', 'start compiling routes...', true);
+        Logger.info('build', '自动生成路由规则...', true);
         await this.routeManager.buildRoutes();
-        Logger.info('build', 'compiling routes completed.', true);
+        Logger.info('build', '路由规则生成完成', true);
 
-        Logger.info('build', 'start writing files to /.lavas...', true);
+        Logger.info('build', '写入临时文件', true);
         await this.writeRuntimeConfig();
         await this.writeFileToLavasDir(
             BUILD_SCRIPT,
             readFileSync(join(__dirname, `../templates/${BUILD_SCRIPT}`))
         );
-        Logger.info('build', 'writing files to /.lavas completed', true);
+        Logger.info('build', '临时文件写入完成', true);
 
         // write middleware.js & store.js
         await this.writeMiddleware();

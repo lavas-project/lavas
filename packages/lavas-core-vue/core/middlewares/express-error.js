@@ -2,6 +2,7 @@
  * @file expressError.js, error handler middleware for express
  * @author lavas
  */
+/* istanbul ignore file */
 
 /**
  * generate error middleware

@@ -3,10 +3,12 @@
  * @author lavas
  */
 
-import {emptyDir, outputFile, copy} from 'fs-extra';
+import {emptyDir, outputFile, copy, remove} from 'fs-extra';
 import {join} from 'path';
 
-import {CONFIG_FILE} from '../constants';
+import {copyWorkboxLibraries} from 'workbox-build';
+import glob from 'glob'
+import {CONFIG_FILE, ASSETS_DIRNAME_IN_DIST} from '../constants';
 import {webpackCompile} from '../utils/webpack';
 import {distLavasPath} from '../utils/path';
 import Logger from '../utils/logger';
@@ -23,24 +25,25 @@ export default class ProdBuilder extends BaseBuilder {
      * build in production mode
      */
     async build() {
-        let {build, globals} = this.config;
+        let {build, globals, serviceWorker} = this.config;
+        let serviceWorkerEnable = serviceWorker.enable
 
         // clear dist/ first
-        Logger.info('build', `start clearing ${build.path}...`, true);
+        Logger.info('build', `准备清理 ${build.path}...`, true);
         await emptyDir(build.path);
-        Logger.info('build', `${build.path} cleared.`, true);
+        Logger.info('build', `${build.path} 清理完成`, true);
 
-        Logger.info('build', 'start compiling routes...', true);
+        Logger.info('build', '自动生成路由规则...', true);
         await this.routeManager.buildRoutes();
-        Logger.info('build', 'compiling routes completed.', true);
+        Logger.info('build', '路由规则生成完成', true);
 
-        Logger.info('build', 'start writing files to /.lavas...', true);
+        Logger.info('build', '写入临时文件', true);
         await Promise.all([
             this.writeRuntimeConfig(),
             this.writeMiddleware(),
             this.writeStore()
-        ])
-        Logger.info('build', 'writing files to /.lavas completed', true);
+        ]);
+        Logger.info('build', '临时文件写入完成', true);
 
         // SSR build process
         if (build.ssr) {
@@ -51,6 +54,11 @@ export default class ProdBuilder extends BaseBuilder {
 
             // build bundle renderer
             await this.renderer.build(clientConfig, serverConfig);
+
+            // serviceWorker.enable maybe changed during setting webpack config
+            if (serviceWorker.enable !== serviceWorkerEnable) {
+                await this.writeRuntimeConfig()
+            }
 
             /**
              * when running online server, renderer needs to use template and
@@ -85,6 +93,11 @@ export default class ProdBuilder extends BaseBuilder {
         // SPA build process
         else {
             await webpackCompile(await this.createSPAConfig(), build.stats);
+        }
+
+        if (serviceWorker.enable !== false) {
+            // Copy workbox files to dist/static/workbox-v3.*.*/
+            await copyWorkboxLibraries(join(build.path, ASSETS_DIRNAME_IN_DIST));
         }
     }
 }

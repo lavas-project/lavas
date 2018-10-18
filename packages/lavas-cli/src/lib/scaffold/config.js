@@ -28,6 +28,8 @@ module.exports = {
         development: 'https://bos.nj.bpc.baidu.com/mms-res/lavas-scaffold/config_dev.json'
     },
 
+    TAR_GZ_ENDPOINT: 'https://bos.nj.bpc.baidu.com/v1/assets/lavas/',
+
     /**
      * render common data
      *

@@ -1,6 +1,6 @@
 {
   "name": "lavas-core-vue",
-  "version": "1.1.13",
+  "version": "1.2.1",
   "description": "Lavas core implemented by Vue",
   "main": "dist/index.js",
   "files": [
@@ -82,11 +82,11 @@
     "vuex": "^2.3.1",
     "webpack": "^3.6.0",
     "webpack-bundle-analyzer": "^2.8.2",
-    "webpack-chain": "^4.5.0",
+    "webpack-chain": "4.8.0",
     "webpack-dev-middleware": "^1.12.0",
-    "webpack-hot-middleware": "^2.19.0",
+    "webpack-hot-middleware": "~2.22.0",
     "webpack-node-externals": "^1.6.0",
-    "workbox-webpack-plugin": "2.1.2"
+    "workbox-webpack-plugin": "^3.4.1"
   },
   "peerDependencies": {
     "webpack": "^3.0.0"

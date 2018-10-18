@@ -52,8 +52,8 @@ exports.isNetworkConnect = function () {
 /**
  * 获取 Lavas 项目的根目录
  *
- * @params {Object} options 选项
- * @params {boolean} options.containsFound 结果包含是否是Lavas项目
+ * @param {Object} options 选项
+ * @param {boolean} options.containsFound 结果包含是否是Lavas项目
  *
  * @return {string|Object} 项目根目录，当options.containsFound 为 true时，一并返回是否是Lavas项目
  */
@@ -99,7 +99,7 @@ exports.getLavasProjectRoot = function (options = {}) {
 };
 
 exports.getLavasCoreVersion = function () {
-    let lavasProject = exports.getLavasProjectRoot({containsFound: true})
+    let lavasProject = exports.getLavasProjectRoot({containsFound: true});
 
     if (!lavasProject.found) {
         return;
@@ -112,4 +112,4 @@ exports.getLavasCoreVersion = function () {
 
     let version = fs.readJsonSync(packageJsonPath).version;
     return version;
-}
+};
