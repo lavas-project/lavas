@@ -154,7 +154,6 @@ export default class MiddlewareComposer {
                 // serve sw-register.js & sw.js
                 if (selectedMiddlewares.includes(INTERNAL_MIDDLEWARE.SERVICE_WORKER)
                     && serviceWorker && serviceWorker.swDest) {
-
                     let swFiles = [
                         basename(serviceWorker.swDest),
                         'sw-register.js'
