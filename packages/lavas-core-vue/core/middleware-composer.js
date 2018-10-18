@@ -154,14 +154,15 @@ export default class MiddlewareComposer {
                 // serve sw-register.js & sw.js
                 if (selectedMiddlewares.includes(INTERNAL_MIDDLEWARE.SERVICE_WORKER)
                     && serviceWorker && serviceWorker.swDest) {
+
                     let swFiles = [
                         basename(serviceWorker.swDest),
                         'sw-register.js'
                     ].map(f => posix.join(publicPath, f));
                     this.add(async (ctx, next) => {
                         let done = false;
-                        if (swFiles.includes(ctx.path)) {
-                            // Don't cache service-worker.js & sw-register.js.
+                        if (swFiles.includes(ctx.path) || /^\/precache\-manifest.+\.js$/.test(ctx.path)) {
+                            // Don't cache service-worker.js & sw-register.js & precache-manifest.js.
                             ctx.set('Cache-Control', 'private, no-cache, no-store');
                             done = await send(ctx, ctx.path.substring(publicPath.length), {
                                 root: this.cwd
