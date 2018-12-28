@@ -58,11 +58,11 @@ export function useWorkbox(webpackConfig, lavasConfig) {
     // service-worker provided by user
     let serviceWorkerContent = readFileSync(swSrc);
     if (serviceWorkerContent.indexOf('new WorkboxSW') !== -1) {
-        Logger.warn('build', '检测到您还在使用 workbox 2.x 的模板语法')
-        Logger.warn('build', 'lavas-core-vue 从 1.2.0 版本开始已经升级为 workbox3')
-        Logger.warn('build', '为了防止编译错误，当前已经关闭了 Service Worker 功能。\n')
-        Logger.warn('build', '如果您想升级到 workbox3, 可以查阅 https://github.com/lavas-project/lavas/issues/188 获取升级指南')
-        Logger.warn('build', '如果您想继续使用 workbox2，可以将 lavas-core-vue 的版本固定在 1.1.13。\n');
+        Logger.warn('build', 'Your `service-worker.js` seems to be workbox 2.x')
+        Logger.warn('build', 'But lavas-core-vue has upgraded to workbox 3.x from v1.2.0')
+        Logger.warn('build', 'Service Worker is disabled to avoid errors\n')
+        Logger.warn('build', 'If you want to get updated, visit https://github.com/lavas-project/lavas/issues/188')
+        Logger.warn('build', 'Else keep using workbox 2.x by fixing version of lavas-core-vue to v1.1.13 \n');
         lavasConfig.serviceWorker.enable = false
         return;
     }

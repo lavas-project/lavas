@@ -19,8 +19,8 @@ function inner(customTemplate, ssr, baseUrl) {
         return template(customTemplate)({ssr}).replace(/<</g, '<%').replace(/>>/g, '%>');
     }
 
-    Logger.warn('build', 'core/index.html.tmpl 已经过期')
-    Logger.warn('build', '您可以查看 https://lavas.baidu.com/guide/v2/advanced/core#indexhtmltmpl 获得更多信息\n');
+    Logger.warn('build', 'Using `core/index.html.tmpl` is DEPRECATED!!')
+    Logger.warn('build', 'See `https://lavas.baidu.com/guide/v2/advanced/core#indexhtmltmpl` for more infomation\n');
 
     let templatePath = ssr ? serverTemplatePath : clientTemplatePath;
     let useCustomOnlyFlag = false;

@@ -1,6 +1,6 @@
 {
   "name": "lavas-core-vue",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Lavas core implemented by Vue",
   "main": "dist/index.js",
   "files": [
@@ -90,5 +90,8 @@
   },
   "peerDependencies": {
     "webpack": "^3.0.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0"
   }
 }

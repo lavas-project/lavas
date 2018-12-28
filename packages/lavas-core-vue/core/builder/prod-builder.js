@@ -29,21 +29,21 @@ export default class ProdBuilder extends BaseBuilder {
         let serviceWorkerEnable = serviceWorker.enable
 
         // clear dist/ first
-        Logger.info('build', `准备清理 ${build.path}...`, true);
+        Logger.info('build', `Ready to clean ${build.path}...`, true);
         await emptyDir(build.path);
-        Logger.info('build', `${build.path} 清理完成`, true);
+        Logger.info('build', `${build.path} cleaned`, true);
 
-        Logger.info('build', '自动生成路由规则...', true);
+        Logger.info('build', 'Auto generating routes...', true);
         await this.routeManager.buildRoutes();
-        Logger.info('build', '路由规则生成完成', true);
+        Logger.info('build', 'Auto generating routes complete', true);
 
-        Logger.info('build', '写入临时文件', true);
+        Logger.info('build', 'Writing temp files', true);
         await Promise.all([
             this.writeRuntimeConfig(),
             this.writeMiddleware(),
             this.writeStore()
         ]);
-        Logger.info('build', '临时文件写入完成', true);
+        Logger.info('build', 'Writing temp files complete', true);
 
         // SSR build process
         if (build.ssr) {
