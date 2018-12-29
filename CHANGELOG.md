@@ -2,9 +2,13 @@
 
 =======
 
+## Lavas-core-vue [1.2.4] - 2018-12-28
+
+- [Enhancement] 应开发者要求，控制台输出信息改回英文版本。
+
 ## Lavas-core-vue [1.2.3] - 2018-11-28
 
-- [Enhancement]] 调整 ServiceWorker 的更新机制。[ISSUE #212](https://github.com/lavas-project/lavas/issues/212) [PR](https://github.com/lavas-project/lavas/issues/213)
+- [Enhancement] 调整 ServiceWorker 的更新机制。[ISSUE #212](https://github.com/lavas-project/lavas/issues/212) [PR](https://github.com/lavas-project/lavas/issues/213)
 
 ## Lavas-core-vue [1.2.2] - 2018-10-18
 

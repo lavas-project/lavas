@@ -167,7 +167,7 @@ export default class ConfigReader {
 
         // read from custom config
         if (this.customConfigPath) {
-            Logger.info('build', `读取自定义配置： ${this.customConfigPath}...`, true);
+            Logger.info('build', `Read customized config file: ${this.customConfigPath}...`, true);
             delete require.cache[require.resolve(this.customConfigPath)];
 
             let customConfig = await import(this.customConfigPath);
@@ -180,19 +180,19 @@ export default class ConfigReader {
         // read from lavas.config.js
         let singleConfigPath = join(this.cwd, LAVAS_CONFIG_FILE);
         if (await pathExists(singleConfigPath)) {
-            Logger.info('build', '读取 lavas.config.js...', true);
+            Logger.info('build', 'Reading lavas.config.js...', true);
             delete require.cache[require.resolve(singleConfigPath)];
 
             let singleConfig = await import(singleConfigPath);
             this.mergeEnv(singleConfig);
             merge(config, singleConfig, mergeArray);
 
-            Logger.info('build', '读取配置完成', true);
+            Logger.info('build', 'Reading complete', true);
             return config;
         }
 
         // read from config/
-        Logger.warn('build', '从 config 目录读取配置已经过时，请尝试把配置写到 lavas.config.js 中');
+        Logger.warn('build', 'Reading config from `config` directory is DEPRECATED!，Please write config into `lavas.config.js`');
         let configDir = join(this.cwd, 'config');
         let files = glob.sync(
             '**/*.js', {
@@ -240,10 +240,10 @@ export default class ConfigReader {
      * @return {Object} config
      */
     async readConfigFile() {
-        Logger.info('build', '开始读取配置...', true);
+        Logger.info('build', 'Reading config...', true);
         let parsedConfig = JsonUtil.parse(await readFile(distLavasPath(this.cwd, CONFIG_FILE), 'utf8'));
         parsedConfig.globals = {rootDir: this.cwd};
-        Logger.info('build', '配置读取完成', true, true);
+        Logger.info('build', 'Reading config complete', true, true);
         return parsedConfig;
     }
 }
