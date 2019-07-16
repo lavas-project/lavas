@@ -31,7 +31,6 @@
   ],
   "dependencies": {
     "babel-loader": "^7.1.1",
-    "@babel/preset-env":"^7.5.4",
     "babel-runtime": "^6.26.0",
     "chokidar": "^1.7.0",
     "compose-middleware": "^3.0.0",
