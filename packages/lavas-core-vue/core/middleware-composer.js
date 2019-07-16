@@ -20,6 +20,7 @@ import ssrFactory from './middlewares/ssr';
 import koaErrorFactory from './middlewares/koa-error';
 import expressErrorFactory from './middlewares/express-error';
 import staticFactory from './middlewares/static';
+import contentTypeFactory from './middlewares/content-type';
 
 // enum of internal middlewares
 const INTERNAL_MIDDLEWARE = {
@@ -197,11 +198,6 @@ export default class MiddlewareComposer {
         let {router: {base}, build: {ssr, publicPath}, serviceWorker, errorHandler} = this.config;
         base = removeTrailingSlash(base || '/');
 
-        if (selectedMiddlewares.includes(INTERNAL_MIDDLEWARE.COMPRESSION)) {
-            // gzip compression
-            this.add(compression());
-        }
-
         if (selectedMiddlewares.includes(INTERNAL_MIDDLEWARE.FAVICON)) {
             // serve favicon
             let faviconPath = posix.join(this.cwd, ASSETS_DIRNAME_IN_DIST, 'img/icons/favicon.ico');
@@ -265,6 +261,8 @@ export default class MiddlewareComposer {
                     }
                 }
             }
+            
+            this.add(contentTypeFactory());
 
             // SSR middleware.
             if (selectedMiddlewares.includes(INTERNAL_MIDDLEWARE.SSR)) {

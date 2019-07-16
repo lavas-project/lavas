@@ -8,6 +8,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 const fork = require('child_process').fork;
+const compression = require('compression');
 const express = require('express');
 const app = express();
 const historyMiddleware = require('connect-history-api-fallback');
@@ -148,6 +149,14 @@ module.exports = function (program) {
 function startSPA(routesJsonPath) {
     try {
         let baseUrl = require(routesJsonPath).base;
+        let rootDir = utils.getLavasProjectRoot();
+        let configPath = path.resolve(rootDir, '.lavas/config.json');
+        if (fs.pathExistsSync(configPath)) {
+            let parsedConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+            if (parsedConfig.build.compress) {
+                app.use(compression())
+            }
+        }
         if (!baseUrl || baseUrl === '/') {
             // redirect all requests to '/index.html'
             app.use(historyMiddleware({

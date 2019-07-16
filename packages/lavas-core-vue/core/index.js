@@ -58,6 +58,7 @@ export default class LavasCore extends EventEmitter {
             .bind(this.middlewareComposer);
         this.expressMiddleware = this.middlewareComposer.express
             .bind(this.middlewareComposer);
+        this.setup = this.middlewareComposer.setup.bind(this.middlewareComposer);
 
         // expose render function
         this.render = this.renderer.render.bind(this.renderer);
