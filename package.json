@@ -1,6 +1,6 @@
 {
   "name": "lavas",
-  "version": "2.1.9",
+  "version": "2.1.10",
   "description": "pwa project solution cli tool",
   "files": [
     "bin",
