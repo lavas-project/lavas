@@ -63,7 +63,7 @@
     "progress-bar-webpack-plugin": "^1.10.0",
     "querystring": "^0.2.0",
     "semver": "^5.4.1",
-    "serialize-javascript": "^1.4.0",
+    "serialize-javascript": "^2.1.1",
     "serve-favicon": "^2.4.3",
     "serve-static": "^1.12.4",
     "stylus": "^0.54.5",
